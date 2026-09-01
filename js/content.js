@@ -5114,7 +5114,24 @@ function customizeCards(c = null) {
                 card.querySelector(".ic-DashboardCard__header").prepend(container);
                 container.appendChild(topColor);
                 container.style.backgroundImage = "url(\"" + cardOptions.img + "\")";
+                // Mark the injection so the clearing branch below can tell our
+                // image apart from one Canvas set itself. This branch reuses
+                // Canvas' own .ic-DashboardCard__header_image when it exists, so
+                // an unconditional clear would wipe legitimate course images.
+                container.dataset.ochreCardImage = "1";
                 topColor.style.opacity = .5;
+            } else {
+                // img === "": clear an image we previously injected. Without this
+                // branch storage reverts correctly but the picture stays on screen
+                // until a full page load, because nothing ever undoes the inline
+                // backgroundImage set above.
+                const currentImg = card.querySelector(".ic-DashboardCard__header_image");
+                if (currentImg && currentImg.dataset.ochreCardImage === "1") {
+                    currentImg.style.backgroundImage = "";
+                    delete currentImg.dataset.ochreCardImage;
+                    const topColor = card.querySelector(".ic-DashboardCard__header_hero");
+                    if (topColor) topColor.style.opacity = 1;
+                }
             }
 
             // card name

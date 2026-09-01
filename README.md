@@ -83,6 +83,14 @@ Work is sequenced in three phases. Detail lives in
 Then open your institution's Canvas site and click the extension icon to
 configure it.
 
+### Running tests
+
+```
+node test/theme-revert.test.js
+```
+
+Dependency-free for now; a real runner arrives with Phase 2.
+
 ### Regenerating icons
 
 ```

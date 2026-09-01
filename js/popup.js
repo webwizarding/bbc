@@ -1905,14 +1905,22 @@ function importTheme(theme) {
                         // the card image on the dashboard). Fall back to "" so
                         // cards keep their default Canvas images.
                         const themeImgs = (theme["custom_cards"] || []).filter(u => u && u !== "none" && u.trim() !== "");
-                        if (theme["custom_cards"].length > 0) {
-                            let pos = 0;
-                            Object.keys(sync["custom_cards"]).forEach(key => {
-                                sync["custom_cards"][key].img = themeImgs.length ? themeImgs[pos] : "";
-                                pos = (pos === themeImgs.length - 1) ? 0 : pos + 1;
-                            });
-                            final["custom_cards"] = sync["custom_cards"];
-                        }
+                        // No `length > 0` guard. An empty array is a meaningful
+                        // value, not an absent one: it is exactly what getExport()
+                        // produces for a user who had no card images, so it is
+                        // what "revert theme" replays. Skipping it made revert
+                        // unable to clear images a theme had added — everything
+                        // else reverted and the pictures stayed. A theme that
+                        // says nothing about card images omits the key entirely,
+                        // in which case this case never runs at all.
+                        const live = sync["custom_cards"] || {};
+                        let pos = 0;
+                        Object.keys(live).forEach(key => {
+                            if (!live[key]) return;
+                            live[key].img = themeImgs.length ? themeImgs[pos] : "";
+                            if (themeImgs.length) pos = (pos + 1) % themeImgs.length;
+                        });
+                        final["custom_cards"] = live;
                         break;
                     }
                     default:
