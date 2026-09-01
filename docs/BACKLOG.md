@@ -203,3 +203,51 @@ which is failure 2.
 Operating rule until then: treat a surprising test result as
 suspect-the-harness-first. If a failure mode does not make mechanical sense,
 check the harness before checking the code.
+
+## Standing question: who decides where a credentialed request goes?
+
+Three instances of one bug class have now been found and fixed, all in
+Phase 1, all with the same shape: **an external signal was allowed to name
+the destination of a request carrying the user's Canvas session.**
+
+| # | Where | Who named the destination | Fixed in |
+|---|---|---|---|
+| 1 | `setupCustomURL` domain probe | Any site the user visited, by returning a JSON array from `/api/v1/courses` | `f62a63d` |
+| 2 | `domain.includes(entry)` host match | Anyone who registers `canvas.ucsc.edu.attacker.net` | `f62a63d` |
+| 3 | `Link: rel="next"` following | The server, via a response header, to any origin | `59b004f` |
+
+Each was found while working on something else, which is the point: none
+presented as a security problem. #1 looked like a first-run convenience, #2
+like a string comparison, #3 like the one part of the pagination problem
+already solved.
+
+**Make this a standing question for every remaining Phase 1 item: where can
+this send the user's Canvas session, and who decides?**
+
+Specifically load-bearing for:
+
+- **1.4 host permissions.** The whole item is about which origins we attach
+  to. `optional_host_permissions` plus
+  `chrome.scripting.registerContentScripts()` means the user's stored custom
+  domain decides where content scripts run — the same input that produced #1
+  and #2. Validate it at the point it is granted, not only where it is read.
+- **1.3 storage.** `custom_domain` is user-controlled data that determines
+  request destinations. The migration must not widen what counts as a match.
+- **3.8 theme browsing.** Fetching a theme index from
+  `raw.githubusercontent.com` introduces a second remote whose content is
+  parsed and applied. It must not be able to name further destinations.
+
+### Related: inherited code that appears to solve the problem gets less scrutiny
+
+#3 was in code merged from upstream `dev` and was on track to become the
+canonical implementation precisely because it looked like the one piece of
+the pagination problem already handled. Reviewing it found five defects in
+eight test cases, four of them silent-truncation bugs and one the security
+issue above.
+
+Apply the same suspicion to anything else `dev` contributed that overlaps a
+Phase 1 item. From the merge audit, the overlaps still unreviewed are the
+`gaIf*` grade-analytics DOM mutations (which save and restore original
+values, overlapping 1.1's teardown concerns) and `ensureCurrentUserId`
+(which caches an API result, overlapping 1.2). Both are inside quarantined
+features, so neither is urgent.
