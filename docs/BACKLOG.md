@@ -285,3 +285,44 @@ first whether it can be written to not enumerate. Only fall back to auditing
 the list when the enumeration is genuinely irreducible — and when it is, say so
 in a comment, so the next person knows it was a decision rather than an
 oversight.
+
+## Known smell: selectors that silently match nothing
+
+Distinct from the enumeration smell, though related. A CSS selector or
+`querySelector` that stops matching produces **no error and no log** — the
+styling or behaviour just quietly disappears. There is no loud failure path,
+so these rot undetected between the release that breaks them and the user who
+notices something looks wrong.
+
+Instances found so far:
+
+| Where | Selector | Why it can stop matching |
+|---|---|---|
+| `css/darkmodecss.js` (from `c63b44a`) | `[class$="-baseButton__content"]` | Matches an emotion-generated Instructure UI class by suffix. The suffix is more stable than the hash, but it is still generated and can change on any Canvas release |
+| `css/darkmodecss.js` (from `6b9653c`) | `.css-gpxu0l-view-tabs__container` fragment matching | Same, on the Global Announcements page |
+| `js/content.js` `changeFavicon` | `link[rel="icon"` — **unterminated attribute selector**, missing `]` | Never matched anything. Fixed at `cff4c86`; had been silently doing nothing |
+| 1.1 guard audit | Marker-class guards in `createCardAssignment`, `loadDashboardNotes`, `ensureTodoTaskMenu` | Survived the 503-identifier rebrand only because every class name is a string literal, so `sed` rewrote both sides together. A name constructed at runtime would have broken silently |
+| `css/content.css` grades table (fixed) | `thead th:nth-child(6)` labelled "asset processors" | Positional, so on an instance without that column the selector matches a different column entirely — arguably worse than matching nothing |
+
+Note the favicon one: an unterminated selector is not an exotic failure. It
+parsed, it ran, it returned null on every call, and nothing anywhere said so.
+
+### Possible cheap detection, not built
+
+A dev-mode assertion that each of our selectors matched at least once per page
+would catch most of this. Sketch:
+
+- Collect the selectors we depend on in a table rather than inlining them.
+- Behind the Phase 2 debug flag, after the route settles, run each and log the
+  ones with zero matches.
+- Zero matches is not always a bug — many selectors are route-specific — so it
+  would need a per-selector expectation ("should match on grades pages"), which
+  is itself an enumeration. Worth weighing against just accepting the risk.
+
+A cheaper subset with no such problem: validate at load that every selector we
+use is **syntactically valid**, via `document.querySelector` in a try/catch or
+`CSS.supports("selector(...)")`. That would have caught the favicon bug
+immediately and costs nothing at runtime. Worth doing when Phase 2 adds the
+debug mode.
+
+**Not built now.** Recorded so the decision is deliberate.
