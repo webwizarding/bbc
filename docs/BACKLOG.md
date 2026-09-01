@@ -251,3 +251,37 @@ Phase 1 item. From the merge audit, the overlaps still unreviewed are the
 values, overlapping 1.1's teardown concerns) and `ensureCurrentUserId`
 (which caches an API result, overlapping 1.2). Both are inside quarantined
 features, so neither is urgent.
+
+## Known smell: enumerating the cases you thought of
+
+A recurring failure mode in this codebase. Someone writes a list or a chain of
+conditions covering the cases they had in mind, and the case they did not think
+of falls through silently — no error, just absent or wrong behaviour.
+
+Instances found so far:
+
+| Where | The enumeration | What fell through |
+|---|---|---|
+| `css/content.css` grades table | `td.due, td.assignment_score, td.details { white-space: normal }` | The Submitted cell, which stayed `nowrap` in a pinned column and overflowed into its neighbour |
+| `css/content.css` grades table | `thead th:nth-child(1..8)` widths naming a fixed column order | Instances without the newer asset-processors column get every width from the sixth onwards on the wrong column |
+| `customizeCards` | `if (img === "none") … else if (img !== "") …` | `img === ""`, so a cleared card image was never removed from the DOM |
+| `importTheme` | `if (theme.custom_cards.length > 0)` | The empty array, which is what "revert to no images" looks like |
+| `isTodoTaskType` (from `dev`) | `assignment`, `planner_note`, `quiz`, `discussion_topic` | Canvas also emits `wiki_page`, `calendar_event`, `assessment_request`, `sub_assignment` — unverified whether any belong |
+| dev's `Link` parser | `/<([^>]+)>;\s*rel="next"/` | Space before `;`, unquoted rel, `rel="next last"`, uppercase `Rel` |
+
+**The default response is not to audit the list for completeness.** Every one
+of these was written by someone who had audited their list. The response is to
+ask whether the code can be written so there is no list:
+
+- The grades fix applies wrapping to *every* cell rather than a named set, and
+  drops the positional widths entirely.
+- `importTheme` writes whatever the theme says, with absence represented by the
+  key being missing rather than by a length check.
+- The `Link` parser was rewritten to the grammar rather than to the shapes
+  Canvas currently emits.
+
+When a conditional or list in the remaining Phase 1 work enumerates cases, ask
+first whether it can be written to not enumerate. Only fall back to auditing
+the list when the enumeration is genuinely irreducible — and when it is, say so
+in a comment, so the next person knows it was a decision rather than an
+oversight.
