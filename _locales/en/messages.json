@@ -119,6 +119,9 @@
 	"grade_hover": {
 		"message": "Show Only On Hover"
 	},
+	"card_letter": {
+		"message": "Show letter grade"
+	},
 	"due": {
 		"message": "Due"
 	},
@@ -298,5 +301,20 @@
 	},
 	"hide_new_canvas": {
 		"message": "Hide New Dashboard"
+	},
+	"hide_sequence_footer": {
+		"message": "Hide Next/Previous Buttons"
+	},
+	"global_search": {
+		"message": "Global Canvas Search"
+	},
+	"grade_analytics": {
+		"message": "Grade Analytics"
+	},
+	"grade_analytics_desc": {
+		"message": "Adds tools to help you analyze your grades."
+	},
+	"grade_analytics_zones": {
+		"message": "Colored grade zones"
 	}
 }
