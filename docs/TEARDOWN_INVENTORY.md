@@ -11,6 +11,30 @@ leaks across navigation is anything attached above the swapped subtree:
 `document.head`, `document.documentElement`, `document.body`, and anything
 holding a reference (observers, intervals, listeners).
 
+## The classification rule
+
+**A feature is document-scoped if it attaches above Canvas' client-side swap
+boundary, and route-scoped if it lives in the subtree Canvas destroys.**
+
+This is the rule for every feature added from here on. It is structural, not a
+judgement call, and it is checkable: look at what the feature appends to. If
+the attach point is `document.head`, `document.documentElement`, or
+`document.body`, it survives navigation and must initialise once. If it is
+inside `#content`, `#right-side`, the dashboard card container, or the course
+sidebar, Canvas will destroy it and it must be reapplied.
+
+The earlier framing — that these features "happen to be route-independent" —
+was weaker and got the right answer for the wrong reason. Route-independence
+is a consequence of the attach point, not a separate property to assess.
+
+Two practical corollaries:
+
+- A document-scoped feature must never be registered with the route cycle.
+  Dark mode is the sharp case: re-injecting a stylesheet that already applies
+  would produce the flash of light content it exists to prevent.
+- A route-scoped feature must be idempotent at its insertion point, because
+  reapply may run on a route Canvas did *not* clear.
+
 ---
 
 ## A. Injected root nodes

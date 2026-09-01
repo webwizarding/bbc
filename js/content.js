@@ -19,6 +19,95 @@ function getRoute() {
     return window.location.pathname;
 }
 
+// ---------------------------------------------------------------------------
+// Lifecycle registry
+//
+// Every MutationObserver, interval, and document-level listener this extension
+// starts is registered here so it can be stopped again. Before this existed,
+// two observers were held in `const` locals inside the functions that created
+// them, so no reference survived and they could not be disconnected at all --
+// both observing document.documentElement with subtree:true, the most
+// expensive shape available. One interval was not even assigned to a variable.
+//
+// Scope mirrors Canvas' client-side swap boundary, which is the same rule used
+// to classify features in docs/TEARDOWN_INVENTORY.md:
+//
+//   "document"  attaches above the swap boundary and survives navigation.
+//               Started once, never restarted. Dark mode and the custom font
+//               live here, and re-running them would be a visible regression.
+//   "route"     lives in the subtree Canvas destroys on navigation. Stopped
+//               and restarted by the route cycle.
+//
+// This commit only makes things registerable and stoppable; nothing calls
+// stopRouteScoped() yet. The reapply cycle is the next commit.
+// ---------------------------------------------------------------------------
+const lifecycle = {
+    observers: new Map(),   // name -> { observer, scope }
+    intervals: new Map(),   // name -> { id, scope }
+    listeners: new Map(),   // name -> { target, type, handler, options, scope }
+};
+
+/** Register a MutationObserver under a name, replacing any previous one. */
+function registerObserver(name, observer, target, options, scope = "route") {
+    stopObserver(name);
+    observer.observe(target, options);
+    lifecycle.observers.set(name, { observer, scope });
+    return observer;
+}
+
+function stopObserver(name) {
+    const entry = lifecycle.observers.get(name);
+    if (!entry) return false;
+    entry.observer.disconnect();
+    lifecycle.observers.delete(name);
+    return true;
+}
+
+/** Register a repeating timer under a name, replacing any previous one. */
+function registerInterval(name, fn, ms, scope = "route") {
+    stopInterval(name);
+    lifecycle.intervals.set(name, { id: setInterval(fn, ms), scope });
+}
+
+function stopInterval(name) {
+    const entry = lifecycle.intervals.get(name);
+    if (!entry) return false;
+    clearInterval(entry.id);
+    lifecycle.intervals.delete(name);
+    return true;
+}
+
+/** Register a listener under a name, replacing any previous one. */
+function registerListener(name, target, type, handler, options, scope = "route") {
+    stopListener(name);
+    target.addEventListener(type, handler, options);
+    lifecycle.listeners.set(name, { target, type, handler, options, scope });
+}
+
+function stopListener(name) {
+    const entry = lifecycle.listeners.get(name);
+    if (!entry) return false;
+    entry.target.removeEventListener(entry.type, entry.handler, entry.options);
+    lifecycle.listeners.delete(name);
+    return true;
+}
+
+/** Stop everything registered as route-scoped. Document-scoped work is left alone. */
+function stopRouteScoped() {
+    for (const [name, e] of [...lifecycle.observers]) if (e.scope === "route") stopObserver(name);
+    for (const [name, e] of [...lifecycle.intervals]) if (e.scope === "route") stopInterval(name);
+    for (const [name, e] of [...lifecycle.listeners]) if (e.scope === "route") stopListener(name);
+}
+
+/** Counts for the duplicate-node acceptance test and the debug mode in Phase 2. */
+function lifecycleCounts() {
+    return {
+        observers: lifecycle.observers.size,
+        intervals: lifecycle.intervals.size,
+        listeners: lifecycle.listeners.size,
+    };
+}
+
 function getCurrentCourseId() {
     const match = getRoute().match(/^\/courses\/(\d+)(?:\/|$)/);
     return match ? parseInt(match[1]) : null;
@@ -367,10 +456,11 @@ function maintainAssignmentNavButtons() {
 }
 
 function watchSubmissionPageButton() {
-    if (submissionPageButtonObserver) return;
+    if (lifecycle.observers.has("submissionPageButton")) return;
     maintainAssignmentNavButtons();
-    submissionPageButtonObserver = new MutationObserver(maintainAssignmentNavButtons);
-    submissionPageButtonObserver.observe(document.documentElement, { childList: true, subtree: true });
+    submissionPageButtonObserver = registerObserver("submissionPageButton",
+        new MutationObserver(maintainAssignmentNavButtons),
+        document.documentElement, { childList: true, subtree: true }, "route");
     for (const ms of [300, 800, 1600, 3000, 5000]) {
         setTimeout(maintainAssignmentNavButtons, ms);
     }
@@ -790,7 +880,9 @@ function isDomainCanvasPage() {
         // reminders apply here. (Scope for this is narrowed in the host
         // permissions work; this preserves existing behaviour for now.)
         setTimeout(reminderWatch, 2000);
-        setInterval(reminderWatch, 60000);
+        // Was an uncaptured setInterval, so it could never be cleared. Document-
+        // scoped: reminders are browser-wide and deliberately outlive any route.
+        registerInterval("reminderWatch", reminderWatch, 60000, "document");
         chrome.storage.onChanged.addListener((changes) => {
             Object.keys(changes).forEach(key => {
                 if (key === "remind") reminderWatch();
@@ -807,7 +899,10 @@ function startExtension() {
     };
     removeFooter();
     let footerScheduled = false;
-    const footerObserver = new MutationObserver(() => {
+    // Was a const local, so nothing could ever disconnect it. Document-scoped:
+    // the footer sits outside the subtree Canvas swaps, so this runs for the
+    // life of the document rather than per route.
+    registerObserver("footer", new MutationObserver(() => {
         // Canvas mutates the DOM constantly; only check for the footer at most once
         // per animation frame instead of running a querySelector on every mutation.
         if (footerScheduled) return;
@@ -816,8 +911,7 @@ function startExtension() {
             footerScheduled = false;
             removeFooter();
         });
-    });
-    footerObserver.observe(document.documentElement, { childList: true, subtree: true });
+    }), document.documentElement, { childList: true, subtree: true }, "document");
 
     // Start the submission-page "Back to Assignment" button watcher and the SPA
     // navigation hook immediately, before the async storage callbacks below.
@@ -1639,8 +1733,10 @@ function checkDashboardReady() {
         }
     };
 
-    const observer = new MutationObserver(callback);
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    // Was a const local, so nothing could ever disconnect it. Route-scoped: it
+    // exists to notice the dashboard being rendered, which is per-navigation.
+    registerObserver("dashboardReady", new MutationObserver(callback),
+        document.documentElement, { childList: true, subtree: true }, "route");
 }
 
 function recieveMessage(request, sender, sendResponse) {
