@@ -1163,8 +1163,8 @@ async function applyCustomBackground() {
             margin-left: -35px !important;
             margin-right: -35px !important;
             box-sizing: border-box !important;
-            background-color: color-mix(in srgb, var(--bcbackground-0), transparent ${bgTransparent}%) !important;
-            border: 1px solid color-mix(in srgb, var(--bcborders) 60%, transparent) !important;
+            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
+            border: 1px solid color-mix(in srgb, var(--ochre-borders) 60%, transparent) !important;
             border-radius: 10px !important;
             position: sticky !important;
             top: 0 !important;
@@ -1181,11 +1181,11 @@ async function applyCustomBackground() {
            background peeks through between the day cards. */
         #dashboard-planner .planner-day,
         #dashboard-planner .planner-empty-days {
-            background: color-mix(in srgb, var(--bcbackground-0), transparent ${bgTransparent}%) !important;
+            background: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 12px !important;
-            border: 1px solid color-mix(in srgb, var(--bcborders) 75%, transparent) !important;
+            border: 1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent) !important;
             padding: 8px 12px !important;
             box-sizing: border-box !important;
         }
@@ -1202,20 +1202,20 @@ async function applyCustomBackground() {
             background: transparent !important;
         }
         #dashboard-planner .Grouping-styles__title {
-            background: var(--bcbackground-1) !important;
+            background: var(--ochre-background-1) !important;
             border-radius: 6px !important;
         }
         /* Item-row hover: subtle tint on the glass instead of Canvas's flat
            gray, so rows feel alive on the translucent day cards. */
         #dashboard-planner .planner-item:hover,
         #dashboard-planner .Grouping-styles__heroHover:hover {
-            background: color-mix(in srgb, var(--bctext-0) 5%, transparent) !important;
+            background: color-mix(in srgb, var(--ochre-text-0) 5%, transparent) !important;
             border-radius: 8px !important;
         }
         #right-side-wrapper {
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
-            background-color: color-mix(in srgb, var(--bcbackground-0), transparent ${bgTransparent}%);
+            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%);
             border-radius: 5px;
         }
         /* Native left nav column: #left-side > #sticky-container.ic-sticky-frame
@@ -1228,7 +1228,7 @@ async function applyCustomBackground() {
         #left-side {
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
-            background-color: color-mix(in srgb, var(--bcbackground-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
         }
         /* Recent feedback lives in #right-side. The dark-mode CSS
            (darkmodecss.js) recolors its text, but those rules are dark-mode-
@@ -1244,45 +1244,45 @@ async function applyCustomBackground() {
         #right-side .event-details .event-details__context *,
         #right-side .recent_feedback .event-details p,
         #right-side .recent_feedback .event-details span {
-            color: var(--bctext-0) !important;
+            color: var(--ochre-text-0) !important;
         }
         .event-details strong {
-            color: var(--bctext-0) !important;
+            color: var(--ochre-text-0) !important;
         }
         /* Native global nav sidebar. color-mix only accepts a solid color, so
            gradient/image sidebars keep their existing look (rule is invalid and
-           ignored). At 100% opacity this is equivalent to var(--bcsidebar).
+           ignored). At 100% opacity this is equivalent to var(--ochre-sidebar).
            Sidebar blur only shows when sidebar opacity < 100.
-           The icon/text colors are recolored to var(--bcsidebar-text) to match
+           The icon/text colors are recolored to var(--ochre-sidebar-text) to match
            the background we just set — without this, light mode (where
-           --bcsidebar is the light default #e3e3e3) would leave institution-
+           --ochre-sidebar is the light default #e3e3e3) would leave institution-
            themed light icons on a now-light background = white-on-white.
            Mirrors the dark-mode rules in css/darkmodecss.js. */
         .ic-app-header {
-            background: color-mix(in srgb, var(--bcsidebar), transparent ${sidebarTransparent}%) !important;
+            background: color-mix(in srgb, var(--ochre-sidebar), transparent ${sidebarTransparent}%) !important;
             backdrop-filter: blur(${sidebarBlur}px) !important;
             -webkit-backdrop-filter: blur(${sidebarBlur}px) !important;
         }
         .ic-app-header__menu-list-link svg,
         .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active svg {
-            fill: var(--bcsidebar-text) !important;
+            fill: var(--ochre-sidebar-text) !important;
         }
         .menu-item-icon-container,
         .ic-app-header__menu-list-link .menu-item__text,
         .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active .menu-item__text {
-            color: var(--bcsidebar-text) !important;
+            color: var(--ochre-sidebar-text) !important;
         }
         .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active .ic-app-header__menu-list-link,
         .ic-app-header__menu-list-link:hover {
             background: #0000004f !important;
         }
-        /* Better sidebar. The inline background-color is var(--bcsidebar), so the
+        /* Better sidebar. The inline background-color is var(--ochre-sidebar), so the
            !important here is required to override it. The same sidebar_opacity /
            sidebar_blur sliders drive both surfaces, so whichever sidebar is
            active (Better Sidebar when enabled, otherwise the native nav) picks
            up the value. */
         #better-sidebar-container {
-            background-color: color-mix(in srgb, var(--bcsidebar), transparent ${sidebarTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--ochre-sidebar), transparent ${sidebarTransparent}%) !important;
             backdrop-filter: blur(${sidebarBlur}px) !important;
             -webkit-backdrop-filter: blur(${sidebarBlur}px) !important;
         }
@@ -1297,7 +1297,7 @@ async function applyCustomBackground() {
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 12px !important;
-            border: 1px solid color-mix(in srgb, var(--bcborders) 75%, transparent) !important;
+            border: 1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent) !important;
             /* box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important; */
         }
         #context_modules_sortable_container {
@@ -1321,7 +1321,7 @@ async function applyCustomBackground() {
             border-radius: 0 !important;
         }
         #assignments.ui-tabs-panel {
-            background-color: color-mix(in srgb, var(--bcbackground-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 5px !important;
@@ -1336,7 +1336,7 @@ async function applyCustomBackground() {
         #content {
             margin: 36px 48px 48px !important;
             padding: 10px !important;
-            background-color: color-mix(in srgb, var(--bcbackground-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 5px !important;
@@ -1347,7 +1347,7 @@ async function applyCustomBackground() {
         #content {
             margin: 36px 48px 48px !important;
             padding: 10px !important;
-            background-color: color-mix(in srgb, var(--bcbackground-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 5px !important;
@@ -1365,7 +1365,7 @@ async function applyCustomBackground() {
         .ic-Layout-contentMain {
             margin: 26px 38px 38px !important;
             padding: 10px !important;
-            background-color: color-mix(in srgb, var(--bcbackground-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 10px !important;
@@ -1373,7 +1373,7 @@ async function applyCustomBackground() {
         ` : ""}
         ${isConversationsPage() ? `
         .css-1nh4pc4-view-flexItem {
-            background-color: color-mix(in srgb, var(--bcbackground-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 5px !important;
@@ -1383,12 +1383,12 @@ async function applyCustomBackground() {
         .css-1nh4pc4-view-flexItem svg * {
             fill: currentColor !important;
             stroke: currentColor !important;
-            color: var(--bctext-0) !important;
+            color: var(--ochre-text-0) !important;
         }
         ` : ""}
         .item-group-condensed .ig-row.ig-published.no-estimated-duration {
-            color: var(--bctext-1) !important;
-            border: 1px solid color-mix(in srgb, var(--bcborders) 60%, transparent) !important;
+            color: var(--ochre-text-1) !important;
+            border: 1px solid color-mix(in srgb, var(--ochre-borders) 60%, transparent) !important;
             border-radius: 0 !important;
             padding: 10px 12px !important;
         }
@@ -1408,7 +1408,7 @@ async function applyCustomBackground() {
         .item-group-container {
             background: transparent !important;
             border-radius: 12px !important;
-            border: 1px solid color-mix(in srgb, var(--bcborders) 75%, transparent) !important;
+            border: 1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent) !important;
         }
         .ig-header {
             /* backdrop-filter: blur(10px) !important; */
@@ -1441,10 +1441,10 @@ async function applyCustomBackground() {
         .ochre-gpa,
         .ic-DashboardCard {
             ${cardTransparency
-                ? `background: color-mix(in srgb, var(--bcbackground-0), transparent ${cardTransparent}%) !important;
+                ? `background: color-mix(in srgb, var(--ochre-background-0), transparent ${cardTransparent}%) !important;
             backdrop-filter: blur(${cardBlur}px) saturate(120%) !important;
             -webkit-backdrop-filter: blur(${cardBlur}px) saturate(120%) !important;`
-                : `background: var(--bcbackground-0) !important;`}
+                : `background: var(--ochre-background-0) !important;`}
         }
         /* Card header strip (the course-nickname bar under the hero). Canvas
            paints it a solid light color ($ic-color-light) and nothing overrides
@@ -1458,7 +1458,7 @@ async function applyCustomBackground() {
         .ic-DashboardCard__header_content {
             ${cardTransparency
                 ? `background: none !important;`
-                : `background: var(--bcbackground-0) !important;`}
+                : `background: var(--ochre-background-0) !important;`}
         }
         tr.student_assignment.assignment_graded.editable > * {
             border:none!important
@@ -2072,7 +2072,7 @@ function renderProgressRingsMode(wrapper, shown, totalAll, completedAll, percent
         overlay.className = 'ochre-progress-overlay';
         overlay.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;';
         const textWrap = document.createElement('div');
-        textWrap.style.cssText = 'text-align:center;color:var(--bctext-0);';
+        textWrap.style.cssText = 'text-align:center;color:var(--ochre-text-0);';
         textWrap.innerHTML = `<div class='ochre-progress-percent' style='font-weight:700;font-size:20px;line-height:1;'></div><div class='ochre-progress-count' style='font-size:12px;margin-top:4px;'></div>`;
         overlay.appendChild(textWrap);
         wrapper.appendChild(overlay);
@@ -2323,7 +2323,7 @@ function renderProgressRainbow(wrapper, shown, totalAll, completedAll, percent) 
         // Same textWrap structure as rings mode so fitProgressOverlayText
         // measures the whole percent+count block, not just one line.
         const textWrap = document.createElement('div');
-        textWrap.style.cssText = 'text-align:center;color:var(--bctext-0);';
+        textWrap.style.cssText = 'text-align:center;color:var(--ochre-text-0);';
         textWrap.innerHTML = `<div class='ochre-progress-percent' style='font-weight:700;font-size:20px;line-height:1;'></div><div class='ochre-progress-count' style='font-size:12px;margin-top:3px;'></div>`;
         overlay.appendChild(textWrap);
         wrapper.appendChild(overlay);
@@ -2368,7 +2368,7 @@ function renderProgressLines(wrapper, shown) {
             row = document.createElement('div');
             row.className = 'ochre-progress-line';
             row.style.cssText = 'display:flex;flex-direction:column;gap:3px;width:100%;';
-            row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11px;"><span class="cr-pl-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;"></span><span class="cr-pl-pct" style="flex-shrink:0;font-weight:600;color:var(--bctext-0);"></span></div><div style="position:relative;height:8px;border-radius:999px;overflow:hidden;"><div class="cr-pl-fill" style="height:100%;border-radius:999px;width:0%;transition:width .8s cubic-bezier(.2,.9,.2,1);"></div></div>`;
+            row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11px;"><span class="cr-pl-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;"></span><span class="cr-pl-pct" style="flex-shrink:0;font-weight:600;color:var(--ochre-text-0);"></span></div><div style="position:relative;height:8px;border-radius:999px;overflow:hidden;"><div class="cr-pl-fill" style="height:100%;border-radius:999px;width:0%;transition:width .8s cubic-bezier(.2,.9,.2,1);"></div></div>`;
             list.appendChild(row);
         }
         const labelEl = row.querySelector('.cr-pl-label');
@@ -2409,7 +2409,7 @@ function renderProgressOneLine(wrapper, shown, totalAll, completedAll, percent) 
     if (!head) {
         head = document.createElement('div');
         head.className = 'cr-ol-head';
-        head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--bctext-0);';
+        head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ochre-text-0);';
         head.innerHTML = `<span>Overall</span><span class="cr-ol-pct" style="font-weight:700;"></span>`;
         box.appendChild(head);
     }
@@ -2433,7 +2433,7 @@ function renderProgressOneLine(wrapper, shown, totalAll, completedAll, percent) 
         bar = document.createElement('div');
         bar.className = 'cr-ol-bar';
         // position:relative so absolutely-positioned segments anchor to it
-        bar.style.cssText = 'position:relative;width:100%;height:14px;border-radius:999px;overflow:hidden;background:var(--bcbackground-1);';
+        bar.style.cssText = 'position:relative;width:100%;height:14px;border-radius:999px;overflow:hidden;background:var(--ochre-background-1);';
         box.appendChild(bar);
     }
 
@@ -2869,8 +2869,8 @@ function ensureTodoTaskMenu(location, feedbackElement) {
         });
 
         menu.innerHTML = `
-            <div style="display:flex;flex-direction:column;gap:8px;padding:8px;border:1px solid #c7cdd1;border-radius:6px;background:var(--bcbackground-2);position:relative;">
-                <button id="better-todo-add-task-close" type="button" class="ochre-custom-btn" title="Close" style="position:absolute;top:4px;right:6px;padding:0 6px;cursor:pointer;line-height:18px;font-size:14px;color:var(--bctext-1);">\u00d7</button>
+            <div style="display:flex;flex-direction:column;gap:8px;padding:8px;border:1px solid #c7cdd1;border-radius:6px;background:var(--ochre-background-2);position:relative;">
+                <button id="better-todo-add-task-close" type="button" class="ochre-custom-btn" title="Close" style="position:absolute;top:4px;right:6px;padding:0 6px;cursor:pointer;line-height:18px;font-size:14px;color:var(--ochre-text-1);">\u00d7</button>
                 <input type="text" id="better-todo-new-task-title" class="ochre-custom-input" placeholder="Task title" maxlength="255">
                 <textarea id="better-todo-new-task-details" class="ochre-custom-input" placeholder="Details (optional)" style="min-height:70px;resize:vertical;padding-top:6px;padding-bottom:6px;"></textarea>
                 <select id="better-todo-new-task-course" class="ochre-custom-input"></select>
@@ -2880,7 +2880,7 @@ function ensureTodoTaskMenu(location, feedbackElement) {
                 </div>
                 <input type="text" id="better-todo-new-task-link" class="ochre-custom-input" placeholder="Link (optional)" maxlength="2048">
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                    <span id="better-todo-add-task-status" style="font-size:12px;color:var(--bctext-0);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                    <span id="better-todo-add-task-status" style="font-size:12px;color:var(--ochre-text-0);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
                     <div style="display:flex;gap:6px;align-items:center;">
                         <button id="better-todo-add-task-delete" class="ochre-custom-btn" style="padding:4px 10px;cursor:pointer;display:none;color:#db3754;" type="button" title="Delete this custom task">Delete</button>
                         <button id="better-todo-add-task-submit" class="ochre-custom-btn" style="padding:4px 10px;cursor:pointer;" type="button">Create</button>
@@ -3056,7 +3056,7 @@ function openTaskForEdit(item) {
 async function createTodoSections(location) {
 	if (!location.querySelector("#better-todo-header")) {
 		let header = makeElement("div", location, { id: "better-todo-header" });
-		header.style = "display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bcbackground-1);padding-bottom:-2px;";
+		header.style = "display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ochre-background-1);padding-bottom:-2px;";
 		let today = new Date();
 		today.setHours(0,0,0,0);
 		const todayString = today.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
@@ -3073,7 +3073,7 @@ async function createTodoSections(location) {
 		<div style="display:flex;justify-content:center;margin-top:20px;">
 			<div id="better-todo-filterbuttongroup" style="display:flex;gap:50px;justify-content:space-between;position:relative;padding-bottom:5px;width:70%;height:30px;">
 				<div id="better-todo-announcement" style="color:black !important;width:25px;cursor:pointer;">
-					<svg fill="var(--bctext-0)" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" style="transition:all .3s ease;">
+					<svg fill="var(--ochre-text-0)" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" style="transition:all .3s ease;">
 						<g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
 						<g id="SVGRepo_iconCarrier">
 							<path d="M1587.162 31.278c11.52-23.491 37.27-35.689 63.473-29.816 25.525 6.099 43.483 28.8 43.483 55.002V570.46C1822.87 596.662 1920 710.733 1920 847.053c0 136.32-97.13 250.503-225.882 276.705v513.883c0 26.202-17.958 49.016-43.483 55.002a57.279 57.279 0 0 1-12.988 1.468c-21.12 0-40.772-11.745-50.485-31.171C1379.238 1247.203 964.18 1242.347 960 1242.347H564.706v564.706h87.755c-11.859-90.127-17.506-247.003 63.473-350.683 52.405-67.087 129.657-101.082 229.948-101.082v112.941c-64.49 0-110.57 18.861-140.837 57.487-68.781 87.868-45.064 263.83-30.269 324.254 4.18 16.828.34 34.673-10.277 48.34-10.73 13.665-27.219 21.684-44.499 21.684H508.235c-31.171 0-56.47-25.186-56.47-56.47v-621.177h-56.47c-155.747 0-282.354-126.607-282.354-282.353v-56.47h-56.47C25.299 903.523 0 878.336 0 847.052c0-31.172 25.299-56.471 56.47-56.471h56.471v-56.47c0-155.634 126.607-282.354 282.353-282.354h564.593c16.941-.112 420.48-7.002 627.275-420.48Zm-5.986 218.429c-194.71 242.371-452.216 298.164-564.705 311.04v572.724c112.489 12.876 369.995 68.556 564.705 311.04ZM903.53 564.7H395.294c-93.402 0-169.412 76.01-169.412 169.411v225.883c0 93.402 76.01 169.412 169.412 169.412H903.53V564.7Zm790.589 123.444v317.93c65.618-23.379 112.94-85.497 112.94-159.021 0-73.525-47.322-135.53-112.94-158.909Z" fill-rule="evenodd"></path>
@@ -3081,7 +3081,7 @@ async function createTodoSections(location) {
 					</svg>
 				</div>
 				<div id="better-todo-assignments" style="color:black !important;width:25px;cursor:pointer;">
-					<svg fill="var(--bctext-0)" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" style="transition:all .3s ease;">
+					<svg fill="var(--ochre-text-0)" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" style="transition:all .3s ease;">
 						<g id="SVGRepo_bgCarrier" stroke-width="1"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
 						<g id="SVGRepo_iconCarrier">
 							<path d="M1468.214 0v551.145L840.27 1179.089c-31.623 31.623-49.693 74.54-49.693 119.715v395.289h395.288c45.176 0 88.093-18.07 119.716-49.694l162.633-162.633v438.206H0V0h1468.214Zm129.428 581.3c22.137-22.136 57.825-22.136 79.962 0l225.879 225.879c22.023 22.023 22.023 57.712 0 79.848l-677.638 677.637c-10.616 10.503-24.96 16.49-39.98 16.49H903.516v-282.35c0-15.02 5.986-29.364 16.49-39.867Zm-920.005 548.095H338.82v112.94h338.818v-112.94Zm225.88-225.879H338.818v112.94h564.697v-112.94Zm734.106-202.5-89.561 89.56 146.03 146.031 89.562-89.56-146.031-146.031Zm-508.228-362.197H338.82v338.818h790.576V338.82Z" fill-rule="evenodd"></path>
@@ -3093,11 +3093,11 @@ async function createTodoSections(location) {
 						<g id="SVGRepo_bgCarrier" stroke-width="0"></g>
 						<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
 						<g id="SVGRepo_iconCarrier"> <g id="Interface / Checkbox_Check">
-							<path id="Vector" d="M8 12L11 15L16 9M4 16.8002V7.2002C4 6.08009 4 5.51962 4.21799 5.0918C4.40973 4.71547 4.71547 4.40973 5.0918 4.21799C5.51962 4 6.08009 4 7.2002 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V16.8036C20 17.9215 20 18.4805 19.7822 18.9079C19.5905 19.2842 19.2837 19.5905 18.9074 19.7822C18.48 20 17.921 20 16.8031 20H7.19691C6.07899 20 5.5192 20 5.0918 19.7822C4.71547 19.5905 4.40973 19.2842 4.21799 18.9079C4 18.4801 4 17.9203 4 16.8002Z" stroke="var(--bctext-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+							<path id="Vector" d="M8 12L11 15L16 9M4 16.8002V7.2002C4 6.08009 4 5.51962 4.21799 5.0918C4.40973 4.71547 4.71547 4.40973 5.0918 4.21799C5.51962 4 6.08009 4 7.2002 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V16.8036C20 17.9215 20 18.4805 19.7822 18.9079C19.5905 19.2842 19.2837 19.5905 18.9074 19.7822C18.48 20 17.921 20 16.8031 20H7.19691C6.07899 20 5.5192 20 5.0918 19.7822C4.71547 19.5905 4.40973 19.2842 4.21799 18.9079C4 18.4801 4 17.9203 4 16.8002Z" stroke="var(--ochre-text-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
 						</g></g>
 					</svg>
 				</div>
-				<div id="better-todo-indicator" style="position:absolute;bottom:4px;left:0;height:3px;background-color:var(--bctext-0);border-radius:3px 3px 0 0;transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+				<div id="better-todo-indicator" style="position:absolute;bottom:4px;left:0;height:3px;background-color:var(--ochre-text-0);border-radius:3px 3px 0 0;transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></div>
 			</div>
 		</div>
 		`;
@@ -3194,7 +3194,7 @@ async function createTodoSections(location) {
             else label = "<strong>" + key + "</strong>";
             makeElement("div", wrapper, {
                 innerHTML: "<span>" + label + "</span>",
-                style: "display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--bctext-0);"
+                style: "display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--ochre-text-0);"
             })
 
             let listContainer = makeElement("div", wrapper, { className: "todo-group-list" });
@@ -3298,7 +3298,7 @@ function clearTodoList() {
 }
 
 // "Alternate colors" (Better Todo List, light mode only): recolors the main
-// todo-list icon fill to white instead of the default --bctext-0, so icons
+// todo-list icon fill to white instead of the default --ochre-text-0, so icons
 // stay visible on lighter course-color strips. Implemented through a CSS
 // variable so toggling the option or dark mode recolors existing icons live
 // without a re-render.
@@ -3306,7 +3306,7 @@ const TODO_ALT_ICON_COLOR = "#ffffff";
 let todoAltStyleEl = null;
 function applyTodoAlternateColors() {
     const altOn = options.todo_alternate_colors === true && options.dark_mode !== true;
-    const color = altOn ? TODO_ALT_ICON_COLOR : "var(--bctext-0)";
+    const color = altOn ? TODO_ALT_ICON_COLOR : "var(--ochre-text-0)";
     if (!todoAltStyleEl) {
         todoAltStyleEl = document.createElement("style");
         todoAltStyleEl.id = "crtodoaltcss";
@@ -3517,7 +3517,7 @@ function populateAssignments(iscompleted = false) {
         // rendered black in light mode or the theme text color in dark mode
         // instead of the course's card color.
         const classNameColor = options.todo_ignore_card_colors
-            ? (options.dark_mode === true ? "var(--bctext-0)" : "#000000")
+            ? (options.dark_mode === true ? "var(--ochre-text-0)" : "#000000")
             : courseColor;
         // "Remove icons" (Better Todo List): when on, the task-type icon is
         // omitted from the colored strip on the left of each task.
@@ -3526,7 +3526,7 @@ function populateAssignments(iscompleted = false) {
         const isCustomTask = item.plannable_type == "planner_note" || item.planner_override?.custom === true;
         const taskHref = isCustomTask ? customTaskHref(item) : (domain + item.html_url);
         const editButtonSvg = isCustomTask
-            ? `<svg class="better-todo-assignment-edit" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:15px;height:15px;position:absolute;top:18px;right:5px;opacity:0.3;transition:all .3s ease;cursor:pointer;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.3'" title="Edit this custom task"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke="var(--bctext-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+            ? `<svg class="better-todo-assignment-edit" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:15px;height:15px;position:absolute;top:18px;right:5px;opacity:0.3;transition:all .3s ease;cursor:pointer;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.3'" title="Edit this custom task"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke="var(--ochre-text-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
             : "";
         const iconSize = isCustomTask ? 26 : 20;
         const iconLeftOffset = isCustomTask ? 2 : 5;
@@ -3543,7 +3543,7 @@ function populateAssignments(iscompleted = false) {
 
 		assignment.style.overflowX = "hidden";
 		assignment.innerHTML = `
-		<div style="display:flex;align-items:center;gap:5px;width:100%;height:60px;background:var(--bcbackground-2);border-radius:5px;transition:all .4s ease;overflow:hidden;">
+		<div style="display:flex;align-items:center;gap:5px;width:100%;height:60px;background:var(--ochre-background-2);border-radius:5px;transition:all .4s ease;overflow:hidden;">
 			<div style="width:40px;display:flex;align-items:center;justify-content:center;background-color:${courseColor};height:100%;border-radius:5px 0 0 5px;">
                 <div style="width:${iconSize}px;height:${iconSize}px;display:flex;margin-left:${iconLeftOffset}px;">
                     ${taskIcon}
@@ -3553,14 +3553,14 @@ function populateAssignments(iscompleted = false) {
 				<div style="display:flex;flex-direction:column;gap:3px;">
 					<span style="color:${classNameColor};font-size:12px;margin-top:-2px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;box-sizing:border-box;padding-right:22px;">${item.context_name}</span>
 					<a href="${taskHref}" style="color:inherit;text-decoration:none;font-weight:bold;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;padding-right:28px;margin-top:-5px;">${item.plannable.title}</a>
-					<span style="color:var(--bctext-0);font-size:12px;margin-top:-5px;">${convertToDueDate(item.plannable_date)}</span>
+					<span style="color:var(--ochre-text-0);font-size:12px;margin-top:-5px;">${convertToDueDate(item.plannable_date)}</span>
 				</div>
 				${editButtonSvg}
 				<svg class="better-todo-assignment-checkmark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:15px;height:15px;position:absolute;top:0px;right:5px;opacity:0.3;transition:all .3s ease;cursor:pointer;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.3'">
 					<g id="SVGRepo_bgCarrier" stroke-width="0"></g>
 					<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
 					<g id="SVGRepo_iconCarrier"> <g id="Interface / Checkbox_Check">
-						<path id="Vector" d="M8 12L11 15L16 9M4 16.8002V7.2002C4 6.08009 4 5.51962 4.21799 5.0918C4.40973 4.71547 4.71547 4.40973 5.0918 4.21799C5.51962 4 6.08009 4 7.2002 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V16.8036C20 17.9215 20 18.4805 19.7822 18.9079C19.5905 19.2842 19.2837 19.5905 18.9074 19.7822C18.48 20 17.921 20 16.8031 20H7.19691C6.07899 20 5.5192 20 5.0918 19.7822C4.71547 19.5905 4.40973 19.2842 4.21799 18.9079C4 18.4801 4 17.9203 4 16.8002Z" stroke="var(--bctext-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+						<path id="Vector" d="M8 12L11 15L16 9M4 16.8002V7.2002C4 6.08009 4 5.51962 4.21799 5.0918C4.40973 4.71547 4.71547 4.40973 5.0918 4.21799C5.51962 4 6.08009 4 7.2002 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V16.8036C20 17.9215 20 18.4805 19.7822 18.9079C19.5905 19.2842 19.2837 19.5905 18.9074 19.7822C18.48 20 17.921 20 16.8031 20H7.19691C6.07899 20 5.5192 20 5.0918 19.7822C4.71547 19.5905 4.40973 19.2842 4.21799 18.9079C4 18.4801 4 17.9203 4 16.8002Z" stroke="var(--ochre-text-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
 					</g></g>
 				</svg>
 			</div>
@@ -3634,7 +3634,7 @@ function populateAnnouncements() {
 
 		// "Ignore card colors": black in light mode, theme text color in dark.
 		const classNameColor = options.todo_ignore_card_colors
-			? (options.dark_mode === true ? "var(--bctext-0)" : "#000000")
+			? (options.dark_mode === true ? "var(--ochre-text-0)" : "#000000")
 			: courseColor;
 		// "Remove icons": drop the announcement icon from the colored strip.
 		const removeIcons = options.todo_remove_icons === true;
@@ -3645,7 +3645,7 @@ function populateAnnouncements() {
 		}
 
 		announcement.innerHTML = `
-		<div style="display:flex;align-items:center;gap:5px;width:100%;height:60px;background:var(--bcbackground-2);border-radius:5px;${filter}">
+		<div style="display:flex;align-items:center;gap:5px;width:100%;height:60px;background:var(--ochre-background-2);border-radius:5px;${filter}">
 			<div style="width:40px;display:flex;align-items:center;justify-content:center;background-color:${courseColor};height:100%;border-radius:5px 0 0 5px;">
 				<div style="width:23px;height:23px;display:flex;margin-left:0px;">
 					${removeIcons ? "" : `<svg fill="var(--cr-todo-icon)" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" style="transition:all .3s ease;">
@@ -3660,7 +3660,7 @@ function populateAnnouncements() {
 				<div style="display:flex;flex-direction:column;gap:3px;">
 					<span style="color:${classNameColor};font-size:12px;margin-top:-2px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;box-sizing:border-box;padding-right:22px;">${item.context_name}</span>
 					<a href="${domain + item.html_url}" style="color:inherit;text-decoration:none;font-weight:bold;text-overflow:ellipsis;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:-5px;">${item.plannable.title}</a>
-					<span style="color:var(--bctext-0);font-size:12px;margin-top:-5px;">${convertToDueDate(item.plannable_date)}</span>
+					<span style="color:var(--ochre-text-0);font-size:12px;margin-top:-5px;">${convertToDueDate(item.plannable_date)}</span>
 				</div>
 			</div>
 		</div>
@@ -3909,10 +3909,10 @@ function getSidebarScale() {
 
 function applySidebarScaleStyles(sidebarList) {
     const scale = getSidebarScale();
-    sidebarList.style.setProperty("--bc-sidebar-icon-size", `${Math.round(20 * scale)}px`);
-    sidebarList.style.setProperty("--bc-sidebar-btn-height", `${Math.round(30 * scale)}px`);
-    sidebarList.style.setProperty("--bc-sidebar-btn-gap", `${Math.round(8 * scale)}px`);
-    sidebarList.style.setProperty("--bc-sidebar-label-size", `${Math.round(14 * scale)}px`);
+    sidebarList.style.setProperty("--ochre-sidebar-icon-size", `${Math.round(20 * scale)}px`);
+    sidebarList.style.setProperty("--ochre-sidebar-btn-height", `${Math.round(30 * scale)}px`);
+    sidebarList.style.setProperty("--ochre-sidebar-btn-gap", `${Math.round(8 * scale)}px`);
+    sidebarList.style.setProperty("--ochre-sidebar-label-size", `${Math.round(14 * scale)}px`);
 }
 
 // Re-apply the tinted course-content panel when the background opacity slider
@@ -3926,7 +3926,7 @@ function applyBetterSidebarContentPanel() {
     if (!contentMain) return;
     const bgOpacity = Math.max(0, Math.min(100, Number(options.bg_opacity ?? 65)));
     const bgBlur = Math.max(0, Math.min(30, Number(options.bg_blur ?? 8)));
-    contentMain.style.setProperty("background", `color-mix(in srgb, var(--bcbackground-0) ${bgOpacity}%, transparent)`, "important");
+    contentMain.style.setProperty("background", `color-mix(in srgb, var(--ochre-background-0) ${bgOpacity}%, transparent)`, "important");
     contentMain.style.setProperty("backdrop-filter", `blur(${bgBlur}px)`, "important");
     contentMain.style.setProperty("-webkit-backdrop-filter", `blur(${bgBlur}px)`, "important");
 }
@@ -3989,7 +3989,7 @@ async function setupBetterSidebar(mode = getSidebarLayoutMode()) {
             contentMain?.style.setProperty("margin", "26px 38px 38px", "important");
             contentMain?.style.setProperty("padding", "10px", "important");
             contentMain?.style.setProperty("border-radius", "10px", "important");
-            contentMain?.style.setProperty("background", `color-mix(in srgb, var(--bcbackground-0) ${Math.max(0, Math.min(100, Number(options.bg_opacity ?? 65)))}%, transparent)`, "important");
+            contentMain?.style.setProperty("background", `color-mix(in srgb, var(--ochre-background-0) ${Math.max(0, Math.min(100, Number(options.bg_opacity ?? 65)))}%, transparent)`, "important");
             contentMain?.style.setProperty("backdrop-filter", `blur(${Math.max(0, Math.min(30, Number(options.bg_blur ?? 8)))}px)`, "important");
             contentMain?.style.setProperty("-webkit-backdrop-filter", `blur(${Math.max(0, Math.min(30, Number(options.bg_blur ?? 8)))}px)`, "important");
         }
@@ -4017,7 +4017,7 @@ async function setupBetterSidebar(mode = getSidebarLayoutMode()) {
         }
 
         let sidebarList = makeElement("div", sidebarParent, { id: "better-sidebar-container",
-            style: `display:flex;flex-direction:column;width:50px;justify-content:center;align-items:center;box-sizing:border-box;position:relative;background-color:var(--bcsidebar);height:100vh;position:sticky;top:0;left:0;`
+            style: `display:flex;flex-direction:column;width:50px;justify-content:center;align-items:center;box-sizing:border-box;position:relative;background-color:var(--ochre-sidebar);height:100vh;position:sticky;top:0;left:0;`
         }, true);
         let sidebarContent = makeElement("div", sidebarList, {
             style: "display:flex;flex-direction:column;gap:20px;width:100%;flex:1;justify-content:flex-start;align-items:center;margin:40px;"
@@ -4032,7 +4032,7 @@ async function setupBetterSidebar(mode = getSidebarLayoutMode()) {
                 <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                 <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                 <g id="SVGRepo_iconCarrier">
-                    <path d="M20 4V20M4 12H16M16 12L12 8M16 12L12 16" stroke="var(--bcsidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M20 4V20M4 12H16M16 12L12 8M16 12L12 16" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                 </g>
             </svg>
         `
@@ -4059,11 +4059,11 @@ async function setupBetterSidebar(mode = getSidebarLayoutMode()) {
 }
 function createSidebarButton(text, url, parent, icon) {
 	let button = makeElement("a", parent, {
-        style: "width:40%;height:var(--bc-sidebar-btn-height,30px);cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;gap:var(--bc-sidebar-btn-gap,8px);color:var(--bcsidebar-text) !important;font-weight:bold;position:relative;",
+        style: "width:40%;height:var(--ochre-sidebar-btn-height,30px);cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;gap:var(--ochre-sidebar-btn-gap,8px);color:var(--ochre-sidebar-text) !important;font-weight:bold;position:relative;",
 		className: "ochre-custom-btn better-sidebar-btn",
 		href: url,
 	});
-    button.innerHTML = `${icon ? `${icon}<span class="better-sidebar-label" style="font-size:var(--bc-sidebar-label-size,14px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${text}</span>` : `<span class="better-sidebar-label" style="font-size:var(--bc-sidebar-label-size,14px);">${text}</span>`}`;
+    button.innerHTML = `${icon ? `${icon}<span class="better-sidebar-label" style="font-size:var(--ochre-sidebar-label-size,14px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${text}</span>` : `<span class="better-sidebar-label" style="font-size:var(--ochre-sidebar-label-size,14px);">${text}</span>`}`;
     return button;
 }
 
@@ -4125,13 +4125,13 @@ function watchSidebarBadges() {
 function populateSidebarFromNav(sidebarContent) {
 	const excludeIds = ["global_nav_help_link", "global_nav_history_link"];
 	const customIcons = {
-		"global_nav_profile_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="var(--bcsidebar-text)"></path></g></svg>`,
-		"global_nav_dashboard_link": `<svg fill="var(--bcsidebar-text)" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><rect x="2" y="2" width="9" height="11" rx="2"></rect><rect x="13" y="2" width="9" height="7" rx="2"></rect><rect x="2" y="15" width="9" height="7" rx="2"></rect><rect x="13" y="11" width="9" height="11" rx="2"></rect></g></svg>`,
-		"global_nav_conversations_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L9 12M20 18L15 12M3 8L10.225 12.8166C10.8665 13.2443 11.1872 13.4582 11.5339 13.5412C11.8403 13.6147 12.1597 13.6147 12.4661 13.5412C12.8128 13.4582 13.1335 13.2443 13.775 12.8166L21 8M6.2 19H17.8C18.9201 19 19.4802 19 19.908 18.782C20.2843 18.5903 20.5903 18.2843 20.782 17.908C21 17.4802 21 16.9201 21 15.8V8.2C21 7.0799 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V15.8C3 16.9201 3 17.4802 3.21799 17.908C3.40973 18.2843 3.71569 18.5903 4.09202 18.782C4.51984 19 5.07989 19 6.2 19Z" stroke="var(--bcsidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>`,
-		"global_nav_calendar_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M3 9H21M7 3V5M17 3V5M6 12H8M11 12H13M16 12H18M6 15H8M11 15H13M16 15H18M6 18H8M11 18H13M16 18H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" stroke="var(--bcsidebar-text)" stroke-width="2" stroke-linecap="round"></path></g></svg>`,
-		"global_nav_courses_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M20 12V4C20 2.89543 19.1046 2 18 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V18.5" stroke="var(--bcsidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 2V14L16.8182 11L20 14V5" stroke="var(--bcsidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>`,
-		"global_nav_groups_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6C14.3432 6 13 7.34315 13 9C13 10.6569 14.3432 12 16 12C17.6569 12 19 10.6569 19 9C19 7.34315 17.6569 6 16 6ZM11 9C11 6.23858 13.2386 4 16 4C18.7614 4 21 6.23858 21 9C21 10.3193 20.489 11.5193 19.6542 12.4128C21.4951 13.0124 22.9176 14.1993 23.8264 15.5329C24.1374 15.9893 24.0195 16.6114 23.5631 16.9224C23.1068 17.2334 22.4846 17.1155 22.1736 16.6591C21.1979 15.2273 19.4178 14 17 14C13.166 14 11 17.0742 11 19C11 19.5523 10.5523 20 10 20C9.44773 20 9.00001 19.5523 9.00001 19C9.00001 18.308 9.15848 17.57 9.46082 16.8425C9.38379 16.7931 9.3123 16.7323 9.24889 16.6602C8.42804 15.7262 7.15417 15 5.50001 15C3.84585 15 2.57199 15.7262 1.75114 16.6602C1.38655 17.075 0.754692 17.1157 0.339855 16.7511C-0.0749807 16.3865 -0.115709 15.7547 0.248886 15.3398C0.809035 14.7025 1.51784 14.1364 2.35725 13.7207C1.51989 12.9035 1.00001 11.7625 1.00001 10.5C1.00001 8.01472 3.01473 6 5.50001 6C7.98529 6 10 8.01472 10 10.5C10 11.7625 9.48013 12.9035 8.64278 13.7207C9.36518 14.0785 9.99085 14.5476 10.5083 15.0777C11.152 14.2659 11.9886 13.5382 12.9922 12.9945C11.7822 12.0819 11 10.6323 11 9ZM3.00001 10.5C3.00001 9.11929 4.1193 8 5.50001 8C6.88072 8 8.00001 9.11929 8.00001 10.5C8.00001 11.8807 6.88072 13 5.50001 13C4.1193 13 3.00001 11.8807 3.00001 10.5Z" fill="var(--bcsidebar-text)"></path></g></svg>`,
-		"globalNavExternalTool-69": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill-rule="evenodd" clip-rule="evenodd" d="M6 1C4.34315 1 3 2.34315 3 4V17V20C3 21.6569 4.34315 23 6 23H18C19.6569 23 21 21.6569 21 20V17V4C21 2.34315 19.6569 1 18 1H6ZM5 20V17C5 16.4477 5.44772 16 6 16H18C18.5523 16 19 16.4477 19 17V20C19 20.5523 18.5523 21 18 21H6C5.44772 21 5 20.5523 5 20ZM18 14C18.3506 14 18.6872 14.0602 19 14.1707V4C19 3.44772 18.5523 3 18 3H6C5.44772 3 5 3.44772 5 4V14.1707C5.31278 14.0602 5.64936 14 6 14H18ZM14.5 19.25C15.1904 19.25 15.75 18.6904 15.75 18C15.75 17.3096 15.1904 16.75 14.5 16.75C13.8096 16.75 13.25 17.3096 13.25 18C13.25 18.6904 13.8096 19.25 14.5 19.25Z" fill="var(--bcsidebar-text)"></path></g></svg>`,
+		"global_nav_profile_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="var(--ochre-sidebar-text)"></path></g></svg>`,
+		"global_nav_dashboard_link": `<svg fill="var(--ochre-sidebar-text)" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><rect x="2" y="2" width="9" height="11" rx="2"></rect><rect x="13" y="2" width="9" height="7" rx="2"></rect><rect x="2" y="15" width="9" height="7" rx="2"></rect><rect x="13" y="11" width="9" height="11" rx="2"></rect></g></svg>`,
+		"global_nav_conversations_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L9 12M20 18L15 12M3 8L10.225 12.8166C10.8665 13.2443 11.1872 13.4582 11.5339 13.5412C11.8403 13.6147 12.1597 13.6147 12.4661 13.5412C12.8128 13.4582 13.1335 13.2443 13.775 12.8166L21 8M6.2 19H17.8C18.9201 19 19.4802 19 19.908 18.782C20.2843 18.5903 20.5903 18.2843 20.782 17.908C21 17.4802 21 16.9201 21 15.8V8.2C21 7.0799 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V15.8C3 16.9201 3 17.4802 3.21799 17.908C3.40973 18.2843 3.71569 18.5903 4.09202 18.782C4.51984 19 5.07989 19 6.2 19Z" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>`,
+		"global_nav_calendar_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M3 9H21M7 3V5M17 3V5M6 12H8M11 12H13M16 12H18M6 15H8M11 15H13M16 15H18M6 18H8M11 18H13M16 18H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round"></path></g></svg>`,
+		"global_nav_courses_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M20 12V4C20 2.89543 19.1046 2 18 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V18.5" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 2V14L16.8182 11L20 14V5" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>`,
+		"global_nav_groups_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6C14.3432 6 13 7.34315 13 9C13 10.6569 14.3432 12 16 12C17.6569 12 19 10.6569 19 9C19 7.34315 17.6569 6 16 6ZM11 9C11 6.23858 13.2386 4 16 4C18.7614 4 21 6.23858 21 9C21 10.3193 20.489 11.5193 19.6542 12.4128C21.4951 13.0124 22.9176 14.1993 23.8264 15.5329C24.1374 15.9893 24.0195 16.6114 23.5631 16.9224C23.1068 17.2334 22.4846 17.1155 22.1736 16.6591C21.1979 15.2273 19.4178 14 17 14C13.166 14 11 17.0742 11 19C11 19.5523 10.5523 20 10 20C9.44773 20 9.00001 19.5523 9.00001 19C9.00001 18.308 9.15848 17.57 9.46082 16.8425C9.38379 16.7931 9.3123 16.7323 9.24889 16.6602C8.42804 15.7262 7.15417 15 5.50001 15C3.84585 15 2.57199 15.7262 1.75114 16.6602C1.38655 17.075 0.754692 17.1157 0.339855 16.7511C-0.0749807 16.3865 -0.115709 15.7547 0.248886 15.3398C0.809035 14.7025 1.51784 14.1364 2.35725 13.7207C1.51989 12.9035 1.00001 11.7625 1.00001 10.5C1.00001 8.01472 3.01473 6 5.50001 6C7.98529 6 10 8.01472 10 10.5C10 11.7625 9.48013 12.9035 8.64278 13.7207C9.36518 14.0785 9.99085 14.5476 10.5083 15.0777C11.152 14.2659 11.9886 13.5382 12.9922 12.9945C11.7822 12.0819 11 10.6323 11 9ZM3.00001 10.5C3.00001 9.11929 4.1193 8 5.50001 8C6.88072 8 8.00001 9.11929 8.00001 10.5C8.00001 11.8807 6.88072 13 5.50001 13C4.1193 13 3.00001 11.8807 3.00001 10.5Z" fill="var(--ochre-sidebar-text)"></path></g></svg>`,
+		"globalNavExternalTool-69": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill-rule="evenodd" clip-rule="evenodd" d="M6 1C4.34315 1 3 2.34315 3 4V17V20C3 21.6569 4.34315 23 6 23H18C19.6569 23 21 21.6569 21 20V17V4C21 2.34315 19.6569 1 18 1H6ZM5 20V17C5 16.4477 5.44772 16 6 16H18C18.5523 16 19 16.4477 19 17V20C19 20.5523 18.5523 21 18 21H6C5.44772 21 5 20.5523 5 20ZM18 14C18.3506 14 18.6872 14.0602 19 14.1707V4C19 3.44772 18.5523 3 18 3H6C5.44772 3 5 3.44772 5 4V14.1707C5.31278 14.0602 5.64936 14 6 14H18ZM14.5 19.25C15.1904 19.25 15.75 18.6904 15.75 18C15.75 17.3096 15.1904 16.75 14.5 16.75C13.8096 16.75 13.25 17.3096 13.25 18C13.25 18.6904 13.8096 19.25 14.5 19.25Z" fill="var(--ochre-sidebar-text)"></path></g></svg>`,
 	};
 	
 	const navMenu = document.getElementById("menu");
@@ -4187,25 +4187,25 @@ function populateSidebarFromNav(sidebarContent) {
                             // Check if svg already has a style attribute
                             if (icon.includes('style="')) {
                                 // Append to existing style
-                                icon = icon.replace(/style="([^"]*)"/, `style="$1 width:20px;height:20px;flex-shrink:0;fill:var(--bcsidebar-text);stroke:var(--bcsidebar-text);"`);
+                                icon = icon.replace(/style="([^"]*)"/, `style="$1 width:20px;height:20px;flex-shrink:0;fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);"`);
                             } else {
                                 // Add new style attribute
-                                icon = icon.replace("<svg", '<svg style="width:20px;height:20px;flex-shrink:0;fill:var(--bcsidebar-text);stroke:var(--bcsidebar-text);"');
+                                icon = icon.replace("<svg", '<svg style="width:20px;height:20px;flex-shrink:0;fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);"');
                             }
                         } else {
                             // Smaller SVG - just add colors
                             if (icon.includes('style="')) {
-                                icon = icon.replace(/style="([^"]*)"/, `style="$1 fill:var(--bcsidebar-text);stroke:var(--bcsidebar-text);flex-shrink:0;"`);
+                                icon = icon.replace(/style="([^"]*)"/, `style="$1 fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);flex-shrink:0;"`);
                             } else {
-                                icon = icon.replace("<svg", '<svg style="fill:var(--bcsidebar-text);stroke:var(--bcsidebar-text);flex-shrink:0;"');
+                                icon = icon.replace("<svg", '<svg style="fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);flex-shrink:0;"');
                             }
                         }
                     } else {
                         // No viewBox - just add colors
                         if (icon.includes('style="')) {
-                            icon = icon.replace(/style="([^"]*)"/, `style="$1 fill:var(--bcsidebar-text);stroke:var(--bcsidebar-text);"`);
+                            icon = icon.replace(/style="([^"]*)"/, `style="$1 fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);"`);
                         } else {
-                            icon = icon.replace("<svg", '<svg style="fill:var(--bcsidebar-text);stroke:var(--bcsidebar-text);"');
+                            icon = icon.replace("<svg", '<svg style="fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);"');
                         }
                     }
                 }
@@ -4237,8 +4237,8 @@ function updateSidebar(expanded, sidebarList, expander) {
     const buttons = document.querySelectorAll(".better-sidebar-btn");
     buttons.forEach(label => label.style.width = expanded ? "80%" : "40%");
     sidebarList.querySelectorAll(".better-sidebar-btn svg").forEach(svg => {
-        svg.style.width = "var(--bc-sidebar-icon-size,20px)";
-        svg.style.height = "var(--bc-sidebar-icon-size,20px)";
+        svg.style.width = "var(--ochre-sidebar-icon-size,20px)";
+        svg.style.height = "var(--ochre-sidebar-icon-size,20px)";
     });
 
     // Expand (or restore) the entire left-side column when the sidebar toggles
@@ -4680,8 +4680,8 @@ async function changeColorPreset(colors) {
 Dark mode
 */
 
-// Light-mode fallbacks for the --bc* variables, always emitted so extension UI renders in light mode; dark mode overrides below.
-const BC_LIGHT_DEFAULTS = {
+// Light-mode fallbacks for the --ochre-* variables, always emitted so extension UI renders in light mode; dark mode overrides below.
+const OCHRE_LIGHT_DEFAULTS = {
     "background-0": "#ffffff",
     "background-1": "#c7c7c7",
     "background-2": "#d9d9d9",
@@ -4695,10 +4695,10 @@ const BC_LIGHT_DEFAULTS = {
 };
 
 function generateDarkModeCSS() {
-    // Always-on light-mode defaults so var(--bc*) resolves in light mode too.
+    // Always-on light-mode defaults so var(--ochre-*) resolves in light mode too.
     let css = ":root{\n";
-    Object.keys(BC_LIGHT_DEFAULTS).forEach((key) => {
-        css += "    --bc" + key + ": " + BC_LIGHT_DEFAULTS[key] + ";\n";
+    Object.keys(OCHRE_LIGHT_DEFAULTS).forEach((key) => {
+        css += "    --ochre-" + key + ": " + OCHRE_LIGHT_DEFAULTS[key] + ";\n";
     });
     css += "}\n\n";
 
@@ -4708,7 +4708,7 @@ function generateDarkModeCSS() {
     let darkBlock = ":root{\n";
     if (options.dark_preset) {
         Object.keys(options.dark_preset).forEach((key) => {
-            darkBlock += "    --bc" + key + ": " + options.dark_preset[key] + ";\n";
+            darkBlock += "    --ochre-" + key + ": " + options.dark_preset[key] + ";\n";
         });
     }
     darkBlock += "}\n\n";
@@ -5975,7 +5975,7 @@ function removeGlobalSearch() {
 }
 
 // Shared search icon used by the sidebar + header triggers.
-const GLOBAL_SEARCH_ICON_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle cx="11" cy="11" r="7" stroke="var(--bcsidebar-text)" stroke-width="2" fill="none"/><path d="m20 20-3.2-3.2" stroke="var(--bcsidebar-text)" stroke-width="2" stroke-linecap="round"/></g></svg>`;
+const GLOBAL_SEARCH_ICON_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle cx="11" cy="11" r="7" stroke="var(--ochre-sidebar-text)" stroke-width="2" fill="none"/><path d="m20 20-3.2-3.2" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round"/></g></svg>`;
 
 // Placement: a search trigger is injected into whichever left sidebar is
 // active — the Better Sidebar (when enabled) or Canvas' native global nav —
@@ -6035,8 +6035,8 @@ function ensureGlobalSearchBetterSidebarButton(betterSidebar) {
     btn.title = "Search Canvas (Ctrl+K)";
     btn.setAttribute("role", "button");
     btn.setAttribute("aria-label", "Search Canvas");
-    btn.style.cssText = "width:40%;height:var(--bc-sidebar-btn-height,30px);cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;gap:var(--bc-sidebar-btn-gap,8px);color:var(--bcsidebar-text) !important;font-weight:bold;position:relative;";
-    btn.innerHTML = `${GLOBAL_SEARCH_ICON_SVG}<span class="better-sidebar-label" style="font-size:var(--bc-sidebar-label-size,14px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">Search</span>`;
+    btn.style.cssText = "width:40%;height:var(--ochre-sidebar-btn-height,30px);cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;gap:var(--ochre-sidebar-btn-gap,8px);color:var(--ochre-sidebar-text) !important;font-weight:bold;position:relative;";
+    btn.innerHTML = `${GLOBAL_SEARCH_ICON_SVG}<span class="better-sidebar-label" style="font-size:var(--ochre-sidebar-label-size,14px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">Search</span>`;
     btn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); openGlobalSearchModal(); });
     // Append so it sits at the bottom of the sidebar item list.
     sidebarContent.appendChild(btn);
@@ -6059,8 +6059,8 @@ function applyGlobalSearchSidebarButtonMode(btn, expanded) {
     const label = btn.querySelector(".better-sidebar-label");
     if (label) label.style.display = expanded ? "block" : "none";
     btn.querySelectorAll("svg").forEach(svg => {
-        svg.style.width = "var(--bc-sidebar-icon-size,20px)";
-        svg.style.height = "var(--bc-sidebar-icon-size,20px)";
+        svg.style.width = "var(--ochre-sidebar-icon-size,20px)";
+        svg.style.height = "var(--ochre-sidebar-icon-size,20px)";
     });
 }
 
@@ -6967,8 +6967,8 @@ function applyGradeAnalyticsImagineState(panel) {
     const btn = panel.querySelector("#ochre-ga-imagine");
     if (!btn) return;
     btn.setAttribute("aria-pressed", String(gaImagineIf));
-    btn.style.borderColor = gaImagineIf ? "#2563eb" : "var(--bcborders)";
-    btn.style.color = gaImagineIf ? "#2563eb" : "var(--bctext-0)";
+    btn.style.borderColor = gaImagineIf ? "#2563eb" : "var(--ochre-borders)";
+    btn.style.color = gaImagineIf ? "#2563eb" : "var(--ochre-text-0)";
     btn.style.fontWeight = gaImagineIf ? "600" : "";
 }
 
@@ -7000,16 +7000,16 @@ function ensureGradeAnalyticsPanel() {
         // Fallback: top of the content container until the anchor renders.
         container.insertBefore(panel, container.firstChild);
     }
-    panel.style.cssText = `margin:18px 0;padding:16px;border:1px solid color-mix(in srgb, var(--bcborders) 75%, transparent);border-radius:10px;background-color:var(--bcbackground-0);color:var(--bctext-0);font-family:"Lato","Helvetica Neue",Helvetica,Arial,sans-serif;box-sizing:border-box;`;
+    panel.style.cssText = `margin:18px 0;padding:16px;border:1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent);border-radius:10px;background-color:var(--ochre-background-0);color:var(--ochre-text-0);font-family:"Lato","Helvetica Neue",Helvetica,Arial,sans-serif;box-sizing:border-box;`;
     panel.innerHTML = `
         <div style="display:flex;align-items:center;gap:10px;">
-            <h2 style="margin:0;font-size:18px;color:var(--bctext-0);">Grade Analytics</h2>
-            <button id="ochre-ga-imagine" type="button" aria-pressed="false" title="Toggle Imagine-If mode" style="margin-left:auto;background:var(--bcbackground-1);color:var(--bctext-0);border:1px solid var(--bcborders);border-radius:8px;padding:4px 12px;font-size:14px;line-height:1.4;cursor:pointer;">Imagine-If mode</button>
-            <button id="ochre-ga-toggle" type="button" aria-expanded="true" title="Toggle Grade Analytics" style="background:var(--bcbackground-1);color:var(--bctext-0);border:1px solid var(--bcborders);border-radius:8px;padding:4px 12px;font-size:14px;line-height:1.4;cursor:pointer;"><svg style="transform:rotate(180deg);display:block;" fill="currentColor" width="16px" height="16px" viewBox="-6.5 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><path d="M18.813 11.406l-7.906 9.906c-0.75 0.906-1.906 0.906-2.625 0l-7.906-9.906c-0.75-0.938-0.375-1.656 0.781-1.656h16.875c1.188 0 1.531 0.719 0.781 1.656z"/></svg></button>
+            <h2 style="margin:0;font-size:18px;color:var(--ochre-text-0);">Grade Analytics</h2>
+            <button id="ochre-ga-imagine" type="button" aria-pressed="false" title="Toggle Imagine-If mode" style="margin-left:auto;background:var(--ochre-background-1);color:var(--ochre-text-0);border:1px solid var(--ochre-borders);border-radius:8px;padding:4px 12px;font-size:14px;line-height:1.4;cursor:pointer;">Imagine-If mode</button>
+            <button id="ochre-ga-toggle" type="button" aria-expanded="true" title="Toggle Grade Analytics" style="background:var(--ochre-background-1);color:var(--ochre-text-0);border:1px solid var(--ochre-borders);border-radius:8px;padding:4px 12px;font-size:14px;line-height:1.4;cursor:pointer;"><svg style="transform:rotate(180deg);display:block;" fill="currentColor" width="16px" height="16px" viewBox="-6.5 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><path d="M18.813 11.406l-7.906 9.906c-0.75 0.906-1.906 0.906-2.625 0l-7.906-9.906c-0.75-0.938-0.375-1.656 0.781-1.656h16.875c1.188 0 1.531 0.719 0.781 1.656z"/></svg></button>
         </div>
         <div id="ochre-ga-body">
-        <p id="ochre-ga-status" style="margin:0 0 10px;color:var(--bctext-1);font-size:13px;">Loading grade data…</p>
-        <div id="ochre-ga-tabs" style="display:flex;gap:4px;border-bottom:1px solid color-mix(in srgb, var(--bcborders) 75%, transparent);margin-bottom:14px;">
+        <p id="ochre-ga-status" style="margin:0 0 10px;color:var(--ochre-text-1);font-size:13px;">Loading grade data…</p>
+        <div id="ochre-ga-tabs" style="display:flex;gap:4px;border-bottom:1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent);margin-bottom:14px;">
             <button type="button" data-ga-tab="overview" style="${gaTabStyle(true)}">Overview</button>
             <button type="button" data-ga-tab="calc" style="${gaTabStyle(false)}">Final Calculator</button>
             <button type="button" data-ga-tab="heatmap" style="${gaTabStyle(false)}">Heatmap</button>
@@ -7018,39 +7018,39 @@ function ensureGradeAnalyticsPanel() {
         <div id="ochre-ga-stats" style="display:none;flex-wrap:wrap;gap:10px;margin-bottom:14px;"></div>
         <div id="ochre-ga-charts" style="display:none;gap:24px;flex-wrap:wrap;">
             <div id="ochre-ga-box-pie" style="flex:1 1 calc(33.333% - 8px);min-width:0;">
-                <h3 style="margin:0 0 8px;font-size:14px;color:var(--bctext-0);">Score distribution (graded assignments)</h3>
-                <div style="position:relative;height:280px;"><canvas id="ochre-ga-pie"></canvas><div id="ochre-ga-pie-tip" style="position:absolute;display:none;pointer-events:none;background:var(--bcbackground-1);color:var(--bctext-0);border:1px solid var(--bcborders);border-radius:6px;padding:6px 10px;font-size:12px;z-index:10;white-space:nowrap;"></div></div>
+                <h3 style="margin:0 0 8px;font-size:14px;color:var(--ochre-text-0);">Score distribution (graded assignments)</h3>
+                <div style="position:relative;height:280px;"><canvas id="ochre-ga-pie"></canvas><div id="ochre-ga-pie-tip" style="position:absolute;display:none;pointer-events:none;background:var(--ochre-background-1);color:var(--ochre-text-0);border:1px solid var(--ochre-borders);border-radius:6px;padding:6px 10px;font-size:12px;z-index:10;white-space:nowrap;"></div></div>
             </div>
             <div id="ochre-ga-box-line" style="flex:1 1 calc(66.666% - 16px);min-width:0;">
                 <div style="display:flex;align-items:center;gap:10px;margin:0 0 8px;">
-                    <h3 style="margin:0;font-size:14px;color:var(--bctext-0);">Overall grade over time</h3>
-                    <label for="ochre-ga-fity" style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--bctext-1);cursor:pointer;user-select:none;"><input type="checkbox" id="ochre-ga-fity"> Fit Y axis</label>
+                    <h3 style="margin:0;font-size:14px;color:var(--ochre-text-0);">Overall grade over time</h3>
+                    <label for="ochre-ga-fity" style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ochre-text-1);cursor:pointer;user-select:none;"><input type="checkbox" id="ochre-ga-fity"> Fit Y axis</label>
                 </div>
-                <div style="position:relative;height:280px;"><canvas id="ochre-ga-line"></canvas><div id="ochre-ga-line-tip" style="position:absolute;display:none;pointer-events:none;background:var(--bcbackground-1);color:var(--bctext-0);border:1px solid var(--bcborders);border-radius:6px;padding:8px 10px;font-size:12px;z-index:20;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,0.25);"></div></div>
+                <div style="position:relative;height:280px;"><canvas id="ochre-ga-line"></canvas><div id="ochre-ga-line-tip" style="position:absolute;display:none;pointer-events:none;background:var(--ochre-background-1);color:var(--ochre-text-0);border:1px solid var(--ochre-borders);border-radius:6px;padding:8px 10px;font-size:12px;z-index:20;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,0.25);"></div></div>
             </div>
         </div>
         </div>
         <div id="ochre-ga-tab-calc" style="display:none;">
             <div style="max-width:620px;">
-                <p style="margin:0 0 14px;color:var(--bctext-1);font-size:13px;">Enter how much your final is worth and the overall grade you want to show see what grade you need on the final.</p>
+                <p style="margin:0 0 14px;color:var(--ochre-text-1);font-size:13px;">Enter how much your final is worth and the overall grade you want to show see what grade you need on the final.</p>
                 <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
-                    <label style="flex:1 1 200px;font-size:12px;color:var(--bctext-1);">Final exam weight (% of grade)
-                        <input id="ochre-ga-calc-weight" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="20" style="display:block;width:100%;margin-top:4px;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--bcborders);background:var(--bcbackground-1);color:var(--bctext-0);font-size:15px;">
+                    <label style="flex:1 1 200px;font-size:12px;color:var(--ochre-text-1);">Final exam weight (% of grade)
+                        <input id="ochre-ga-calc-weight" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="20" style="display:block;width:100%;margin-top:4px;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--ochre-borders);background:var(--ochre-background-1);color:var(--ochre-text-0);font-size:15px;">
                     </label>
-                    <label style="flex:1 1 200px;font-size:12px;color:var(--bctext-1);">Target overall grade (%)
-                        <input id="ochre-ga-calc-target" type="number" min="0" step="0.1" inputmode="decimal" placeholder="90" style="display:block;width:100%;margin-top:4px;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--bcborders);background:var(--bcbackground-1);color:var(--bctext-0);font-size:15px;">
+                    <label style="flex:1 1 200px;font-size:12px;color:var(--ochre-text-1);">Target overall grade (%)
+                        <input id="ochre-ga-calc-target" type="number" min="0" step="0.1" inputmode="decimal" placeholder="90" style="display:block;width:100%;margin-top:4px;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--ochre-borders);background:var(--ochre-background-1);color:var(--ochre-text-0);font-size:15px;">
                     </label>
                 </div>
-                <label for="ochre-ga-calc-show" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--bctext-0);cursor:pointer;user-select:none;margin-bottom:14px;"><input type="checkbox" id="ochre-ga-calc-show"> Show grade goal on the overview</label>
-                <div id="ochre-ga-calc-result" style="padding:12px 16px;border-radius:8px;background:var(--bcbackground-1);border:1px solid color-mix(in srgb, var(--bcborders) 75%, transparent);font-size:14px;"></div>
+                <label for="ochre-ga-calc-show" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ochre-text-0);cursor:pointer;user-select:none;margin-bottom:14px;"><input type="checkbox" id="ochre-ga-calc-show"> Show grade goal on the overview</label>
+                <div id="ochre-ga-calc-result" style="padding:12px 16px;border-radius:8px;background:var(--ochre-background-1);border:1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent);font-size:14px;"></div>
             </div>
         </div>
         <div id="ochre-ga-tab-heatmap" style="display:none;position:relative;">
             <div style="overflow-x:auto;max-width:100%;padding:2px 2px 6px;">
                 <div id="ochre-ga-heatmap-grid" style="display:inline-flex;gap:4px;"></div>
             </div>
-            <div id="ochre-ga-heatmap-note" style="margin:0;color:var(--bctext-1);font-size:12px;"></div>
-            <div style="display:flex;align-items:center;gap:4px;margin-top:8px;font-size:11px;color:var(--bctext-1);">
+            <div id="ochre-ga-heatmap-note" style="margin:0;color:var(--ochre-text-1);font-size:12px;"></div>
+            <div style="display:flex;align-items:center;gap:4px;margin-top:8px;font-size:11px;color:var(--ochre-text-1);">
                 <span>0%</span>
                 <span style="width:11px;height:11px;border-radius:3px;display:inline-block;background:${GA_ZONE_COLORS[0]};"></span>
                 <span style="width:11px;height:11px;border-radius:3px;display:inline-block;background:${GA_ZONE_COLORS[5]};"></span>
@@ -7058,10 +7058,10 @@ function ensureGradeAnalyticsPanel() {
                 <span style="width:11px;height:11px;border-radius:3px;display:inline-block;background:${GA_ZONE_COLORS[15]};"></span>
                 <span style="width:11px;height:11px;border-radius:3px;display:inline-block;background:${GA_ZONE_COLORS[19]};"></span>
                 <span>100%</span>
-                <span style="margin-left:12px;display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;display:inline-block;background:color-mix(in srgb, var(--bctext-1) 20%, transparent);"></span>No grade/assignment</span>
+                <span style="margin-left:12px;display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;display:inline-block;background:color-mix(in srgb, var(--ochre-text-1) 20%, transparent);"></span>No grade/assignment</span>
             </div>
-            <style>#ochre-grade-analytics .ochre-ga-hcell:hover{outline:1px solid var(--bctext-0);outline-offset:1px;}</style>
-            <div id="ochre-ga-heatmap-tip" style="position:absolute;display:none;pointer-events:none;z-index:100;background:var(--bcbackground-1);color:var(--bctext-0);border:1px solid var(--bcborders);border-radius:6px;padding:6px 10px;font-size:12px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,0.25);"></div>
+            <style>#ochre-grade-analytics .ochre-ga-hcell:hover{outline:1px solid var(--ochre-text-0);outline-offset:1px;}</style>
+            <div id="ochre-ga-heatmap-tip" style="position:absolute;display:none;pointer-events:none;z-index:100;background:var(--ochre-background-1);color:var(--ochre-text-0);border:1px solid var(--ochre-borders);border-radius:6px;padding:6px 10px;font-size:12px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,0.25);"></div>
         </div>
         </div>
     `;
@@ -7294,14 +7294,14 @@ function renderGaStats() {
     if (!stats) return;
     stats.style.display = "flex";
     const stat = (cap, val, color) =>
-        `<div style="padding:8px 14px;border-radius:8px;background:var(--bcbackground-1);"><div style="font-size:18px;font-weight:700;color:${color || "var(--bctext-0)"};">${val}</div><div style="font-size:11px;text-transform:uppercase;color:var(--bctext-1);">${cap}</div></div>`;
+        `<div style="padding:8px 14px;border-radius:8px;background:var(--ochre-background-1);"><div style="font-size:18px;font-weight:700;color:${color || "var(--ochre-text-0)"};">${val}</div><div style="font-size:11px;text-transform:uppercase;color:var(--ochre-text-1);">${cap}</div></div>`;
     // Trend card: arrow + colored delta of the overall grade over the last 5
     // graded assignments (green climbing, red falling, grey steady).
-    let trendVal = "-", trendColor = "var(--bctext-0)";
+    let trendVal = "-", trendColor = "var(--ochre-text-0)";
     if (gaData.trend != null) {
         if (gaData.trend > 0.05) { trendVal = "\u25B2 +" + gaData.trend.toFixed(1) + "%"; trendColor = "#16a34a"; }
         else if (gaData.trend < -0.05) { trendVal = "\u25BC " + gaData.trend.toFixed(1) + "%"; trendColor = "#dc2626"; }
-        else { trendVal = "\u25BA " + gaData.trend.toFixed(1) + "%"; trendColor = "var(--bctext-1)"; }
+        else { trendVal = "\u25BA " + gaData.trend.toFixed(1) + "%"; trendColor = "var(--ochre-text-1)"; }
     }
     // Grade goal card from the Final Calculator tab: the score needed on the
     // final to hit the stored target grade.
@@ -7347,7 +7347,7 @@ function renderGradeAnalytics() {
 // Inline style for one panel tab button; the active tab gets the accent
 // underline, matching how the rest of the panel is styled inline.
 function gaTabStyle(active) {
-    return `background:transparent;border:none;padding:6px 14px;font-size:14px;font-weight:600;cursor:pointer;color:${active ? "var(--bctext-0)" : "var(--bctext-1)"};border-bottom:2px solid ${active ? "#2563eb" : "transparent"};`;
+    return `background:transparent;border:none;padding:6px 14px;font-size:14px;font-weight:600;cursor:pointer;color:${active ? "var(--ochre-text-0)" : "var(--ochre-text-1)"};border-bottom:2px solid ${active ? "#2563eb" : "transparent"};`;
 }
 
 function gaSetTab(tab) {
@@ -7360,7 +7360,7 @@ function gaSetTab(tab) {
     }
     panel.querySelectorAll("[data-ga-tab]").forEach(btn => {
         const active = btn.dataset.gaTab === tab;
-        btn.style.color = active ? "var(--bctext-0)" : "var(--bctext-1)";
+        btn.style.color = active ? "var(--ochre-text-0)" : "var(--ochre-text-1)";
         btn.style.borderBottomColor = active ? "#2563eb" : "transparent";
     });
     if (tab === "overview") {
@@ -7377,7 +7377,7 @@ function gaSetTab(tab) {
 // Severity color for an arbitrary score percentage — the same palette the
 // doughnut / zone charts use, so a 70 renders yellow, an 85 green, etc.
 function gaSeverityColor(pct) {
-    if (pct == null || !isFinite(pct)) return "var(--bctext-0)";
+    if (pct == null || !isFinite(pct)) return "var(--ochre-text-0)";
     const b = GA_BUCKETS.find(b => pct >= b.min && pct < b.max);
     return (b || GA_BUCKETS[GA_BUCKETS.length - 1]).color;
 }
@@ -7393,7 +7393,7 @@ const GA_NEEDED_COLORS = [
 ];
 
 function gaNeededColor(needed) {
-    if (needed == null || !isFinite(needed)) return "var(--bctext-0)";
+    if (needed == null || !isFinite(needed)) return "var(--ochre-text-0)";
     const b = GA_NEEDED_COLORS.find(b => needed >= b.min);
     return (b || GA_NEEDED_COLORS[GA_NEEDED_COLORS.length - 1]).color;
 }
@@ -7420,14 +7420,14 @@ function renderGaCalculator() {
     const box = panel.querySelector("#ochre-ga-calc-result");
     if (!box) return;
     if (!gaCalc || gaCalc.weight == null || !(gaCalc.weight > 0) || gaCalc.target == null) {
-        box.innerHTML = `<span style="color:var(--bctext-1);">Enter your final's weight and your target grade to see what you need on the final.</span>`;
+        box.innerHTML = `<span style="color:var(--ochre-text-1);">Enter your final's weight and your target grade to see what you need on the final.</span>`;
         return;
     }
     const w = gaCalc.weight / 100;
     const target = gaCalc.target;
     const current = gaData ? gaData.current : null;
     if (current == null) {
-        box.innerHTML = `<span style="color:var(--bctext-1);">Waiting for grade data…</span>`;
+        box.innerHTML = `<span style="color:var(--ochre-text-1);">Waiting for grade data…</span>`;
         return;
     }
     const needed = (target - current * (1 - w)) / w;
@@ -7444,7 +7444,7 @@ function renderGaCalculator() {
         head = `<span style="font-size:20px;font-weight:700;color:${gaNeededColor(needed)};">You need ≥ ${needed.toFixed(1)}% on the final</span>`;
         sub = `You got this!`;
     }
-    box.innerHTML = head + `<div style="margin-top:6px;color:var(--bctext-1);font-size:13px;">${sub}</div>`;
+    box.innerHTML = head + `<div style="margin-top:6px;color:var(--ochre-text-1);font-size:13px;">${sub}</div>`;
 }
 
 // --- Heatmap tab ----------------------------------------------------------
@@ -7551,8 +7551,8 @@ function gaBuildHeatmapData() {
 function gaHeatmapShowTip(tip, e, cell, avg) {
     const d = cell.date;
     const rows = cell.items.map(p =>
-        `<div style="margin-top:2px;color:var(--bctext-1);">${gaEscHtml(p.title)} — <b style="color:${gaHeatmapColor(p.pct)};">${p.pct.toFixed(1)}%</b></div>`).join("");
-    tip.innerHTML = `<b>${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}</b> — avg <b style="color:${gaHeatmapColor(avg)};">${avg.toFixed(1)}%</b><div style="margin-top:4px;font-size:11px;color:var(--bctext-1);">${cell.items.length} assignment${cell.items.length === 1 ? "" : "s"}:</div>${rows}`;
+        `<div style="margin-top:2px;color:var(--ochre-text-1);">${gaEscHtml(p.title)} — <b style="color:${gaHeatmapColor(p.pct)};">${p.pct.toFixed(1)}%</b></div>`).join("");
+    tip.innerHTML = `<b>${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}</b> — avg <b style="color:${gaHeatmapColor(avg)};">${avg.toFixed(1)}%</b><div style="margin-top:4px;font-size:11px;color:var(--ochre-text-1);">${cell.items.length} assignment${cell.items.length === 1 ? "" : "s"}:</div>${rows}`;
     tip.style.display = "block";
     const host = tip.offsetParent || tip.parentNode;
     const hostRect = host.getBoundingClientRect();
@@ -7603,7 +7603,7 @@ function renderGaHeatmap() {
     labels.style.cssText = `display:flex;flex-direction:column;gap:${GA_HM_GAP}px;padding-top:${GA_HM_MONTH_H}px;`;
     ["", "Mon", "", "Wed", "", "Fri", ""].forEach(t => {
         const l = document.createElement("div");
-        l.style.cssText = `height:${GA_HM_CELL}px;font-size:9px;line-height:${GA_HM_CELL}px;color:var(--bctext-1);white-space:nowrap;`;
+        l.style.cssText = `height:${GA_HM_CELL}px;font-size:9px;line-height:${GA_HM_CELL}px;color:var(--ochre-text-1);white-space:nowrap;`;
         l.textContent = t;
         labels.appendChild(l);
     });
@@ -7628,14 +7628,14 @@ function renderGaHeatmap() {
             prevMonth = thursday.getMonth();
             const lab = document.createElement("div");
             lab.textContent = months[prevMonth];
-            lab.style.cssText = `position:absolute;top:0;left:${wk * (GA_HM_CELL + GA_HM_GAP)}px;font-size:10px;line-height:1;color:var(--bctext-1);white-space:nowrap;`;
+            lab.style.cssText = `position:absolute;top:0;left:${wk * (GA_HM_CELL + GA_HM_GAP)}px;font-size:10px;line-height:1;color:var(--ochre-text-1);white-space:nowrap;`;
             wrap.appendChild(lab);
         }
         for (let d = 0; d < 7; d++) {
             const cell = data.byDay.get(cursor.getTime());
             const div = document.createElement("div");
             div.className = "ochre-ga-hcell";
-            div.style.cssText = `width:${GA_HM_CELL}px;height:${GA_HM_CELL}px;border-radius:3px;background:${cell ? gaHeatmapColor(cell.sum / cell.items.length) : "color-mix(in srgb, var(--bctext-1) 20%, transparent)"};`;
+            div.style.cssText = `width:${GA_HM_CELL}px;height:${GA_HM_CELL}px;border-radius:3px;background:${cell ? gaHeatmapColor(cell.sum / cell.items.length) : "color-mix(in srgb, var(--ochre-text-1) 20%, transparent)"};`;
             if (cell) {
                 const avg = cell.sum / cell.items.length;
                 div.addEventListener("mousemove", (e) => gaHeatmapShowTip(tip, e, cell, avg));
@@ -8100,7 +8100,7 @@ function gaApplyImagineTotal() {
         if (!note) {
             note = document.createElement("div");
             note.className = "ochre-ga-if-note";
-            note.style.cssText = "font-size:11px;font-style:italic;color:var(--bctext-1);margin-top:2px;";
+            note.style.cssText = "font-size:11px;font-style:italic;color:var(--ochre-text-1);margin-top:2px;";
             th.appendChild(note);
         }
         if (note.dataset.gaIfHtml !== "Imagine-If scenario; not your actual grade.") {
@@ -8124,7 +8124,7 @@ function gaRestoreImagineTotal() {
 // Canvas's table CSS gives selects/inputs an 11px bottom margin and a tall
 // native select box, which made our rows taller than the page's own —
 // margin:0 and a fixed select height keep the rows even.
-const GA_IF_TD_INPUT = "box-sizing:border-box;padding:3px 6px;border-radius:5px;border:1px solid var(--bcborders);background:var(--bcbackground-1);color:var(--bctext-0);font-size:12px;margin:0;";
+const GA_IF_TD_INPUT = "box-sizing:border-box;padding:3px 6px;border-radius:5px;border:1px solid var(--ochre-borders);background:var(--ochre-background-1);color:var(--ochre-text-0);font-size:12px;margin:0;";
 const GA_IF_TD_NUM = GA_IF_TD_INPUT + "width:58px;";
 const GA_IF_TD_SEL = GA_IF_TD_INPUT + "max-width:170px;height:26px;padding:2px 4px;";
 const GA_IF_TD_BTN = GA_IF_TD_INPUT + "cursor:pointer;white-space:nowrap;";
@@ -8180,7 +8180,7 @@ function gaIfBuildAssignmentControls(tr, a) {
     edit.className = "ochre-ga-if-edit";
     edit.style.cssText = "display:inline-flex;align-items:center;gap:4px;";
     edit.innerHTML = `<input data-ga-if-score type="number" step="any" placeholder="—" value="${a.score == null ? "" : a.score}" title="Imagine-If score (numerator); blank = not counted" style="${GA_IF_TD_NUM}">`
-        + ` <span style="color:var(--bctext-1);">/</span> `
+        + ` <span style="color:var(--ochre-text-1);">/</span> `
         + `<input data-ga-if-pts type="number" step="any" min="0" placeholder="—" value="${a.points == null ? "" : a.points}" title="Imagine-If points possible (denominator)" style="${GA_IF_TD_NUM}">`;
     (scoreTd.querySelector(".score_holder") || scoreTd).appendChild(edit);
     const th = tr.querySelector("th.title");
@@ -8210,7 +8210,7 @@ function gaIfBuildGroupControls(tr, g) {
     edit.className = "ochre-ga-if-edit";
     edit.style.cssText = "display:inline-flex;align-items:center;gap:4px;margin-left:8px;";
     edit.innerHTML = `<input data-ga-if-gweight type="number" min="0" max="100" step="0.1" value="${g.weight}" title="Imagine-If group weight (% of grade)" style="${GA_IF_TD_NUM}">`
-        + ` <span style="color:var(--bctext-1);">%</span>`;
+        + ` <span style="color:var(--ochre-text-1);">%</span>`;
     (scoreTd.querySelector(".score_holder") || scoreTd).appendChild(edit);
     // Icon-only remove button in the row's last cell.
     const lastTd = tr.cells[tr.cells.length - 1];
@@ -8239,8 +8239,8 @@ function gaIfMakeAssignmentRow(a) {
     // !important beats the stylesheet's), to win the edge conflicts and
     // paint the white line the custom background shows on real rows.
     for (const cell of tr.cells) {
-        cell.style.setProperty("border-top", "1px solid var(--bctext-1,#e2e2e2)", "important");
-        cell.style.setProperty("border-bottom", "1px solid var(--bctext-1,#e2e2e2)", "important");
+        cell.style.setProperty("border-top", "1px solid var(--ochre-text-1,#e2e2e2)", "important");
+        cell.style.setProperty("border-bottom", "1px solid var(--ochre-text-1,#e2e2e2)", "important");
     }
     return tr;
 }
@@ -8256,8 +8256,8 @@ function gaIfMakeGroupRow(g) {
         <td class="asset_processors_cell"></td><td class="details"></td><td></td>`;
     // Same cell-level separators as gaIfMakeAssignmentRow.
     for (const cell of tr.cells) {
-        cell.style.setProperty("border-top", "1px solid var(--bctext-1,#e2e2e2)", "important");
-        cell.style.setProperty("border-bottom", "1px solid var(--bctext-1,#e2e2e2)", "important");
+        cell.style.setProperty("border-top", "1px solid var(--ochre-text-1,#e2e2e2)", "important");
+        cell.style.setProperty("border-bottom", "1px solid var(--ochre-text-1,#e2e2e2)", "important");
     }
     return tr;
 }
