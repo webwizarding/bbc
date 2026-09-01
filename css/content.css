@@ -365,25 +365,32 @@
 
 /* ===== Grades table: scale down with narrow windows =====
    Canvas lays out #grades_summary with content-driven auto sizing plus hard
-   min-widths (title 150px, details 80px) and nowrap cells (due, score,
-   details), giving it a ~780px floor below which the whole table overflows
-   the page instead of shrinking. Switch it to fixed layout with percentage
-   column widths (set on the header row, which drives fixed layout) and let
-   tight cells wrap, so the header, body and rows all scale with the
-   viewport. #assignments scrolls horizontally as a last resort (e.g. while a
-   what-if score input is open). */
-#grades_summary { table-layout: fixed; width: 100%; }
-#grades_summary thead th:nth-child(1) { width: 30%; } /* Name */
-#grades_summary thead th:nth-child(2) { width: 12%; } /* Due */
-#grades_summary thead th:nth-child(3) { width: 10%; } /* Submitted */
-#grades_summary thead th:nth-child(4) { width: 7%; }  /* Status */
-#grades_summary thead th:nth-child(5) { width: 11%; } /* Score */
-#grades_summary thead th:nth-child(6) { width: 3%; }  /* asset processors */
-#grades_summary thead th:nth-child(7) { width: 15%; } /* Details */
-#grades_summary thead th:nth-child(8) { width: 3%; }  /* progress */
-#grades_summary td.due,
-#grades_summary td.assignment_score,
-#grades_summary td.details { white-space: normal; }
+   min-widths (title 150px, details 80px) and nowrap cells, giving it a
+   ~780px floor below which the whole table overflows the page instead of
+   shrinking. Below that floor we switch it to fixed layout so the header,
+   body and rows scale with the viewport. #assignments scrolls horizontally
+   as a last resort (e.g. while a what-if score input is open).
+
+   Two things this deliberately does NOT do, both of which it used to:
+
+   1. It does not apply at every width. Forcing table-layout:fixed on a wide
+      viewport constrains columns Canvas had sized to their content, which
+      made the Due and Submitted dates collide. Canvas' own layout is fine
+      above its floor, so the override is scoped to where the problem is.
+
+   2. It does not enumerate columns. The previous version assigned widths by
+      thead th:nth-child(1..8), naming a specific column order that included
+      the newer asset-processors column. On an instance without that column
+      every width from the sixth onwards lands on the wrong column. It also
+      listed which cells may wrap (due, score, details) and missed the
+      Submitted cell, so that one stayed nowrap inside a constrained column
+      and overflowed into its neighbour. Percentages are gone and every cell
+      may wrap, so neither list can be incomplete. */
+@media (max-width: 900px) {
+    #grades_summary { table-layout: fixed; width: 100%; }
+    #grades_summary th,
+    #grades_summary td { white-space: normal; overflow-wrap: anywhere; }
+}
 #assignments { overflow-x: auto; }
 
 
