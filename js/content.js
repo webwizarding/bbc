@@ -1,57 +1,68 @@
+// The origin cannot change without a full document load, so capturing it once
+// is safe. The path can and does change under us: Canvas' "New Canvas" UI
+// navigates client-side via history.pushState/replaceState.
 const domain = window.location.origin;
-const current_page = window.location.pathname;
 
-// NOTE: upstream dev shipped a partial client-side navigation fix here
-// (patched pushState/replaceState + popstate, re-running four page-chrome
-// watchers). It was removed during the merge: Phase 1.1 replaces it with a
-// full routing layer with teardown, and keeping both would mean two
-// competing navigation mechanisms. `current_page` is left as the original
-// module-level capture until 1.1 lands.
+// Single accessor for the current route. Every route test in this file goes
+// through it.
+//
+// This replaces a module-level `current_page` captured once at document_start,
+// which went stale on every client-side navigation and left ~20 route checks
+// describing whichever page the user happened to land on first. Six call sites
+// had already been patched to read window.location.pathname directly to work
+// around it, so the file carried two mechanisms; both are now this one.
+//
+// Kept as a function rather than a getter or a cached value on purpose: there
+// is no navigation event we can trust to invalidate a cache, which is the
+// mistake being undone here.
+function getRoute() {
+    return window.location.pathname;
+}
 
 function getCurrentCourseId() {
-    const match = current_page.match(/^\/courses\/(\d+)(?:\/|$)/);
+    const match = getRoute().match(/^\/courses\/(\d+)(?:\/|$)/);
     return match ? parseInt(match[1]) : null;
 }
 
 function getSidebarLayoutMode() {
-    if (current_page.match(/^\/courses\/(\d+)(?:\/|$)/)) return "course";
+    if (getRoute().match(/^\/courses\/(\d+)(?:\/|$)/)) return "course";
     if (isProfilePage()) return "course";
-    if (current_page === "/courses" || current_page === "/courses/") return "dash";
-    if (current_page === "/" || current_page === "") return "dash";
+    if (getRoute() === "/courses" || getRoute() === "/courses/") return "dash";
+    if (getRoute() === "/" || getRoute() === "") return "dash";
     return "dash";
 }
 
 function isGradesPage() {
-    return /^\/courses\/\d+\/grades(?:\/|$)/.test(current_page);
+    return /^\/courses\/\d+\/grades(?:\/|$)/.test(getRoute());
 }
 
 function isCoursesIndexPage() {
-    return /^\/courses\/?$/.test(current_page);
+    return /^\/courses\/?$/.test(getRoute());
 }
 
 function isGroupsIndexPage() {
-    return /^\/groups\/?$/.test(current_page);
+    return /^\/groups\/?$/.test(getRoute());
 }
 
 function isConversationsPage() {
-    return /^\/conversations(?:\/|$)/.test(current_page);
+    return /^\/conversations(?:\/|$)/.test(getRoute());
 }
 
 function isAccountsPage() {
-    return /^\/accounts(?:\/|$)/.test(current_page);
+    return /^\/accounts(?:\/|$)/.test(getRoute());
 }
 
 function isProfilePage() {
-    return /^\/profile(?:\/|$)/.test(current_page);
+    return /^\/profile(?:\/|$)/.test(getRoute());
 }
 
 // Quiz pages: /courses/123/quizzes/456 (pre-take/intro) and
 // /courses/123/quizzes/456/take (the actual quiz).
 function isQuizPage() {
-    return /^\/courses\/\d+\/quizzes\/\d+(?:\/|$)/.test(current_page);
+    return /^\/courses\/\d+\/quizzes\/\d+(?:\/|$)/.test(getRoute());
 }
 function isQuizTakePage() {
-    return /^\/courses\/\d+\/quizzes\/\d+\/take(?:\/|$)/.test(current_page);
+    return /^\/courses\/\d+\/quizzes\/\d+\/take(?:\/|$)/.test(getRoute());
 }
 function isQuizPreTakePage() {
     return isQuizPage() && !isQuizTakePage();
@@ -62,12 +73,8 @@ function quizSafeModeActive() {
     return isQuizPage() && options.quiz_safe_mode === true;
 }
 
-// Read the URL live: Canvas' "New Canvas" UI navigates client-side via
-// history.pushState/replaceState, and current_page (captured at document_start)
-// can be stale when the user clicks into a submission page. Reading
-// window.location.pathname at check time makes this correct regardless.
 function getSubmissionAssignmentLink() {
-    const match = window.location.pathname.match(/^\/courses\/(\d+)\/assignments\/(\d+)\/submissions\/(\d+)(?:\/|$)/);
+    const match = getRoute().match(/^\/courses\/(\d+)\/assignments\/(\d+)\/submissions\/(\d+)(?:\/|$)/);
     if (!match) return null;
     return `${domain}/courses/${match[1]}/assignments/${match[2]}/`;
 }
@@ -118,7 +125,7 @@ function ensureCurrentUserId() {
 // submission ("grades") page for that assignment. The lookahead keeps this
 // from matching the submission pages themselves (/.../submissions/678).
 function getAssignmentGradesLink() {
-    const match = window.location.pathname.match(/^\/courses\/(\d+)\/assignments\/(\d+)(?!\/submissions)(?:\/|$)/);
+    const match = getRoute().match(/^\/courses\/(\d+)\/assignments\/(\d+)(?!\/submissions)(?:\/|$)/);
     if (!match || currentUserIdCache == null) return null;
     return `${domain}/courses/${match[1]}/assignments/${match[2]}/submissions/${currentUserIdCache}`;
 }
@@ -256,7 +263,7 @@ function maintainAssignmentPageButton() {
     assignmentButtonScheduled = true;
     requestAnimationFrame(() => {
         assignmentButtonScheduled = false;
-        const isAssignmentPage = /^\/courses\/\d+\/assignments\/\d+(?!\/submissions)(?:\/|$)/.test(window.location.pathname);
+        const isAssignmentPage = /^\/courses\/\d+\/assignments\/\d+(?!\/submissions)(?:\/|$)/.test(getRoute());
         const existing = document.getElementById("ochre-assignment-grades");
         if (!isAssignmentPage) {
             if (existing) {
@@ -286,7 +293,7 @@ function maintainAssignmentPageButton() {
 }
 
 function isAssignmentPage() {
-    return /^\/courses\/\d+\/assignments(?:\/\d+)?(?:\/|$)/.test(current_page);
+    return /^\/courses\/\d+\/assignments(?:\/\d+)?(?:\/|$)/.test(getRoute());
 }
 
 function removeSequenceFooter() {
@@ -816,7 +823,7 @@ function startExtension() {
     // navigation hook immediately, before the async storage callbacks below.
     // These don't depend on `options`, and running them first means a throw in
     // any later init step can't prevent the button from appearing. The watcher
-    // reads window.location.pathname live and uses a persistent MutationObserver
+    // reads the route live via getRoute() and uses a persistent MutationObserver
     // to (re)inject the button once the content container exists.
     watchSubmissionPageButton();
 
@@ -1550,7 +1557,7 @@ function resetTimer() {
 }
 
 function checkDashboardReady() {
-    const isDashboard = () => current_page == "/" || current_page == "" || /^\/courses\/(\d+)(?:\/|$)/.test(current_page);
+    const isDashboard = () => getRoute() == "/" || getRoute() == "" || /^\/courses\/(\d+)(?:\/|$)/.test(getRoute());
 
     const callback = (mutationList) => {
         // Ignore attribute-only mutations; only structural (childList) changes matter here.
@@ -4794,9 +4801,9 @@ function runDarkModeFixer(override = false) {
     // Quiz safe mode: never auto-run the dark mode fixer on quiz pages.
     if (quizSafeModeActive()) return { "path": "ochre-none", "time": "" };
     if (options.dark_mode !== true) return { "path": "ochre-darkmode_off", "time": "" };
-    if (override === false && !options["dark_mode_fix"].includes(window.location.pathname)) return { "path": "ochre-none", "time": "" };
+    if (override === false && !options["dark_mode_fix"].includes(getRoute())) return { "path": "ochre-none", "time": "" };
     let output = inspectDarkMode();
-    return { "path": window.location.pathname, "time": output.time };
+    return { "path": getRoute(), "time": output.time };
 }
 
 function autoDarkModeCheck() {
@@ -4840,7 +4847,7 @@ function toggleAutoDarkMode() {
 
 let iframeObserver;
 function runiframeChecker() {
-    if (current_page === "/" || current_page === "") return;
+    if (getRoute() === "/" || getRoute() === "") return;
 
     if (options.dark_mode !== true) {
         if (iframeObserver) iframeObserver.disconnect();
@@ -5397,7 +5404,7 @@ function createGPACalcCourse(location, course) {
 }
 
 function setupGPACalc() {
-    if (current_page !== "/" && current_page !== "") return;
+    if (getRoute() !== "/" && getRoute() !== "") return;
     try {
         grades?.then(result => {
 
@@ -6195,8 +6202,8 @@ function onGlobalSearchShortcut(e) {
 
     // Never activate on quiz pages (intro or take) so we don't interfere with
     // the quiz experience or the browser's native Ctrl+K. Read the URL live
-    // because current_page can be stale after Canvas' client-side navigation.
-    if (/^\/courses\/\d+\/quizzes\/\d+(?:\/|$)/.test(window.location.pathname)) return;
+    // because getRoute() can be stale after Canvas' client-side navigation.
+    if (/^\/courses\/\d+\/quizzes\/\d+(?:\/|$)/.test(getRoute())) return;
 
     const modal = document.getElementById("ochre-global-search-modal");
     if (modal && modal.dataset.open === "true") {
@@ -6724,7 +6731,7 @@ function getColors() {
 
 function changeFavicon() {
     if (options.tab_icons !== true) return;
-    let match = current_page.match(/courses\/(?<id>\d*)/);
+    let match = getRoute().match(/courses\/(?<id>\d*)/);
     if (match && match.groups.id && options.custom_cards_3[match.groups.id]?.color) {
         document.querySelector('link[rel="icon"').href = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="128px" height="128px" viewBox="-192 -192 2304.00 2304.00" stroke="white"><g stroke-width="0"><rect x="-192" y="-192" width="2304.00" height="2304.00" rx="0" fill="${options.custom_cards_3[match.groups.id].color.replace("#", "%23")}" strokewidth="0"/></g><g stroke-linecap="round" stroke-linejoin="round"/><g> <path d="M958.568 277.97C1100.42 277.97 1216.48 171.94 1233.67 34.3881 1146.27 12.8955 1054.57 0 958.568 0 864.001 0 770.867 12.8955 683.464 34.3881 700.658 171.94 816.718 277.97 958.568 277.97ZM35.8207 682.031C173.373 699.225 279.403 815.285 279.403 957.136 279.403 1098.99 173.373 1215.05 35.8207 1232.24 12.8953 1144.84 1.43262 1051.7 1.43262 957.136 1.43262 862.569 12.8953 769.434 35.8207 682.031ZM528.713 957.142C528.713 1005.41 489.581 1044.55 441.31 1044.55 393.038 1044.55 353.907 1005.41 353.907 957.142 353.907 908.871 393.038 869.74 441.31 869.74 489.581 869.74 528.713 908.871 528.713 957.142ZM1642.03 957.136C1642.03 1098.99 1748.06 1215.05 1885.61 1232.24 1908.54 1144.84 1920 1051.7 1920 957.136 1920 862.569 1908.54 769.434 1885.61 682.031 1748.06 699.225 1642.03 815.285 1642.03 957.136ZM1567.51 957.142C1567.51 1005.41 1528.38 1044.55 1480.11 1044.55 1431.84 1044.55 1392.71 1005.41 1392.71 957.142 1392.71 908.871 1431.84 869.74 1480.11 869.74 1528.38 869.74 1567.51 908.871 1567.51 957.142ZM958.568 1640.6C816.718 1640.6 700.658 1746.63 683.464 1884.18 770.867 1907.11 864.001 1918.57 958.568 1918.57 1053.14 1918.57 1146.27 1907.11 1233.67 1884.18 1216.48 1746.63 1100.42 1640.6 958.568 1640.6ZM1045.98 1480.11C1045.98 1528.38 1006.85 1567.51 958.575 1567.51 910.304 1567.51 871.172 1528.38 871.172 1480.11 871.172 1431.84 910.304 1392.71 958.575 1392.71 1006.85 1392.71 1045.98 1431.84 1045.98 1480.11ZM1045.98 439.877C1045.98 488.148 1006.85 527.28 958.575 527.28 910.304 527.28 871.172 488.148 871.172 439.877 871.172 391.606 910.304 352.474 958.575 352.474 1006.85 352.474 1045.98 391.606 1045.98 439.877ZM1441.44 1439.99C1341.15 1540.29 1333.98 1697.91 1418.52 1806.8 1579 1712.23 1713.68 1577.55 1806.82 1418.5 1699.35 1332.53 1541.74 1339.7 1441.44 1439.99ZM1414.21 1325.37C1414.21 1373.64 1375.08 1412.77 1326.8 1412.77 1278.53 1412.77 1239.4 1373.64 1239.4 1325.37 1239.4 1277.1 1278.53 1237.97 1326.8 1237.97 1375.08 1237.97 1414.21 1277.1 1414.21 1325.37ZM478.577 477.145C578.875 376.846 586.039 219.234 501.502 110.339 341.024 204.906 206.338 339.592 113.203 498.637 220.666 584.607 378.278 576.01 478.577 477.145ZM679.155 590.32C679.155 638.591 640.024 677.723 591.752 677.723 543.481 677.723 504.349 638.591 504.349 590.32 504.349 542.048 543.481 502.917 591.752 502.917 640.024 502.917 679.155 542.048 679.155 590.32ZM1440 475.712C1540.3 576.01 1697.91 583.174 1806.8 498.637 1712.24 338.159 1577.55 203.473 1418.51 110.339 1332.54 217.801 1341.13 375.413 1440 475.712ZM1414.21 590.32C1414.21 638.591 1375.08 677.723 1326.8 677.723 1278.53 677.723 1239.4 638.591 1239.4 590.32 1239.4 542.048 1278.53 502.917 1326.8 502.917 1375.08 502.917 1414.21 542.048 1414.21 590.32ZM477.145 1438.58C376.846 1338.28 219.234 1331.12 110.339 1415.65 204.906 1576.13 339.593 1710.82 498.637 1805.39 584.607 1696.49 577.443 1538.88 477.145 1438.58ZM679.155 1325.37C679.155 1373.64 640.024 1412.77 591.752 1412.77 543.481 1412.77 504.349 1373.64 504.349 1325.37 504.349 1277.1 543.481 1237.97 591.752 1237.97 640.024 1237.97 679.155 1277.1 679.155 1325.37Z"/></g></svg>`;
     }
@@ -8569,7 +8576,7 @@ function gaExitImagineIf() {
 
 
 function getApiData() {
-    if (current_page === "/" || current_page === "" || options.better_todo || options.better_sidebar) {
+    if (getRoute() === "/" || getRoute() === "" || options.better_todo || options.better_sidebar) {
         getAssignments();
         getGrades();
         getColors();
