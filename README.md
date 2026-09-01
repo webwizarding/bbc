@@ -1,133 +1,95 @@
-![Canvas Refined](/icon/NEWtitle.png)
+# Ochre for Canvas
 
-# Canvas Refined
+A browser extension that improves the [Instructure Canvas](https://www.instructure.com/canvas)
+interface: dark mode, themes, dashboard card customization, an improved to-do
+list, a GPA calculator, and dashboard notes.
 
-I don't like the direction bettercanvas (bettercampus) is heading so I forked it
+Everything runs locally. There is no backend, no account, and no telemetry.
+See [PRIVACY_POLICY.md](PRIVACY_POLICY.md).
 
-They tried to change license but forgot to rebase so this is based on the MIT licensed version and fully legal 🙃
+> **Status: pre-release (0.1.0).** Not yet published to any extension store.
+> Install from source using the steps below.
 
-There is a dev branch for active alpha if you really want
+## Attribution and independence
 
-# Get it now!
+This is an independent project. It is a fork of
+[Canvas Refined](https://github.com/GuySandler/CanvasRefined) by Guy Sandler
+(MIT), which is itself a fork of the MIT-licensed release of
+[BetterCanvas](https://github.com/UseBetterCanvas/bettercanvas) by ksucpea.
+The fork point is Canvas Refined `main` at commit `e1fdfcd`.
 
-1. get it on the [chrome web store](https://chromewebstore.google.com/detail/canvasrefined/ihienfbdfdamhmhhiokjnjmpjgbenedg)! 
-2. get it on the [firefox addon store](https://addons.mozilla.org/en-US/firefox/addon/canvas-refined/)!
+It is **not affiliated with, endorsed by, or supported by** Canvas Refined,
+BetterCanvas, BetterCampus, or Instructure. "Canvas" is a trademark of
+Instructure, Inc., used here only to describe what this extension works with.
 
-## Inquiries
+Please do not report issues with this extension to any of those projects.
 
-To contact me, please email sandlerguy5@gmail.com, or you can open an issue within the "Issues" tab on GitHub.
+### Credits
 
-## Table of Contents
+The great majority of the original work is theirs, not mine:
 
-- [Features](#features)
-- [Dev Installation](#dev-installation)
-- [Version Notes](#version-notes)
-- [Color Reference](#color-reference)
-- [Contributing](#contributing)
-- [Authors](#authors)
+- **[ksucpea](https://github.com/ksucpea)** — original author of BetterCanvas
+- **[Guy Sandler](https://github.com/guysandler)** — Canvas Refined, and most
+  of the features this fork inherits
+- Original contributors: [fudgeu](https://github.com/fudgeu),
+  [Tibo Geeraerts](https://github.com/tibogeeraerts),
+  [Jacob Mungle](https://github.com/Jelgnum),
+  [FireIsGood](https://github.com/FireIsGood)
 
 ## Features
 
-The original introduces improvements to the Canvas user interface:
+Inherited from Canvas Refined:
 
-- Fully customizable dark mode (choose from premade options or manually edit dark mode)
-- Automatic scheduling for dark mode
-- Dashboard card color palletes
-- Themes created by users (broken due to fork)
-- Assignments due list
-- Dashboard notes
-- Custom fonts
-- Condensed cards
-- Dashboard grades
-- Remove sidebar logo
-- Customizable card links
-- Gradient dashboard cards
-- Advanced card customization
-- GPA calculator (college and highschool)
-- Browser wide popup assignment reminder
-- Preview assignments and announcements from the dashboard 
+- Fully customizable dark mode, with scheduling and a system-theme option
+- Dashboard card colour palettes, gradients, and advanced card styling
+  (image size, roundness, spacing, width, height)
+- Custom backgrounds, including presets, your own URL, and daily rotation
+- Improved to-do list with progress rings, hover previews, and custom tasks
+- Improved sidebar
+- Dashboard grades and an assignments-due list
+- GPA calculator with presets, weighting, and cumulative GPA
+- Dashboard notes with Markdown
+- Custom fonts, condensed cards, tab icons
+- Quiz safe mode
+- Browser-wide assignment reminders
+- Themes
 
-## Newly added features
+Changes made in this fork so far are listed in the commit history; this
+section will be updated as the roadmap below lands.
 
-Canvas Refined adds more with more to come!
+## Roadmap
 
-- GPA presets
-- backend stuff:
-	- Searching themes (the original didn't actually implement that)
-	- made the dark mode into a css file instead of a reallllllly long string
-- Card Styles (image size, card roundness, card spacing, width, height, theme compatible)
-- Custom Background
-  - Use presets or add your own by URL
-  - Theme compatible
-  - Daily backgrounds
-- Popup UI revamp
-- NEW Better todo list
-- Better sidebar
-- Simplified UI
-  - Some options won't show up when not needed
-- Markdown in dashboard notes
-- Feature search bar
-- Smaller additions:
-  - Equal height cards for card assignments
-  - Center cards
-  - Hide new dashboard button
+Work is sequenced in three phases. Detail lives in
+[docs/CONTENT_JS_MAP.md](docs/CONTENT_JS_MAP.md) and
+[docs/BACKLOG.md](docs/BACKLOG.md).
 
-## Planned Features
-- mail assistant + ui revamp
-- better calender (+ calender sync)
-- better what if grade
-- global canvas search
-- fix darkmode fixer (and automatic)
-- grade history with graph
-- more shapes for the better todo ring thing
+1. **Correctness.** Client-side navigation handling, a real API layer with
+   pagination and error typing, storage quota routing, narrowed host
+   permissions, observer lifecycle, and accessibility fixes.
+2. **Architecture.** Splitting `js/content.js` into modules, a build step,
+   tests, lint, and CI.
+3. **Features.** A full-page planner view, recurring tasks and subtasks,
+   calendar export, what-if grades, grade history, per-course notes,
+   flashcards with spaced repetition, and theme browsing.
 
-## Extra features that might be added:
-- card grade position, card outline
-- streaks
-- maybe find a way for faster loading
-- liquid glass theme?
-- rotating background, time/weather background overlay
-- custom side logo
-- goals
-- Scheduled Reminder Popups
-- preview font
-- button to remove all card images and undo
-- auto dark mode based on background
+## Install from source
 
-## Community suggestions (maybe will be done at some point)
-- when opening assignments it will show you "if you get a 0 on this your grade will be _"
-- quick modules button on cards
-- module sorting (newest, oldest) (maybe grid view)
-- grade leaderboard per class (opt in)
-- GPA preset by school name maybe
-- sticky notes
+- Clone this repository.
+- Chrome or another Chromium browser: open `chrome://extensions`, enable
+  **Developer mode**, click **Load unpacked**, and select the repository root.
+- Firefox: open `about:debugging#/runtime/this-firefox`, click
+  **Load Temporary Add-on**, and select `manifest.json`.
 
-## Dev Installation
+Then open your institution's Canvas site and click the extension icon to
+configure it.
 
-To install, run, and build with this repository locally,
+### Regenerating icons
 
-- Clone the repository locally
-- Visit `chrome://extensions` in your browser. (replace chrome with your version of chromium)
-- Enable developer mode by toggling the switch in the upper right corner of the viewport.
-- Click the "Load upacked" button in the header.
-- When prompted to open a file, select the root directory of this repository.
+```
+python3 tools/make-icons.py
+```
 
-### How to use
-
-- Once the extension is installed, navigate to your institution's Canvas homepage.
-- To edit the available options, click on the "Extensions" button in the upper right corner of the viewport.
-- When the menu opens, click on the Canvas Refined extension.
-  - A menu will appear with configuration options for your Canvas homepage.
-
-<!-- ## Color Reference
-
-| Color      | Hex                                                              |
-| ---------- | ---------------------------------------------------------------- |
-| Background | ![#161616](https://via.placeholder.com/10/0a192f?text=+) #161616 |
-| Text       | ![#ffffff](https://via.placeholder.com/10/ffffff?text=+) #ffffff |
-| Accent 01  | ![#ff002e](https://via.placeholder.com/10/ff002e?text=+) #ff002e |
-| Accent 02  | ![#ff5200](https://via.placeholder.com/10/ff5200?text=+) #ff5200 |
-| Accent 03  | ![#ff47ad](https://via.placeholder.com/10/ff47ad?text=+) #ff47ad | -->
+Uses only the Python standard library.
 
 ## Contributing
 
@@ -201,42 +163,10 @@ To add a new feature, please follow these guidelines.
   - If the function only adds css, it should be added to `applyAestheticChanges()`, and in this case should not be a separate function, instead add the css to the existing styles found in this function.
   - Anything else should be put under `startExtension()` and should be placed no higher than the `checkDashboardReady` function found here.
 
-## Star History (I think github broke it)
-
-<a href="https://www.star-history.com/?repos=GuySandler%2FCanvasRefined&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=GuySandler/CanvasRefined&type=date&theme=dark&legend=top-left&sealed_token=PPR8AZSTXJAWskYPcyVUafz4OZ5giutqwV8w3P8alGNMcyQG2Lo7T_Y074Z6kokTomyzK253AWTnF2tyF6ShnECZxoFhFpIEXWMgv88r48nqXNI988bEHOqMmM7r3Kcbja4mHL-IrXq4QkIOCdrLOn8trIxUKgU3iglA3WAQFT3NJgrNNgYPvm-boaTF" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=GuySandler/CanvasRefined&type=date&legend=top-left&sealed_token=PPR8AZSTXJAWskYPcyVUafz4OZ5giutqwV8w3P8alGNMcyQG2Lo7T_Y074Z6kokTomyzK253AWTnF2tyF6ShnECZxoFhFpIEXWMgv88r48nqXNI988bEHOqMmM7r3Kcbja4mHL-IrXq4QkIOCdrLOn8trIxUKgU3iglA3WAQFT3NJgrNNgYPvm-boaTF" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=GuySandler/CanvasRefined&type=date&legend=top-left&sealed_token=PPR8AZSTXJAWskYPcyVUafz4OZ5giutqwV8w3P8alGNMcyQG2Lo7T_Y074Z6kokTomyzK253AWTnF2tyF6ShnECZxoFhFpIEXWMgv88r48nqXNI988bEHOqMmM7r3Kcbja4mHL-IrXq4QkIOCdrLOn8trIxUKgU3iglA3WAQFT3NJgrNNgYPvm-boaTF" />
- </picture>
-</a>
-
-## Authors
-
-#### Fork Owner
-
-- [Guy](https://github.com/guysandler)
-
-#### Original Owner
-
-- [ksucpea](https://github.com/ksucpea)
-
-#### Original Contributors
-
-- [fudgeu](https://github.com/fudgeu)
-- [Tibo Geeraerts](https://github.com/tibogeeraerts)
-- [Jacob Mungle](https://github.com/Jelgnum)
-- [FireIsGood](https://github.com/FireIsGood)
-
 ## License
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-You can fork, modify, and use this code however you like with attributes.
-
-![Canvas Refined](/icon/icon-48.png)
+MIT. See [LICENSE-MIT](LICENSE-MIT).
 
 Copyright (c) 2024 ksucpea
-
 Copyright (c) 2026 Guy Sandler
-
+Copyright (c) 2026 webwizarding

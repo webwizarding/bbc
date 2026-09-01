@@ -1,102 +1,93 @@
 # Privacy Policy
 
-**Last Updated:** May 2, 2026
+**Extension:** Ochre for Canvas
+**Last updated:** September 1, 2026
 
-## Overview
+## Summary
 
-Canvas Refined ("the Extension") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and protect your information.
+Ochre for Canvas has no backend. There are no servers, no accounts, no
+analytics, and no telemetry. Everything the extension stores stays in your
+browser's own extension storage on your device.
 
-TLDR: we store some of your canvas info locally on your device and it stays fully local
+This is a design constraint, not a current-state description. The extension is
+built so that it cannot phone home.
 
-## What We Collect
+## What is stored, and where
 
-### 1. User Preferences and Settings
-The Extension stores user preferences and customization settings locally on your device, including:
-- Dark mode preferences and color themes
-- Dashboard customization options
-- Feature toggles (assignments due list, GPA calculator, etc.)
-- Custom fonts and UI preferences
+All storage uses the browser's `chrome.storage` API. Nothing is written
+anywhere else.
 
-These settings are stored locally using Chrome's `chrome.storage` API and synced across your Chrome profile if you enable sync.
+**Your preferences** — dark mode colours and themes, dashboard layout
+options, feature toggles, custom fonts, GPA grade boundaries, and similar
+settings.
 
-### 2. Canvas Data
-The Extension accesses information from your Canvas instance to provide enhanced features:
-- Assignment information and due dates
-- Grade and GPA data
-- Announcements
-- Course and grade information
-- Dashboard content
+**Your own content** — dashboard notes you type, custom tasks you create, and
+reminders you set.
 
-**Important:** This data is retrieved directly from Canvas when you access it and is processed locally on your device. We do not transmit or store this data on external servers.
+**Cached Canvas data** — course names, colours, assignment titles and due
+dates, announcements, and grades, kept so the interface can render without
+refetching on every page load.
 
-### 3. Automatic Error Logging
-The Extension may collect error messages to help improve functionality. Error data is stored locally on your device.
+Two storage areas are used. `chrome.storage.local` never leaves your device.
+`chrome.storage.sync` is replicated by your browser across profiles where you
+have signed in and enabled browser sync — that replication is performed by
+your browser vendor (Google or Mozilla) under their privacy policy, not by
+this extension.
 
-## What We Do NOT Collect
+## What is never collected
 
-- We do NOT collect personal identification information like your name or email
-- We do NOT track your browsing behavior outside of Canvas
-- We do NOT send your data to third-party servers
-- We do NOT use your data for advertising or marketing
-- We do NOT share your data with other applications or services
+- No name, email address, student ID, or other identifying information.
+- No browsing history or activity on any site.
+- No usage analytics, event tracking, crash reporting, or metrics.
+- Nothing is transmitted to the developer or to any third party.
 
-## How Your Data Is Used
+## Network activity
 
-Your data is used exclusively to:
-- Provide the enhanced Canvas interface
-- Store and retrieve your preferences
-- Calculate GPA and process assignment information
-- Display reminders and notifications
-- Improve the Extension's functionality
+The extension makes network requests only in these cases, all of them from
+your browser directly:
 
-## Data Storage and Security
+1. **Your Canvas instance.** Standard Canvas REST API calls, using your
+   existing Canvas session, for data you already have access to. Same-origin
+   with the page you are on.
+2. **Google Fonts** (`fonts.googleapis.com`), only if you enable a custom
+   font, and only to fetch that font file.
+3. **NASA's public APOD API** (`api.nasa.gov`), only if you turn on the
+   NASA daily background.
+4. **Image URLs you supply**, if you set a custom background or custom card
+   image. Your browser fetches those from wherever you pointed it.
 
-- All user data is stored locally on your device using Chrome's storage API
-- The Extension does not maintain servers or databases
-- Your data remains on your device and is not synced to external services (unless you enable Chrome sync, which is controlled by Google's Privacy Policy)
-- Data is only accessible to the Canvas domain
+Items 2 through 4 are off by default and are each controlled by a setting you
+choose to enable. Nothing about you is sent in these requests beyond what any
+ordinary browser request for a file includes.
 
-## Permissions Used
+## Permissions
 
-The Extension requests the following permissions:
+- **`storage`** — to save your settings and content on your device.
+- **Content scripts on Canvas pages** — to read and modify the Canvas
+  interface, which is the entire function of the extension.
+- **Background service worker** — to apply defaults on install and to run
+  scheduled work such as reminders.
 
-- **`storage`**: To save your preferences and settings locally
-- **`content_scripts` on `https://*/*`**: To run on Canvas sites and enhance the interface
-- **`background` service worker**: To handle extension operations
+## Your control
 
-## Third-Party Services
+- Every setting is visible and editable in the extension popup.
+- Settings can be exported, imported, and reset from the popup.
+- Uninstalling removes all extension storage.
+- Your Canvas records belong to your institution and are unaffected by
+  installing or removing this extension.
 
-This Extension does not integrate with third-party analytics, tracking, or data collection services. All functionality is local to your device.
+## Third parties
 
-## Canvas API Access
+None. No analytics SDK, no error-reporting service, no advertising, no
+bundled API keys, and no remotely hosted code.
 
-The Extension makes direct API calls to your Canvas instance to retrieve publicly available course information that you already have access to. This is done directly from your browser and not routed through any external servers.
+## Changes
 
-## Your Rights
-
-You have complete control over your data:
-- You can view all stored preferences in the Extension's options page
-- You can reset all settings at any time
-- Uninstalling the Extension removes all associated data from your device
-- Your Canvas data is managed by your educational institution, not by this Extension
-
-## Changes to This Policy
-
-We may update this Privacy Policy to reflect changes in our practices. We will notify users of significant changes through the Extension's release notes.
+Material changes to this policy will be noted in the repository's release
+notes and in this file's "Last updated" date.
 
 ## Contact
 
-For privacy concerns or questions about this Extension, please contact:
-- **Email:** sandlerguy5@gmail.com
-- **GitHub Issues:** [GuySandler/Actuallycanvasrefined](https://github.com/GuySandler/Actuallycanvasrefined)
+Open an issue on the project's GitHub repository.
 
-## Compliance
-
-This Extension operates in compliance with:
-- Chrome Web Store Developer Program Policies
-- GDPR (General Data Protection Regulation) - as no personal data is collected or transmitted
-- FERPA (Family Educational Rights and Privacy Act) - as data handling is local to the user's device
-
----
-
-By using Canvas Refined, you accept the terms of this Privacy Policy.
+<!-- TODO: add contact address and repository URL once the origin remote is set. -->
