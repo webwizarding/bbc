@@ -5821,6 +5821,14 @@ function applyAestheticChanges() {
         if (options.imageRoundness !== undefined && options.imageRoundness !== 0) style.textContent += `.ic-DashboardCard__header_image, .ic-DashboardCard__header_hero {border-radius: ${options.imageRoundness}px!important;}`;
         if (options.cardSpacing !== undefined && options.cardSpacing !== 0) style.textContent += `.ic-DashboardCard {margin-right: ${options.cardSpacing / 2}px!important; margin-bottom: ${options.cardSpacing / 2}px!important;}`;
         if (options.cardWidth !== undefined && options.cardWidth !== 262) style.textContent += `.ic-DashboardCard {width: ${options.cardWidth}px!important;}`;
+        // DO NOT re-add a `!== 250` guard here, and do not switch this to sizing
+        // .ic-DashboardCard__header_hero instead. Upstream dev did exactly that in
+        // 3e6a592 (2026-08-31), deleting the fix below six days after it landed in
+        // cedb83d ("weird bug fix"). The hero approach deliberately lets the card
+        // grow with its content, which is the content-sized state this comment
+        // names as the trigger. Issue #12 was still open at the time of the merge,
+        // so that resolution was not adopted. Revisit only once #12 is confirmed
+        // fixed by other means; see docs/BACKLOG.md.
         // Always emit a fixed card height when custom card styles are on. The old
         // `!== 250` guard silently dropped the height rule when cardHeight matched
         // the default, which is exactly what happens after importing a theme that

@@ -124,10 +124,36 @@ from 3 to 4. `grade_analytics` and `global_search` are absent from
 popup's `defaultOptions` entirely, so the reset button cannot re-enable
 them — which is why the quarantine holds, but it is the same defect.
 
-### --ochre-buttons is never emitted
+### --ochre-buttons is never emitted (root cause established)
 
 `css/darkmodecss.js` uses `var(--ochre-buttons)` in three rules with no
 fallback. Nothing emits it: not `OCHRE_LIGHT_DEFAULTS`, not the
 `dark_preset` defaults, and no bundled theme supplies a `buttons` key.
-Those three rules have never applied. Pre-existing, predates the
-namespace rename. Possibly relevant to issues #7 and #11.
+Those three rules have never applied in the current architecture.
+
+**It was removed, not never-defined.** `git log -S bcbuttons --all`
+traces it to at least `8207ce2` (5.8.0, 2023-10-17), where dark mode
+shipped as a `darkcss.json` blob containing a static `:root{...}`
+declaration that did emit it, at `#262626`. When dark mode moved to
+`generateDarkModeCSS()`, which builds `:root` by iterating
+`dark_preset` keys, `buttons` was dropped — the presets only ever
+carried background-0/1/2, borders, links, sidebar, sidebar-text, and
+text-0/1/2.
+
+Fix for Phase 1.7: emit `buttons` from both `OCHRE_LIGHT_DEFAULTS` and
+the `dark_preset` defaults. The historical dark value is `#262626`; a
+light value needs choosing. Decide separately whether to expose it as
+an editable swatch in the dark-mode editor, which would mean adding it
+to every bundled theme's export or defaulting it when absent — prefer
+defaulting when absent, since themes are untrusted input anyway.
+
+A full audit of emitted-versus-consumed variables found this is the
+**only** genuine orphan. `--ochre-stop` also died in that migration but
+has no remaining consumers. The four `--ochre-sidebar-{icon-size,
+label-size,btn-height,btn-gap}` variables look orphaned to a static
+scan but are set at runtime via `setProperty()` in
+`applySidebarScaleStyles`.
+
+Plausibly upstream of issues #7 and #11, both of which are contrast
+complaints; a rule that resolves to nothing is a contrast failure by
+definition.
