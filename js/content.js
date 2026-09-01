@@ -716,29 +716,79 @@ function showExampleReminder() {
 
 isDomainCanvasPage();
 
+// Instructure's own hosted Canvas domains, recognised without configuration.
+// Anchored so only instructure.com and its subdomains match: "evilinstructure.com"
+// and "instructure.com.attacker.net" do not.
+const CANVAS_BUILTIN_HOST_PATTERNS = [
+    /(^|\.)instructure\.com$/i
+];
+
+// custom_domain has been written in two formats over time: bare hostnames
+// ("canvas.ucsc.edu") by the popup input, and full origins
+// ("https://canvas.ucsc.edu") by the old auto-detect probe. Normalise both to a
+// lowercase hostname so either keeps working.
+function normalizeDomainEntry(entry) {
+    if (typeof entry !== "string") return "";
+    const raw = entry.trim();
+    if (raw === "") return "";
+    try {
+        return new URL(raw.includes("://") ? raw : "https://" + raw).hostname.toLowerCase();
+    } catch (_) {
+        return raw.replace(/^[a-z]+:\/\//i, "").split("/")[0].split(":")[0].toLowerCase();
+    }
+}
+
+// Exact host, or a subdomain of it. Deliberately not a substring test: the old
+// code used domain.includes(entry), which let "canvas.ucsc.edu.attacker.net"
+// satisfy a "canvas.ucsc.edu" entry.
+function hostMatchesConfiguredDomain(host, entries) {
+    if (!Array.isArray(entries)) return false;
+    for (const entry of entries) {
+        const h = normalizeDomainEntry(entry);
+        if (h === "") continue;
+        if (host === h || host.endsWith("." + h)) return true;
+    }
+    return false;
+}
+
+function isBuiltInCanvasHost(host) {
+    return CANVAS_BUILTIN_HOST_PATTERNS.some(re => re.test(host));
+}
+
 function isDomainCanvasPage() {
     chrome.storage.sync.get(['custom_domain', 'dark_mode', 'dark_preset', 'device_dark', 'remind'], result => {
         options = result;
-        if (result.custom_domain.length && result.custom_domain[0] !== "") {
-            for (let i = 0; i < result.custom_domain.length; i++) {
-                if (domain.includes(result.custom_domain[i])) {
-                    startExtension();
-                    return;
-                }
-            }
+        const host = (window.location.hostname || "").toLowerCase();
+        const configured = Array.isArray(result.custom_domain)
+            ? result.custom_domain.filter(d => normalizeDomainEntry(d) !== "")
+            : [];
 
-            // if the code reaches this point, its not a canvas page so run the reminders
-            setTimeout(reminderWatch, 2000);
-            setInterval(reminderWatch, 60000);
-            // turn the reminders on/off if the option is changed
-            chrome.storage.onChanged.addListener((changes) => {
-                Object.keys(changes).forEach(key => {
-                    if (key === "remind") reminderWatch();
-                })
-            })
-        } else {
-            setupCustomURL();
+        // Canvas is identified two ways, and only these two: a built-in pattern
+        // for Instructure-hosted instances, and domains the user entered
+        // themselves in the popup. It is never inferred from a network response.
+        // The previous implementation fetched /api/v1/courses with the user's
+        // cookies against every HTTPS origin visited and adopted whichever one
+        // returned a non-empty JSON array, which let any site nominate itself as
+        // the user's Canvas and leaked a credentialed request to all of them.
+        if (isBuiltInCanvasHost(host) || hostMatchesConfiguredDomain(host, configured)) {
+            startExtension();
+            return;
         }
+
+        // Not Canvas. If the user has never configured a domain, do nothing at
+        // all -- no fetch, no injection, no timers -- until they act.
+        if (configured.length === 0) return;
+
+        // The user has configured Canvas somewhere, so browser-wide assignment
+        // reminders apply here. (Scope for this is narrowed in the host
+        // permissions work; this preserves existing behaviour for now.)
+        setTimeout(reminderWatch, 2000);
+        setInterval(reminderWatch, 60000);
+        chrome.storage.onChanged.addListener((changes) => {
+            Object.keys(changes).forEach(key => {
+                if (key === "remind") reminderWatch();
+            })
+        })
     });
 }
 
@@ -6650,25 +6700,6 @@ function cleanCustomAssignments() {
             });
 
         });
-    });
-}
-
-function setupCustomURL() {
-    //let test = getData(`${domain}/api/v1/dashboard/dashboard_cards?include[]=concluded&include[]=term`);
-    let test = getData(`${domain}/api/v1/courses?${/*enrollment_state=active&*/""}per_page=100`);
-    test.then(res => {
-        if (res.length) {
-            getCards(res).then(() => {
-                setTimeout(() => {
-                    console.log("Ochre - setting custom domain to " + domain);
-                    chrome.storage.sync.set({ custom_domain: [domain] }).then(location.reload());
-                }, 100);
-            });
-        } else {
-            console.log("Ochre - this url doesn't seem to be a canvas url (1)");
-        }
-    }).catch(err => {
-        console.log("Ochre - this url doesn't seem to be a canvas url (2)");
     });
 }
 

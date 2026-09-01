@@ -157,3 +157,16 @@ scan but are set at runtime via `setProperty()` in
 Plausibly upstream of issues #7 and #11, both of which are contrast
 complaints; a rule that resolves to nothing is a contrast failure by
 definition.
+
+## Phase 2 test runner requirement
+
+Whichever runner Phase 2 adopts must fail loudly when a test body returns an
+unawaited thenable. Vitest does this correctly. The hand-rolled harness in
+`test/` initially did not, and an `async` test body in
+`test/theme-revert.test.js` passed against unfixed code because its assertions
+resolved after the try/catch had returned. The harness now rejects thenables,
+but a hand-rolled harness is exactly where this class of bug lives — prefer a
+real runner over extending it.
+
+Mutation-checking every test is documented as a required step in the README's
+contributing notes.

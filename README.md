@@ -86,7 +86,7 @@ configure it.
 ### Running tests
 
 ```
-node test/theme-revert.test.js
+node test/run.js
 ```
 
 Dependency-free for now; a real runner arrives with Phase 2.
@@ -186,6 +186,24 @@ every user until they touch the control.
 > fallbacks. It has drifted from `background.js`: the two disagree on three
 > values and each defines keys the other lacks. Until that is consolidated,
 > a new option needs a default in **both** places.
+
+#### Fixing a bug
+
+Every bug fix lands with a test, and **every test is mutation-checked before it
+is committed**. This is a required step, not a matter of judgement:
+
+1. Write the test against the fixed code and watch it pass.
+2. Revert the fix.
+3. Confirm the test now **fails**, and fails for the reason you expect.
+4. Restore the fix and confirm it passes again.
+
+A test that has never been observed failing has not been shown to test
+anything. This is not hypothetical here: the first version of
+`test/theme-revert.test.js` had an `async` test body, so its assertions
+resolved after the harness had already recorded a pass. It passed against the
+unfixed code, and only the mutation check caught it. The hand-rolled harness
+now rejects a test body that returns a thenable, but the check is what found
+it.
 
 #### 5. `js/content.js`
 

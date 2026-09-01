@@ -144,6 +144,30 @@ chrome.runtime.onInstalled.addListener(function () {
                 newSyncOptions["fitImageToScreen"] = sync["nasaFitToScreen"];
             }
 
+            // Normalise custom_domain to bare lowercase hostnames. The popup
+            // input has always stored hostnames ("canvas.ucsc.edu"), but the
+            // removed auto-detect probe stored full origins
+            // ("https://canvas.ucsc.edu"). Both must keep working, so rewrite
+            // the stored value once rather than making every read handle both.
+            // Users who had a domain set by the probe keep it and are not asked
+            // to enter it again.
+            if (Array.isArray(sync["custom_domain"])) {
+                const normalized = sync["custom_domain"].map(entry => {
+                    if (typeof entry !== "string") return "";
+                    const raw = entry.trim();
+                    if (raw === "") return "";
+                    try {
+                        return new URL(raw.includes("://") ? raw : "https://" + raw).hostname.toLowerCase();
+                    } catch (e) {
+                        return raw.replace(/^[a-z]+:\/\//i, "").split("/")[0].split(":")[0].toLowerCase();
+                    }
+                }).filter(h => h !== "");
+                const before = sync["custom_domain"].filter(d => typeof d === "string" && d.trim() !== "");
+                const changed = normalized.length !== before.length ||
+                    normalized.some((h, i) => h !== before[i]);
+                if (changed) newSyncOptions["custom_domain"] = normalized;
+            }
+
             if (Object.keys(newLocalOptions).length > 0) {
                 chrome.storage.local.set(newLocalOptions);
             }
