@@ -93,22 +93,29 @@ Uses only the Python standard library.
 
 ## Contributing
 
-### Add a new feature
+### Adding a new option
 
-To add a new feature, please follow these guidelines.
+Every user-facing option is a key in `chrome.storage`. Wiring one up touches
+five places. The list below describes what the code actually does as of
+`0.1.0` — verify against the source before relying on it.
 
-#### Identifier
+#### 1. Choose an identifier
 
-- Should be a unqiue one/two word storage identifier to indicate its status. (ie "dark_mode" or "dashboard_grades")
-- If it has sub options (options that are specific to the main feature) these will also each need a unique identifier.
-- All options are synced and have a 8kb storage limit, so if your feature needs more than this please contact me.
+A unique `snake_case` key, e.g. `dark_mode`, `dashboard_grades`. Sub-options
+(settings that only matter when a parent feature is on) each need their own
+key too.
 
-#### Changes to html/popup.html
+Note the storage limits: `chrome.storage.sync` allows 8,192 bytes per item and
+102,400 bytes in total. Anything that grows with usage belongs in
+`chrome.storage.local` instead.
 
-- Add the appropriate HTML into this file. The corresponding id and name (see below) should be the identifier.
-- If it has no sub options, it should be put in the same container as the other options with no sub options:
+#### 2. `html/popup.html`
 
-```
+Add the control. The element `id` and the input `name` are both the
+identifier. A plain toggle goes in the same container as the other plain
+toggles:
+
+```html
 <div class="option" id="<identifier>">
     <input type="radio" id="off" name="<identifier>">
     <input type="radio" id="on" name="<identifier>">
@@ -116,52 +123,77 @@ To add a new feature, please follow these guidelines.
         <div class="sliderknob"></div>
         <div class="sliderbg"></div>
     </div>
-    <span class="option-name"><option name></span>
+    <span class="option-name" data-i18n="<message_key>">Label</span>
 </div>
 ```
 
-- If it does have sub options it becomes it's own container:
+A toggle that owns sub-options becomes its own container:
 
-```
+```html
 <div class="option-container">
   <div class="option" id="<identifier>">
-    <input type="radio" id="off" name="<identifier>">
-    <input type="radio" id="on" name="<identifier>">
-    <div class="slider">
-      <div class="sliderknob"></div>
-      <div class="sliderbg"></div>
-    </div>
-    <span class="option-name"><option name></span>
+    ... same as above ...
   </div>
   <div class="sub-options">
     <div class="sub-option">
       <input type="checkbox" id="<sub identifier>" name="<sub identifier>">
-      <label for="<sub identifier>" class="sub-text"><option name></label>
+      <label for="<sub identifier>" class="sub-text"
+             data-i18n="<message_key>">Label</label>
     </div>
   </div>
 </div>
 ```
 
-#### Changes to js/popup.js
+Add the `data-i18n` message key to `_locales/en/messages.json`. The other ten
+locales fall back to the inline text when a key is missing, so translations
+can follow later.
 
-- Add the main identifier into the `syncedSwitches` array.
-- If you have sub-options:
-  - Add these identifiers to the array found under the comment that says `//checkboxes`.
+#### 3. `js/popup.js`
 
-#### Changes to js/background.js
+- A main toggle goes in the `syncedSwitches` array at the top of the file.
+- **Every** sub-option goes in `syncedSubOptions`, whatever control renders
+  it — checkbox, slider, select, or time input.
+- A sub-option rendered as a **checkbox** additionally goes in
+  `menu.checkboxes`, inside `setup()`. That array wires up checkbox UI only;
+  sliders and selects are handled elsewhere and must not be added to it.
+- If the option should travel with an exported theme, add it to the relevant
+  `export*` array (`exportLayout`, `exportTodo`, `exportGpa`,
+  `exportBackground`, and so on).
 
-- Add all identifiers into the `syncedOptions` array.
-- Add a default value for your option to the `default_options` array.
-  - Preferably this value should be `false` for booleans or ` ""` for strings (`null` can also be used if Canvas has a default for this option already)
+Missing `syncedSubOptions` is the usual cause of a control that renders
+correctly but does not persist.
 
-#### Changes to js/content.js
+#### 4. `js/background.js`
 
-- There should be a function(s) included in the this file that does the work. The name should clearly indicate it's purpose.
-- Under `applyOptionsChanges()`, add a switch case to call this function when the menu toggle is changed.
-- Depending on what your feature does, it needs to be told when to fire.
-  - If the function changes any aspect of the dashboard, it should be put inside `checkDashboardReady()`.
-  - If the function only adds css, it should be added to `applyAestheticChanges()`, and in this case should not be a separate function, instead add the css to the existing styles found in this function.
-  - Anything else should be put under `startExtension()` and should be placed no higher than the `checkDashboardReady` function found here.
+Add a default to `default_options.sync`, or to `default_options.local` for
+anything bulky or per-course. `onInstalled` seeds only keys that are not
+already present, so an option with no default here is simply `undefined` for
+every user until they touch the control.
+
+> There is no `syncedOptions` array. Earlier revisions of this document
+> instructed contributors to add one; it has never existed in the code.
+
+> **Known defect.** `js/popup.js` carries a second, separate `defaultOptions`
+> object that backs the "reset storage" button and the popup's display
+> fallbacks. It has drifted from `background.js`: the two disagree on three
+> values and each defines keys the other lacks. Until that is consolidated,
+> a new option needs a default in **both** places.
+
+#### 5. `js/content.js`
+
+Write the function that does the work; name it for what it does. Then:
+
+- Add a `case` for the identifier in `applyOptionsChanges()` so toggling the
+  control takes effect without a reload.
+- Decide when it fires:
+  - Changes anything on the dashboard — call it from `checkDashboardReady()`.
+  - Pure CSS — fold it into the existing styles in `applyAestheticChanges()`
+    rather than adding a function.
+  - Anything else — call it from `startExtension()`, no earlier than the
+    `checkDashboardReady()` call already there.
+
+Read values from the module-level `options` object, which mirrors
+`chrome.storage.sync`.
 
 ## License
 
