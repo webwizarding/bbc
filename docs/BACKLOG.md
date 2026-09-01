@@ -66,3 +66,68 @@ storage write.
 Whether to merge any of `dev` is an open decision. It is MIT and attribution
 is already in place, so it is available to us; the cost is that it lands on
 top of the pre-refactor structure.
+
+## Inherited from the upstream dev merge
+
+Merged at `3c5bb3d`. Both features land disabled and are Phase 3
+inventory: not debugged, not refactored, bugs not fixed. Audit counts
+below are what we took on, measured per function-ownership rather than
+by line range.
+
+### Global Canvas Search — 23 functions, 558 lines
+
+| Bug class | Count |
+|---|---|
+| `innerHTML` assignments | 10 |
+| `getData()` calls with no error path | 4 |
+| `.catch()` handlers | 0 |
+| stale `current_page` reads | 1 |
+| `chrome.storage.sync.set` | 0 |
+| MutationObservers (all disconnected) | 1 |
+
+`GLOBAL_SEARCH_STORAGE_KEY` is declared and only ever `remove()`d,
+never written — dead constant from an abandoned persistence approach.
+The index is in-memory with a 10-minute TTL, so it poses no quota risk.
+
+`onGlobalSearchShortcut` reads `window.location.pathname` directly with
+a comment saying `current_page` "can be stale after Canvas' client-side
+navigation" — independent corroboration of Phase 1.1 from upstream.
+
+### Grade Analytics — 65 functions, 1,753 lines
+
+| Bug class | Count |
+|---|---|
+| `innerHTML` assignments | 17 |
+| `.catch()` handlers | 0 |
+| `chrome.storage.sync.set` | **0** |
+| `chrome.storage.local.set` | 3 |
+| stale `current_page` reads | 0 |
+| MutationObservers (all disconnected) | 1 |
+
+**Storage routing is correct here.** All three writes go to `local`,
+including the per-course one (`grade_analytics_final_<courseId>` via
+`gaCalcStorageKey`). The other two keys, `grade_analytics_open` and
+`grade_analytics_fit_y`, are small booleans. Nothing per-course reaches
+`sync`, so this does not worsen Phase 1.3.
+
+### Combined inheritance
+
+27 new `innerHTML` sinks (Phase 1.7 total rises from 44 to 71) and 0
+new `.catch()` handlers on 5 `getData()` calls.
+
+### Defaults drift widened
+
+The `background.js` / `popup.js` duplication that Phase 1.6 consolidates
+got worse: popup-only orphaned keys went from 8 to 10 (dev added
+`todo_ignore_card_colors` and `todo_remove_icons`), and value mismatches
+from 3 to 4. `grade_analytics` and `global_search` are absent from
+popup's `defaultOptions` entirely, so the reset button cannot re-enable
+them — which is why the quarantine holds, but it is the same defect.
+
+### --ochre-buttons is never emitted
+
+`css/darkmodecss.js` uses `var(--ochre-buttons)` in three rules with no
+fallback. Nothing emits it: not `OCHRE_LIGHT_DEFAULTS`, not the
+`dark_preset` defaults, and no bundled theme supplies a `buttons` key.
+Those three rules have never applied. Pre-existing, predates the
+namespace rename. Possibly relevant to issues #7 and #11.
