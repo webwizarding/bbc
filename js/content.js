@@ -620,7 +620,7 @@ function startExtension() {
 
     chrome.storage.onChanged.addListener(applyOptionsChanges);
 
-    console.log("Canvas Refined - running");
+    console.log("Ochre - running");
 }
 
 function applyOptionsChanges(changes) {
@@ -5325,12 +5325,12 @@ function injectQuizSafeModeBanner(safeModeOn) {
 
         makeElement("div", banner, {
             className: "ochre-quiz-safe-title",
-            textContent: "Canvas Refined — Quiz Safe Mode",
+            textContent: "Ochre — Quiz Safe Mode",
         });
 
         makeElement("p", banner, {
             className: "ochre-quiz-safe-info",
-            textContent: "This extension hasn't been 100% approved by all teachers. Quiz Safe Mode turns off most Canvas Refined features that could interfere with this quiz page, giving you the default Canvas quiz experience.",
+            textContent: "This extension hasn't been 100% approved by all teachers. Quiz Safe Mode turns off most Ochre features that could interfere with this quiz page, giving you the default Canvas quiz experience.",
         });
 
         const toggleRow = makeElement("div", banner, { className: "ochre-quiz-safe-row" });
@@ -5479,15 +5479,15 @@ function setupCustomURL() {
         if (res.length) {
             getCards(res).then(() => {
                 setTimeout(() => {
-                    console.log("Canvas Refined - setting custom domain to " + domain);
+                    console.log("Ochre - setting custom domain to " + domain);
                     chrome.storage.sync.set({ custom_domain: [domain] }).then(location.reload());
                 }, 100);
             });
         } else {
-            console.log("Canvas Refined - this url doesn't seem to be a canvas url (1)");
+            console.log("Ochre - this url doesn't seem to be a canvas url (1)");
         }
     }).catch(err => {
-        console.log("Canvas Refined - this url doesn't seem to be a canvas url (2)");
+        console.log("Ochre - this url doesn't seem to be a canvas url (2)");
     });
 }
 

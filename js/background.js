@@ -119,7 +119,7 @@ chrome.runtime.onInstalled.addListener(function () {
         }
     };
 
-    const updateMsg = "Canvas Refined was just updated!\nThis version added new themes, cumulative GPA into the GPA calculator, and a new sorting function for themes.";
+    const updateMsg = "Ochre for Canvas is installed.\nOpen the extension popup on your Canvas dashboard to get started.";
 
     chrome.storage.local.get(null, local => {
         chrome.storage.sync.get(null, async sync => {
