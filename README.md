@@ -198,12 +198,28 @@ is committed**. This is a required step, not a matter of judgement:
 4. Restore the fix and confirm it passes again.
 
 A test that has never been observed failing has not been shown to test
-anything. This is not hypothetical here: the first version of
-`test/theme-revert.test.js` had an `async` test body, so its assertions
-resolved after the harness had already recorded a pass. It passed against the
-unfixed code, and only the mutation check caught it. The hand-rolled harness
-now rejects a test body that returns a thenable, but the check is what found
-it.
+anything. Three real incidents in this repository, none caught by anything
+failing:
+
+- A test body written `async`, so its assertions resolved after the harness
+  had already recorded a pass. It passed against unfixed code.
+- Correct values comparing as unequal across a `vm` realm boundary, which
+  presented as "the counts are wrong" when the counts were right.
+- A code comment that overclaimed what a branch did, and a test written to
+  match the comment rather than the code — so it asserted something the code
+  never did.
+
+**The first two are harness defects and a real test runner fixes them. The
+third is not, and no tooling change catches it.** A test written against a
+mistaken belief about the code will pass, look reasonable, and cover nothing.
+Only reverting the code and watching the test fail distinguishes that from a
+real test. So mutation-checking stays a required step after the harness is
+replaced; it is not `vm`-era ceremony.
+
+**A mutation that does not fail is information, not a nuisance.** It means
+either the code you reverted is dead, or the test is hollow. Both are worth
+knowing, and both are worth chasing down before moving on rather than
+adjusting the mutation until it goes red.
 
 #### 5. `js/content.js`
 

@@ -200,14 +200,30 @@ the ones that assume a cold start, and none of them are route-dependent.
 
 ---
 
-## H. Acceptance test
+## H. Acceptance criteria
 
-Dashboard → course → grades → dashboard, ten times, then count. Every id in
-§A must have a count of exactly 0 or 1; no id may grow. Observers and
-intervals must return to their post-init count.
+Dashboard → course → grades → dashboard, ten times, then count. **Two
+criteria, and the second is the one that is easy to miss:**
+
+1. **Nothing duplicates.** No injected id may appear more than once, and
+   observer/interval/listener counts must return to their post-init values.
+   Incomplete teardown shows up here.
+
+2. **Every route-scoped feature is present exactly once — not *at most*
+   once.** A feature that never comes back passes criterion 1 perfectly: zero
+   is not greater than one. This is the failure mode a duplicate-count test
+   structurally cannot see, and it is the one this codebase actually had.
+   `createNasaInfoOverlay` guarded on a held reference, so after the first
+   navigation it scored zero forever and a duplicate check would have called
+   that a pass.
+
+A count of 0 for a feature whose route is active is a failure, not a pass.
+State the expected count per feature before running, and compare against it —
+do not just look for growth.
 
 Automatable against a fake DOM by driving the route change directly; the
-counts are what matter, not real Canvas markup.
+counts are what matter, not real Canvas markup. Real feature bodies need a
+live Canvas and a manual click-through.
 
 ---
 
