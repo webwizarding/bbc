@@ -222,28 +222,6 @@ function displayDarkModeFixUrls() {
 
 document.addEventListener("DOMContentLoaded", setup);
 
-// toggle visibility of the Discord/GitHub social links (persists locally)
-document.addEventListener("DOMContentLoaded", () => {
-    const toggle = document.getElementById("social-toggle");
-    const buttons = document.querySelector(".social-buttons");
-    if (!toggle || !buttons) return;
-    const KEY = "hide_socials";
-    const render = (hidden) => {
-        buttons.classList.toggle("hidden", hidden);
-        toggle.textContent = chrome.i18n.getMessage(hidden ? "show_links" : "hide_links");
-    };
-    chrome.storage.local.get(KEY, (res) => render(!!res[KEY]));
-    const flip = () => chrome.storage.local.get(KEY, (res) => {
-        const next = !res[KEY];
-        chrome.storage.local.set({ [KEY]: next });
-        render(next);
-    });
-    toggle.addEventListener("click", flip);
-    toggle.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); }
-    });
-});
-
 function setupAssignmentsSlider(initial) {
     let el = document.querySelector('#numAssignmentsSlider');
     el.value = initial;

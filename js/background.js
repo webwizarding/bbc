@@ -216,7 +216,7 @@ async function callNasaApi(dateStr) {
     try {
         response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&thumbs=true&date=${dateStr}`);
     } catch (error) {
-        console.error("[CanvasRefined] Failed to fetch NASA APOD:", error);
+        console.error("[Ochre] Failed to fetch NASA APOD:", error);
         return null;
     }
 

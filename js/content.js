@@ -273,7 +273,7 @@ async function getNasaDailyBackground() {
     try {
         return await chrome.runtime.sendMessage({ type: "getNasaBackground" });
     } catch (error) {
-        console.error("[CanvasRefined] Failed to fetch NASA APOD:", error);
+        console.error("[Ochre] Failed to fetch NASA APOD:", error);
         return null;
     }
 }
