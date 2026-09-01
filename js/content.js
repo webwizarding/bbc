@@ -69,11 +69,11 @@ function addSubmissionPageButton() {
     const assignmentLink = getSubmissionAssignmentLink();
     if (!assignmentLink) return;
     const content = document.getElementById("content");
-    if (!content || content.querySelector("#canvasrefined-assignment-return")) return;
+    if (!content || content.querySelector("#ochre-assignment-return")) return;
 
     makeElement("a", content, {
-        id: "canvasrefined-assignment-return",
-        className: "canvasrefined-custom-btn",
+        id: "ochre-assignment-return",
+        className: "ochre-custom-btn",
         href: assignmentLink,
         textContent: "Back to Assignment",
         style: "display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;margin:0 0 12px 0;padding:10px 14px;text-decoration:none;font-weight:700;",
@@ -83,11 +83,11 @@ function addSubmissionPageButton() {
 function addProfileLogoutPageButton() {
     if (!isProfilePage()) return;
     const content = document.getElementById("content");
-    if (!content || content.querySelector("#canvasrefined-profile-logout")) return;
+    if (!content || content.querySelector("#ochre-profile-logout")) return;
 
     makeElement("a", content, {
-        id: "canvasrefined-profile-logout",
-        className: "canvasrefined-custom-btn",
+        id: "ochre-profile-logout",
+        className: "ochre-custom-btn",
         href: `${domain}/logout`,
         textContent: "Logout",
         style: "display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;margin:0 0 12px 0;padding:10px 14px;text-decoration:none;font-weight:700;",
@@ -98,9 +98,9 @@ function ensureProfileLogoutPageButton() {
     if (!isProfilePage()) return false;
     const content = document.getElementById("content");
     if (!content) return false;
-    if (content.querySelector("#canvasrefined-profile-logout")) return true;
+    if (content.querySelector("#ochre-profile-logout")) return true;
     addProfileLogoutPageButton();
-    return Boolean(content.querySelector("#canvasrefined-profile-logout"));
+    return Boolean(content.querySelector("#ochre-profile-logout"));
 }
 
 function watchProfileLogoutPageButton() {
@@ -129,9 +129,9 @@ function ensureSubmissionPageButton() {
     if (!assignmentLink) return false;
     const content = document.getElementById("content");
     if (!content) return false;
-    if (content.querySelector("#canvasrefined-assignment-return")) return true;
+    if (content.querySelector("#ochre-assignment-return")) return true;
     addSubmissionPageButton();
-    return Boolean(content.querySelector("#canvasrefined-assignment-return"));
+    return Boolean(content.querySelector("#ochre-assignment-return"));
 }
 
 function isAssignmentPage() {
@@ -295,7 +295,7 @@ function createNasaInfoOverlay() {
     }
 
     nasaInfoOverlayEl = document.createElement("div");
-    nasaInfoOverlayEl.id = "canvasrefined-nasa-info-overlay";
+    nasaInfoOverlayEl.id = "ochre-nasa-info-overlay";
     nasaInfoOverlayEl.style.cssText = "position:absolute;right:24px;bottom:24px;z-index:9999;";
     nasaInfoOverlayEl.innerHTML = `
         <div id="nasa-info-icon" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:rgba(30,30,30,0.85);border:1px solid rgba(255,255,255,0.15);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
@@ -465,13 +465,13 @@ async function hideReminder(href) {
 
 function createReminder(reminder, location) {
     const remaining = getRelativeDate(new Date(reminder.d));
-    const wrapper = makeElement("div", location, { "className": "canvasrefined-reminder-wrapper" });
-    const container = makeElement("div", wrapper, { "className": "canvasrefined-reminder-container" });
+    const wrapper = makeElement("div", location, { "className": "ochre-reminder-wrapper" });
+    const container = makeElement("div", wrapper, { "className": "ochre-reminder-container" });
     const svg = makeElement("div", container, { "innerHTML": canvas_svg });
-    const content = makeElement("a", container, { "className": "canvasrefined-reminder-content", "href": reminder.h, "target": "_blank" });
-    const title = makeElement("h2", content, { "className": "canvasrefined-reminder-title", "textContent": reminder.t });
-    const due = makeElement("p", content, { "className": "canvasrefined-reminder-due", "textContent": `Assignment due in ${remaining.time}` });
-    const hidebtn = makeElement("btn", wrapper, { "className": "canvasrefined-reminder-hide", "textContent": "x" });
+    const content = makeElement("a", container, { "className": "ochre-reminder-content", "href": reminder.h, "target": "_blank" });
+    const title = makeElement("h2", content, { "className": "ochre-reminder-title", "textContent": reminder.t });
+    const due = makeElement("p", content, { "className": "ochre-reminder-due", "textContent": `Assignment due in ${remaining.time}` });
+    const hidebtn = makeElement("btn", wrapper, { "className": "ochre-reminder-hide", "textContent": "x" });
     hidebtn.addEventListener("click", () => {
         hideReminder(reminder.h);
         wrapper.remove();
@@ -482,10 +482,10 @@ function createReminder(reminder, location) {
 async function reminderWatch() {
     const sync = await chrome.storage.sync.get("remind");
     if (sync["remind"] !== true) {
-        if (document.getElementById("canvasrefined-reminders")) document.getElementById("canvasrefined-reminders").style.display = "none";
+        if (document.getElementById("ochre-reminders")) document.getElementById("ochre-reminders").style.display = "none";
         return;
     }
-    const container = document.getElementById("canvasrefined-reminders") || makeElement("div", document.body, { "id": "canvasrefined-reminders" });
+    const container = document.getElementById("ochre-reminders") || makeElement("div", document.body, { "id": "ochre-reminders" });
     container.style.display = "flex";
     container.textContent = "";
     const alertPeriod = 1000 * 60 * 60 * 6; // 6 hours
@@ -522,14 +522,14 @@ function updateReminders() {
 }
 
 function showExampleReminder() {
-    const location = document.getElementById("canvasrefined-reminders") || makeElement("div", document.body, { "id": "canvasrefined-reminders" });
+    const location = document.getElementById("ochre-reminders") || makeElement("div", document.body, { "id": "ochre-reminders" });
     if (options.remind !== true) {
         location.remove();
         return;
     }
     location.textContent = "";
     const example = createReminder({ "d": new Date(), "t": "This is an example reminder", }, location);
-    example.querySelector(".canvasrefined-reminder-due").textContent = "This notification will pop up in other pages to remind you of incomplete assignments that are due in less than 6 hours." /*It will notify again at 2 hours if the 'Remind 2x' option is on."*/;
+    example.querySelector(".ochre-reminder-due").textContent = "This notification will pop up in other pages to remind you of incomplete assignments that are due in less than 6 hours." /*It will notify again at 2 hours if the 'Remind 2x' option is on."*/;
 }
 
 
@@ -666,7 +666,7 @@ function applyOptionsChanges(changes) {
 			case "num_assignments":
 				if (!assignments) getAssignments();
 				if (
-					document.querySelectorAll(".canvasrefined-card-assignment")
+					document.querySelectorAll(".ochre-card-assignment")
 						.length === 0
 				)
 					setupCardAssignments();
@@ -705,7 +705,7 @@ function applyOptionsChanges(changes) {
 				moreAssignmentCount = 0;
 				// loadBetterTodo();
 				clearTodoList();
-				createTodoSections(document.querySelector("#canvasrefined-todo-list"));
+				createTodoSections(document.querySelector("#ochre-todo-list"));
 				break;
 			case "gpa_calc":
 			case "gpa_calc_prepend":
@@ -885,8 +885,8 @@ async function applyCustomBackground() {
     // Quiz safe mode: leave the quiz page background untouched.
     if (quizSafeModeActive()) return;
     // let style = document.querySelector("#DashboardCard_Container")
-    let style = document.querySelector("#canvasrefined-background") || document.createElement('style');
-    style.id = "canvasrefined-background";
+    let style = document.querySelector("#ochre-background") || document.createElement('style');
+    style.id = "ochre-background";
 
     const activeBackground = await getActiveCustomBackground();
     if (!activeBackground) {
@@ -1163,8 +1163,8 @@ async function applyCustomBackground() {
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
         }
-        .canvasrefined-gpa-card,
-        .canvasrefined-gpa,
+        .ochre-gpa-card,
+        .ochre-gpa,
         .ic-DashboardCard {
             ${cardTransparency
                 ? `background: color-mix(in srgb, var(--bcbackground-0), transparent ${cardTransparent}%) !important;
@@ -1181,8 +1181,8 @@ async function applyCustomBackground() {
 }
 
 function applyBetterSidebarLayoutFix() {
-    let style = document.querySelector("#canvasrefined-sidebar-layout-fix") || document.createElement("style");
-    style.id = "canvasrefined-sidebar-layout-fix";
+    let style = document.querySelector("#ochre-sidebar-layout-fix") || document.createElement("style");
+    style.id = "ochre-sidebar-layout-fix";
     style.textContent = `
         #wrapper,
         .ic-Layout-wrapper,
@@ -1194,7 +1194,7 @@ function applyBetterSidebarLayoutFix() {
 }
 
 function clearBetterSidebarLayoutFix() {
-	let style = document.querySelector("#canvasrefined-sidebar-layout-fix");
+	let style = document.querySelector("#ochre-sidebar-layout-fix");
 	if (style) style.remove();
 }
 
@@ -1246,7 +1246,7 @@ function checkDashboardReady() {
                     // Canvas often re-renders the dashboard on a hard reload and
                     // replaces the .ic-DashboardCard nodes with fresh ones that have
                     // the same courses/links (so the signature is unchanged) but no
-                    // longer carry our .canvasrefined-card-assignment marker. The
+                    // longer carry our .ochre-card-assignment marker. The
                     // signature guard alone would skip re-setup in that case, leaving
                     // card assignments empty until a popup toggle forces a reload.
                     // Re-run whenever any card is missing its marker too. This is safe
@@ -1254,7 +1254,7 @@ function checkDashboardReady() {
                     // card has the marker, so our own subsequent mutation bursts skip.
                     let missingMarker = false;
                     for (let i = 0; i < cards.length; i++) {
-                        if (!cards[i].querySelector(".canvasrefined-card-assignment")) {
+                        if (!cards[i].querySelector(".ochre-card-assignment")) {
                             missingMarker = true;
                             break;
                         }
@@ -1274,7 +1274,7 @@ function checkDashboardReady() {
                 }
 
                 const rightSide = document.querySelector("#right-side");
-                if (rightSide && !rightSide.querySelector(".canvasrefined-todosidebar")) {
+                if (rightSide && !rightSide.querySelector(".ochre-todosidebar")) {
                     setupBetterTodo();
                     setupBetterSidebar(getSidebarLayoutMode());
                 }
@@ -1595,7 +1595,7 @@ function attachProgressFilterClick(el, courseId) {
     el.style.cursor = 'pointer';
     el.onclick = () => {
         betterTodoProgressFilter = (String(betterTodoProgressFilter) === String(courseId)) ? null : String(courseId);
-        const loc = document.querySelector("#canvasrefined-todo-list");
+        const loc = document.querySelector("#ochre-todo-list");
         if (loc) { clearTodoList(); createTodoSections(loc); }
     };
 }
@@ -1652,10 +1652,10 @@ function renderProgressRingsMode(wrapper, shown, totalAll, completedAll, percent
     const padding = 2;
     const outerRadius = Math.floor((size / 2) - padding);
 
-    let svg = wrapper.querySelector('svg.canvasrefined-progress-svg');
+    let svg = wrapper.querySelector('svg.ochre-progress-svg');
     if (!svg) {
         svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('class', 'canvasrefined-progress-svg');
+        svg.setAttribute('class', 'ochre-progress-svg');
         svg.style.display = 'block';
         wrapper.appendChild(svg);
     }
@@ -1663,19 +1663,19 @@ function renderProgressRingsMode(wrapper, shown, totalAll, completedAll, percent
     svg.setAttribute('height', String(size));
     svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
 
-    let overlay = wrapper.querySelector('.canvasrefined-progress-overlay');
+    let overlay = wrapper.querySelector('.ochre-progress-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
-        overlay.className = 'canvasrefined-progress-overlay';
+        overlay.className = 'ochre-progress-overlay';
         overlay.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;';
         const textWrap = document.createElement('div');
         textWrap.style.cssText = 'text-align:center;color:var(--bctext-0);';
-        textWrap.innerHTML = `<div class='canvasrefined-progress-percent' style='font-weight:700;font-size:20px;line-height:1;'></div><div class='canvasrefined-progress-count' style='font-size:12px;margin-top:4px;'></div>`;
+        textWrap.innerHTML = `<div class='ochre-progress-percent' style='font-weight:700;font-size:20px;line-height:1;'></div><div class='ochre-progress-count' style='font-size:12px;margin-top:4px;'></div>`;
         overlay.appendChild(textWrap);
         wrapper.appendChild(overlay);
     }
-    overlay.querySelector('.canvasrefined-progress-percent').textContent = `${percent}%`;
-    overlay.querySelector('.canvasrefined-progress-count').textContent = `${completedAll}/${totalAll} done`;
+    overlay.querySelector('.ochre-progress-percent').textContent = `${percent}%`;
+    overlay.querySelector('.ochre-progress-count').textContent = `${completedAll}/${totalAll} done`;
 
     const stroke = 8;
     const gap = 4;
@@ -1701,7 +1701,7 @@ function renderProgressRingsMode(wrapper, shown, totalAll, completedAll, percent
             bg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             bg.setAttribute('data-idx', String(idx));
             bg.setAttribute('data-role', 'bg');
-            bg.classList.add('canvasrefined-ring-bg');
+            bg.classList.add('ochre-ring-bg');
             svg.appendChild(bg);
         }
         bg.setAttribute('cx', String(cx));
@@ -1722,7 +1722,7 @@ function renderProgressRingsMode(wrapper, shown, totalAll, completedAll, percent
             fg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             fg.setAttribute('data-idx', String(idx));
             fg.setAttribute('data-role', 'fg');
-            fg.classList.add('canvasrefined-progress-ring');
+            fg.classList.add('ochre-progress-ring');
             fg.setAttribute('stroke-linecap', 'round');
             fg.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
             fg.setAttribute('stroke-dasharray', dasharrayVal);
@@ -1791,10 +1791,10 @@ function renderProgressRainbow(wrapper, shown, totalAll, completedAll, percent) 
     const baseY = outerRadius + stroke / 2 + pad;
     const svgHeight = Math.ceil(baseY + stroke / 2 + 2);
 
-    let svg = wrapper.querySelector('svg.canvasrefined-progress-svg');
+    let svg = wrapper.querySelector('svg.ochre-progress-svg');
     if (!svg) {
         svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('class', 'canvasrefined-progress-svg');
+        svg.setAttribute('class', 'ochre-progress-svg');
         svg.style.display = 'block';
         wrapper.appendChild(svg);
     }
@@ -1901,26 +1901,26 @@ function renderProgressRainbow(wrapper, shown, totalAll, completedAll, percent) 
     const innerRadius = ringCount > 0 ? Math.max(1, outerRadius - (ringCount - 1) * step) : outerRadius;
     const holeCenterY = baseY - (4 * innerRadius) / (3 * Math.PI) + 6;
     const nudge = Math.round(holeCenterY - svgHeight / 2);
-    let overlay = wrapper.querySelector('.canvasrefined-progress-overlay');
+    let overlay = wrapper.querySelector('.ochre-progress-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
-        overlay.className = 'canvasrefined-progress-overlay';
+        overlay.className = 'ochre-progress-overlay';
         overlay.style.cssText = `position:absolute;left:0;top:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;transform:translateY(${nudge}px);`;
-        overlay.innerHTML = `<div class='canvasrefined-progress-percent' style='font-weight:700;font-size:20px;line-height:1;color:var(--bctext-0);'></div><div class='canvasrefined-progress-count' style='font-size:12px;margin-top:3px;color:var(--bctext-0);'></div>`;
+        overlay.innerHTML = `<div class='ochre-progress-percent' style='font-weight:700;font-size:20px;line-height:1;color:var(--bctext-0);'></div><div class='ochre-progress-count' style='font-size:12px;margin-top:3px;color:var(--bctext-0);'></div>`;
         wrapper.appendChild(overlay);
     } else {
         overlay.style.transform = `translateY(${nudge}px)`;
     }
-    overlay.querySelector('.canvasrefined-progress-percent').textContent = `${percent}%`;
-    overlay.querySelector('.canvasrefined-progress-count').textContent = `${completedAll}/${totalAll} done`;
+    overlay.querySelector('.ochre-progress-percent').textContent = `${percent}%`;
+    overlay.querySelector('.ochre-progress-count').textContent = `${completedAll}/${totalAll} done`;
 }
 
 // Mode "lines": one horizontal bar per course, each with its own %.
 function renderProgressLines(wrapper, shown) {
-    let list = wrapper.querySelector('.canvasrefined-progress-lines');
+    let list = wrapper.querySelector('.ochre-progress-lines');
     if (!list) {
         list = document.createElement('div');
-        list.className = 'canvasrefined-progress-lines';
+        list.className = 'ochre-progress-lines';
         list.style.cssText = 'display:flex;flex-direction:column;gap:8px;width:100%;box-sizing:border-box;';
         wrapper.appendChild(list);
     }
@@ -1934,7 +1934,7 @@ function renderProgressLines(wrapper, shown) {
         let row = list.children[idx];
         if (!row) {
             row = document.createElement('div');
-            row.className = 'canvasrefined-progress-line';
+            row.className = 'ochre-progress-line';
             row.style.cssText = 'display:flex;flex-direction:column;gap:3px;width:100%;';
             row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11px;"><span class="cr-pl-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;"></span><span class="cr-pl-pct" style="flex-shrink:0;font-weight:600;color:var(--bctext-0);"></span></div><div style="position:relative;height:8px;border-radius:999px;overflow:hidden;"><div class="cr-pl-fill" style="height:100%;border-radius:999px;width:0%;transition:width .8s cubic-bezier(.2,.9,.2,1);"></div></div>`;
             list.appendChild(row);
@@ -1965,10 +1965,10 @@ function renderProgressLines(wrapper, shown) {
 // to the left (full course color) and its UNCOMPLETED portion to the right
 // (faded course color), with no gaps between segments. Overall % shown above.
 function renderProgressOneLine(wrapper, shown, totalAll, completedAll, percent) {
-    let box = wrapper.querySelector('.canvasrefined-progress-oneline');
+    let box = wrapper.querySelector('.ochre-progress-oneline');
     if (!box) {
         box = document.createElement('div');
-        box.className = 'canvasrefined-progress-oneline';
+        box.className = 'ochre-progress-oneline';
         box.style.cssText = 'display:flex;flex-direction:column;gap:5px;width:100%;box-sizing:border-box;';
         wrapper.appendChild(box);
     }
@@ -1988,7 +1988,7 @@ function renderProgressOneLine(wrapper, shown, totalAll, completedAll, percent) 
         head.onclick = () => {
             if (betterTodoProgressFilter == null) return;
             betterTodoProgressFilter = null;
-            const loc = document.querySelector("#canvasrefined-todo-list");
+            const loc = document.querySelector("#ochre-todo-list");
             if (loc) { clearTodoList(); createTodoSections(loc); }
         };
     } else {
@@ -2075,10 +2075,10 @@ function renderProgressRings(container, scopedData) {
     const percent = totalAll === 0 ? 0 : Math.round((completedAll / totalAll) * 100);
 
     // wrapper reused across renders; clear on mode switch so each mode rebuilds fresh DOM
-    let wrapper = container.querySelector('.canvasrefined-progress-wrapper');
+    let wrapper = container.querySelector('.ochre-progress-wrapper');
     if (!wrapper) {
         wrapper = document.createElement('div');
-        wrapper.className = 'canvasrefined-progress-wrapper';
+        wrapper.className = 'ochre-progress-wrapper';
         wrapper.style.cssText = 'display:flex;flex-direction:column;align-items:center;position:relative;width:100%;box-sizing:border-box;';
         container.appendChild(wrapper);
     }
@@ -2415,32 +2415,32 @@ function ensureTodoTaskMenu(location, feedbackElement) {
 
         const addTaskButton = makeElement("button", actionsRow, {
             id: "better-todo-add-task-btn",
-            className: "canvasrefined-custom-btn",
+            className: "ochre-custom-btn",
             textContent: "+ Add Task",
             style: "width:100%;padding:6px 8px;cursor:pointer;",
         });
 
         const menu = makeElement("div", actionsRow, {
             id: "better-todo-add-task-menu",
-            className: "canvasrefined-add-assignment",
+            className: "ochre-add-assignment",
         });
 
         menu.innerHTML = `
             <div style="display:flex;flex-direction:column;gap:8px;padding:8px;border:1px solid #c7cdd1;border-radius:6px;background:var(--bcbackground-2);position:relative;">
-                <button id="better-todo-add-task-close" type="button" class="canvasrefined-custom-btn" title="Close" style="position:absolute;top:4px;right:6px;padding:0 6px;cursor:pointer;line-height:18px;font-size:14px;color:var(--bctext-1);">\u00d7</button>
-                <input type="text" id="better-todo-new-task-title" class="canvasrefined-custom-input" placeholder="Task title" maxlength="255">
-                <textarea id="better-todo-new-task-details" class="canvasrefined-custom-input" placeholder="Details (optional)" style="min-height:70px;resize:vertical;padding-top:6px;padding-bottom:6px;"></textarea>
-                <select id="better-todo-new-task-course" class="canvasrefined-custom-input"></select>
+                <button id="better-todo-add-task-close" type="button" class="ochre-custom-btn" title="Close" style="position:absolute;top:4px;right:6px;padding:0 6px;cursor:pointer;line-height:18px;font-size:14px;color:var(--bctext-1);">\u00d7</button>
+                <input type="text" id="better-todo-new-task-title" class="ochre-custom-input" placeholder="Task title" maxlength="255">
+                <textarea id="better-todo-new-task-details" class="ochre-custom-input" placeholder="Details (optional)" style="min-height:70px;resize:vertical;padding-top:6px;padding-bottom:6px;"></textarea>
+                <select id="better-todo-new-task-course" class="ochre-custom-input"></select>
                 <div style="display:flex;gap:6px;">
-                    <input type="date" id="better-todo-new-task-date" class="canvasrefined-custom-input">
-                    <input type="time" id="better-todo-new-task-time" class="canvasrefined-custom-input">
+                    <input type="date" id="better-todo-new-task-date" class="ochre-custom-input">
+                    <input type="time" id="better-todo-new-task-time" class="ochre-custom-input">
                 </div>
-                <input type="text" id="better-todo-new-task-link" class="canvasrefined-custom-input" placeholder="Link (optional)" maxlength="2048">
+                <input type="text" id="better-todo-new-task-link" class="ochre-custom-input" placeholder="Link (optional)" maxlength="2048">
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                     <span id="better-todo-add-task-status" style="font-size:12px;color:var(--bctext-0);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
                     <div style="display:flex;gap:6px;align-items:center;">
-                        <button id="better-todo-add-task-delete" class="canvasrefined-custom-btn" style="padding:4px 10px;cursor:pointer;display:none;color:#db3754;" type="button" title="Delete this custom task">Delete</button>
-                        <button id="better-todo-add-task-submit" class="canvasrefined-custom-btn" style="padding:4px 10px;cursor:pointer;" type="button">Create</button>
+                        <button id="better-todo-add-task-delete" class="ochre-custom-btn" style="padding:4px 10px;cursor:pointer;display:none;color:#db3754;" type="button" title="Delete this custom task">Delete</button>
+                        <button id="better-todo-add-task-submit" class="ochre-custom-btn" style="padding:4px 10px;cursor:pointer;" type="button">Create</button>
                     </div>
                 </div>
             </div>
@@ -2455,8 +2455,8 @@ function ensureTodoTaskMenu(location, feedbackElement) {
         courseSelect.addEventListener("change", () => updateTaskCourseSelectColor(courseSelect));
 
         addTaskButton.addEventListener("click", () => {
-            const willOpen = !menu.classList.contains("canvasrefined-custom-open");
-            menu.classList.toggle("canvasrefined-custom-open");
+            const willOpen = !menu.classList.contains("ochre-custom-open");
+            menu.classList.toggle("ochre-custom-open");
             if (willOpen) {
                 resetTaskFormToCreate(menu);
                 // Scroll the form up so the picker stays on screen.
@@ -2487,7 +2487,7 @@ function ensureTodoTaskMenu(location, feedbackElement) {
                 }
                 status.style.color = "#198754";
                 resetTaskFormToCreate(menu);
-                menu.classList.remove("canvasrefined-custom-open");
+                menu.classList.remove("ochre-custom-open");
 
                 getAssignments();
                 clearTodoList();
@@ -2506,7 +2506,7 @@ function ensureTodoTaskMenu(location, feedbackElement) {
         // Close (×) button: dismiss the form without creating/editing a task.
         menu.querySelector("#better-todo-add-task-close")?.addEventListener("click", () => {
             resetTaskFormToCreate(menu);
-            menu.classList.remove("canvasrefined-custom-open");
+            menu.classList.remove("ochre-custom-open");
         });
 
         // Reposition the field on focus so the picker opens on screen.
@@ -2529,7 +2529,7 @@ function ensureTodoTaskMenu(location, feedbackElement) {
                 await deleteCanvasPlannerNote(editingId);
                 deleteCustomTaskLink(editingId);
                 resetTaskFormToCreate(menu);
-                menu.classList.remove("canvasrefined-custom-open");
+                menu.classList.remove("ochre-custom-open");
                 getAssignments();
                 clearTodoList();
                 createTodoSections(location);
@@ -2577,7 +2577,7 @@ function resetTaskFormToCreate(menu) {
 
 // Open the shared form pre-filled with a custom task for editing or deletion.
 function openTaskForEdit(item) {
-    const location = document.getElementById("canvasrefined-todo-list");
+    const location = document.getElementById("ochre-todo-list");
     if (!location) return;
     const feedbackElement = location.querySelector(".recent_feedback");
     ensureTodoTaskMenu(location, feedbackElement);
@@ -2606,7 +2606,7 @@ function openTaskForEdit(item) {
     menu.querySelector("#better-todo-add-task-submit").textContent = "Save";
     const status = menu.querySelector("#better-todo-add-task-status");
     if (status) { status.textContent = ""; status.style.color = ""; }
-    menu.classList.add("canvasrefined-custom-open");
+    menu.classList.add("ochre-custom-open");
     scrollTodoIntoView(menu, true);
 }
 
@@ -2833,8 +2833,8 @@ async function createTodoSections(location) {
 }
 
 function ensureRightSideWrapperScrollbarHidden() {
-    let style = document.getElementById("canvasrefined-hide-right-sidebar-scrollbar") || document.createElement("style");
-    style.id = "canvasrefined-hide-right-sidebar-scrollbar";
+    let style = document.getElementById("ochre-hide-right-sidebar-scrollbar") || document.createElement("style");
+    style.id = "ochre-hide-right-sidebar-scrollbar";
     style.textContent = `
         #right-side-wrapper {
             scrollbar-width: none !important;
@@ -2886,7 +2886,7 @@ function applyTodoAlternateColors() {
 // populateAnnouncements (the old loadBetterTodo renderer is no longer called).
 // A single shared, body-level tooltip is reused across items so it is never
 // clipped by the sidebar's scroll/overflow containers. It reuses the
-// .canvasrefined-hover-preview class so existing light/dark styling applies.
+// .ochre-hover-preview class so existing light/dark styling applies.
 let todoPreviewDelay = null;
 let todoPreviewToken = 0;
 const todoPreviewCache = new Map();
@@ -2897,12 +2897,12 @@ function stripHtmlPreview(html) {
 }
 
 function getTodoPreviewEl() {
-    let el = document.getElementById("canvasrefined-todo-preview");
+    let el = document.getElementById("ochre-todo-preview");
     if (el) return el;
     el = document.createElement("div");
-    el.id = "canvasrefined-todo-preview";
-    el.className = "canvasrefined-hover-preview";
-    el.innerHTML = '<p class="canvasrefined-preview-title"></p><p class="canvasrefined-preview-text"></p>';
+    el.id = "ochre-todo-preview";
+    el.className = "ochre-hover-preview";
+    el.innerHTML = '<p class="ochre-preview-title"></p><p class="ochre-preview-text"></p>';
     el.style.position = "fixed";
     el.style.zIndex = "100001";
     el.style.width = "300px";
@@ -2969,15 +2969,15 @@ async function getTodoPreviewText(item) {
 
 function hideTodoPreview() {
     todoPreviewToken++; // cancel any pending async text update
-    const el = document.getElementById("canvasrefined-todo-preview");
+    const el = document.getElementById("ochre-todo-preview");
     if (el) el.style.display = "none";
 }
 
 async function showTodoPreview(anchor, item) {
     const token = ++todoPreviewToken;
     const el = getTodoPreviewEl();
-    const title = el.querySelector(".canvasrefined-preview-title");
-    const text = el.querySelector(".canvasrefined-preview-text");
+    const title = el.querySelector(".ochre-preview-title");
+    const text = el.querySelector(".ochre-preview-text");
     title.textContent = item.plannable && item.plannable.title ? item.plannable.title : "";
     text.textContent = "Loading…";
     el.style.display = "block";
@@ -3139,7 +3139,7 @@ function populateAssignments(iscompleted = false) {
 
 		let seeMoreButton = makeElement("button", document.getElementById("better-todo-main"), {
 			textContent: `View More (${assignmentCount - maxElements})`,
-			className: "canvasrefined-custom-btn",
+			className: "ochre-custom-btn",
 			id: "better-todo-see-more",
 			style: "width:100%;margin-top:15px;cursor:pointer;"
 		})
@@ -3219,7 +3219,7 @@ function createConfettiBurst(targetElement, opts = {}) {
         const colors = opts.colors || ['#ff4d4f', '#ffc107', '#28a745', '#17a2b8', '#6f42c1', '#ff6b6b', '#ff8a65', '#ffd54f'];
         const rect = targetElement.getBoundingClientRect();
         const container = document.createElement('div');
-        container.className = 'canvasrefined-confetti-container';
+        container.className = 'ochre-confetti-container';
         container.style.position = 'fixed';
         container.style.left = '0';
         container.style.top = '0';
@@ -3234,7 +3234,7 @@ function createConfettiBurst(targetElement, opts = {}) {
 
         for (let i = 0; i < count; i++) {
             const el = document.createElement('div');
-            el.className = 'canvasrefined-confetti';
+            el.className = 'ochre-confetti';
             const w = 4 + Math.floor(Math.random() * 7); // smaller pieces
             const h = Math.max(3, Math.floor(w * (0.4 + Math.random() * 0.8)));
             el.style.position = 'absolute';
@@ -3376,7 +3376,7 @@ function markAs(item, element) {
 
     setTimeout(() => {
         clearTodoList();
-        createTodoSections(document.querySelector("#canvasrefined-todo-list"));
+        createTodoSections(document.querySelector("#ochre-todo-list"));
     }, 400);
 
     // --- Persistence (background, best-effort) ---
@@ -3412,8 +3412,8 @@ function markAs(item, element) {
 }
 
 function createTodoViewMore(location, type) {
-    let viewMoreButton = makeElement("button", location, { "className": "canvasrefined-custom-btn canvasrefined-viewmore-btn", "textContent": "View More" });
-    //viewMoreButton.classList.add("canvasrefined-viewmore-btn");
+    let viewMoreButton = makeElement("button", location, { "className": "ochre-custom-btn ochre-viewmore-btn", "textContent": "View More" });
+    //viewMoreButton.classList.add("ochre-viewmore-btn");
     const showMoreCount = 3;
     viewMoreButton.addEventListener("click", function (e) {
         if (type === "announcement") {
@@ -3430,16 +3430,16 @@ function setupBetterTodo() {
     // Better Todo list is removed from quizzes (it interferes with the quiz page).
     if (isQuizPage()) return;
     if (options.better_todo !== true || isGradesPage()) return;
-    if (document.querySelector('#canvasrefined-todo-list')) return;
+    if (document.querySelector('#ochre-todo-list')) return;
     let list = document.querySelector("#right-side");
     if (!list) return;
-    //if (!list || list.childElementCount === 0 || list.children[0].id === "canvasrefined-todo-list") return;
+    //if (!list || list.childElementCount === 0 || list.children[0].id === "ochre-todo-list") return;
     try {
         /* save the feedback to append it later */
         const feedback = list.querySelector(".events_list.recent_feedback");
 
         list.textContent = "";
-        list = makeElement("div", list, { "className": "canvasrefined-todosidebar","id": "canvasrefined-todo-list"});
+        list = makeElement("div", list, { "className": "ochre-todosidebar","id": "ochre-todo-list"});
         createTodoSections(list);
 
         if (feedback) list.append(feedback);
@@ -3604,7 +3604,7 @@ async function setupBetterSidebar(mode = getSidebarLayoutMode()) {
 function createSidebarButton(text, url, parent, icon) {
 	let button = makeElement("a", parent, {
         style: "width:40%;height:var(--bc-sidebar-btn-height,30px);cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;gap:var(--bc-sidebar-btn-gap,8px);color:var(--bcsidebar-text) !important;font-weight:bold;position:relative;",
-		className: "canvasrefined-custom-btn better-sidebar-btn",
+		className: "ochre-custom-btn better-sidebar-btn",
 		href: url,
 	});
     button.innerHTML = `${icon ? `${icon}<span class="better-sidebar-label" style="font-size:var(--bc-sidebar-label-size,14px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${text}</span>` : `<span class="better-sidebar-label" style="font-size:var(--bc-sidebar-label-size,14px);">${text}</span>`}`;
@@ -3828,10 +3828,10 @@ async function loadBetterTodo() {
     if (options.better_todo !== true || isGradesPage()) return;
     try {
         await getColors();
-        const discussion_svg = '<svg class="canvasrefined-todo-svg" name="IconDiscussion" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"  ><g role="presentation"><path d="M677.647059,16 L677.647059,354.936471 L790.588235,354.936471 L790.588235,129.054118 L1807.05882,129.054118 L1807.05882,919.529412 L1581.06353,919.529412 L1581.06353,1179.29412 L1321.41176,919.529412 L1242.24,919.529412 L1242.24,467.877647 L677.647059,467.877647 L0,467.877647 L0,1484.34824 L338.710588,1484.34824 L338.710588,1903.24706 L756.705882,1484.34824 L1242.24,1484.34824 L1242.24,1032.47059 L1274.99294,1032.47059 L1694.11765,1451.59529 L1694.11765,1032.47059 L1920,1032.47059 L1920,16 L677.647059,16 Z M338.789647,919.563294 L903.495529,919.563294 L903.495529,806.622118 L338.789647,806.622118 L338.789647,919.563294 Z M338.789647,1145.44565 L677.726118,1145.44565 L677.726118,1032.39153 L338.789647,1032.39153 L338.789647,1145.44565 Z M112.941176,580.705882 L1129.41176,580.705882 L1129.41176,1371.40706 L710.4,1371.40706 L451.651765,1631.05882 L451.651765,1371.40706 L112.941176,1371.40706 L112.941176,580.705882 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
-        const quiz_svg = '<svg class="canvasrefined-todo-svg" label="Quiz" name="IconQuiz" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"  ><g role="presentation"><g fill-rule="evenodd" stroke="none" stroke-width="1"><path d="M746.255375,1466.76417 L826.739372,1547.47616 L577.99138,1796.11015 L497.507383,1715.51216 L746.255375,1466.76417 Z M580.35118,1300.92837 L660.949178,1381.52637 L329.323189,1713.15236 L248.725192,1632.55436 L580.35118,1300.92837 Z M414.503986,1135.20658 L495.101983,1215.80457 L80.5979973,1630.30856 L0,1549.71056 L414.503986,1135.20658 Z M1119.32036,264.600006 C1475.79835,-91.8779816 1844.58834,86.3040124 1848.35034,88.1280123 L1848.35034,88.1280123 L1865.45034,96.564012 L1873.88634,113.664011 C1875.71034,117.312011 2053.89233,486.101999 1697.30034,842.693987 L1697.30034,842.693987 L1550.69635,989.297982 L1548.07435,1655.17196 L1325.43235,1877.81395 L993.806366,1546.30196 L415.712386,968.207982 L84.0863971,636.467994 L306.72839,413.826001 L972.602367,411.318001 Z M1436.24035,1103.75398 L1074.40436,1465.70397 L1325.43235,1716.61796 L1434.30235,1607.74796 L1436.24035,1103.75398 Z M1779.26634,182.406009 C1710.18234,156.41401 1457.90035,87.1020124 1199.91836,345.198004 L1199.91836,345.198004 L576.90838,968.207982 L993.806366,1385.10597 L1616.70235,762.095989 C1873.65834,505.139998 1804.68834,250.920007 1779.26634,182.406009 Z M858.146371,525.773997 L354.152388,527.597997 L245.282392,636.467994 L496.310383,887.609985 L858.146371,525.773997 Z"></path><path d="M1534.98715,372.558003 C1483.91515,371.190003 1403.31715,385.326002 1321.69316,466.949999 L1281.22316,507.305998 L1454.61715,680.585992 L1494.97315,640.343994 C1577.16715,558.035996 1591.87315,479.033999 1589.82115,427.164001 L1587.65515,374.610003 L1534.98715,372.558003 Z"></path></g></g></svg>';
-        const announcement_svg = '<svg class="canvasrefined-todo-svg" label="Announcement" name="IconAnnouncement" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false" ><g role="presentation"><path d="M1587.16235,31.2784941 C1598.68235,7.78672942 1624.43294,-4.41091764 1650.63529,1.46202354 C1676.16,7.56084707 1694.11765,30.2620235 1694.11765,56.4643765 L1694.11765,56.4643765 L1694.11765,570.459671 C1822.87059,596.662024 1920,710.732612 1920,847.052612 C1920,983.372612 1822.87059,1097.55614 1694.11765,1123.75849 L1694.11765,1123.75849 L1694.11765,1637.64085 C1694.11765,1663.8432 1676.16,1686.65732 1650.63529,1692.6432 C1646.23059,1693.65967 1641.93882,1694.11144 1637.64706,1694.11144 C1616.52706,1694.11144 1596.87529,1682.36555 1587.16235,1662.93967 C1379.23765,1247.2032 964.178824,1242.34673 960,1242.34673 L960,1242.34673 L564.705882,1242.34673 L564.705882,1807.05261 L652.461176,1807.05261 C640.602353,1716.92555 634.955294,1560.05026 715.934118,1456.37026 C768.338824,1389.2832 845.590588,1355.28791 945.882353,1355.28791 L945.882353,1355.28791 L945.882353,1468.22908 C881.392941,1468.22908 835.312941,1487.09026 805.044706,1525.71614 C736.263529,1613.58438 759.981176,1789.54673 774.776471,1849.97026 C778.955294,1866.79849 775.115294,1884.6432 764.498824,1898.30908 C753.769412,1911.97496 737.28,1919.99379 720,1919.99379 L720,1919.99379 L508.235294,1919.99379 C477.063529,1919.99379 451.764706,1894.80791 451.764706,1863.5232 L451.764706,1863.5232 L451.764706,1242.34673 L395.294118,1242.34673 C239.548235,1242.34673 112.941176,1115.73967 112.941176,959.993788 L112.941176,959.993788 L112.941176,903.5232 L56.4705882,903.5232 C25.2988235,903.5232 0,878.337318 0,847.052612 C0,815.880847 25.2988235,790.582024 56.4705882,790.582024 L56.4705882,790.582024 L112.941176,790.582024 L112.941176,734.111435 C112.941176,578.478494 239.548235,451.758494 395.294118,451.758494 L395.294118,451.758494 L959.887059,451.758494 C976.828235,451.645553 1380.36706,444.756141 1587.16235,31.2784941 Z M1581.17647,249.706729 C1386.46588,492.078494 1128.96,547.871435 1016.47059,560.746729 L1016.47059,560.746729 L1016.47059,1133.47144 C1128.96,1146.34673 1386.46588,1202.02673 1581.17647,1444.51144 L1581.17647,1444.51144 Z M903.529412,564.699671 L395.294118,564.699671 C301.891765,564.699671 225.882353,640.709082 225.882353,734.111435 L225.882353,734.111435 L225.882353,959.993788 C225.882353,1053.39614 301.891765,1129.40555 395.294118,1129.40555 L395.294118,1129.40555 L903.529412,1129.40555 L903.529412,564.699671 Z M1694.11765,688.144376 L1694.11765,1006.07379 C1759.73647,982.694965 1807.05882,920.577318 1807.05882,847.052612 C1807.05882,773.527906 1759.73647,711.5232 1694.11765,688.144376 L1694.11765,688.144376 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
-        const assignment_svg = '<svg class="canvasrefined-todo-svg" label="Assignment" name="IconAssignment" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"><g role="presentation"><path d="M1468.2137,0 L1468.2137,564.697578 L1355.27419,564.697578 L1355.27419,112.939516 L112.939516,112.939516 L112.939516,1807.03225 L1355.27419,1807.03225 L1355.27419,1581.15322 L1468.2137,1581.15322 L1468.2137,1919.97177 L2.5243549e-29,1919.97177 L2.5243549e-29,0 L1468.2137,0 Z M1597.64239,581.310981 C1619.77853,559.174836 1655.46742,559.174836 1677.60356,581.310981 L1677.60356,581.310981 L1903.4826,807.190012 C1925.5058,829.213217 1925.5058,864.902104 1903.4826,887.038249 L1903.4826,887.038249 L1225.8455,1564.67534 C1215.22919,1575.17872 1200.88587,1581.16451 1185.86491,1581.16451 L1185.86491,1581.16451 L959.985883,1581.16451 C928.814576,1581.16451 903.516125,1555.86606 903.516125,1524.69475 L903.516125,1524.69475 L903.516125,1298.81572 C903.516125,1283.79477 909.501919,1269.45145 920.005294,1258.94807 L920.005294,1258.94807 Z M1442.35055,896.29929 L1016.45564,1322.1942 L1016.45564,1468.225 L1162.48643,1468.225 L1588.38135,1042.33008 L1442.35055,896.29929 Z M677.637094,1242.34597 L677.637094,1355.28548 L338.818547,1355.28548 L338.818547,1242.34597 L677.637094,1242.34597 Z M903.516125,1016.46693 L903.516125,1129.40645 L338.818547,1129.40645 L338.818547,1016.46693 L903.516125,1016.46693 Z M1637.62298,701.026867 L1522.19879,816.451052 L1668.22958,962.481846 L1783.65377,847.057661 L1637.62298,701.026867 Z M1129.39516,338.829841 L1129.39516,790.587903 L338.818547,790.587903 L338.818547,338.829841 L1129.39516,338.829841 Z M1016.45564,451.769356 L451.758062,451.769356 L451.758062,677.648388 L1016.45564,677.648388 L1016.45564,451.769356 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
+        const discussion_svg = '<svg class="ochre-todo-svg" name="IconDiscussion" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"  ><g role="presentation"><path d="M677.647059,16 L677.647059,354.936471 L790.588235,354.936471 L790.588235,129.054118 L1807.05882,129.054118 L1807.05882,919.529412 L1581.06353,919.529412 L1581.06353,1179.29412 L1321.41176,919.529412 L1242.24,919.529412 L1242.24,467.877647 L677.647059,467.877647 L0,467.877647 L0,1484.34824 L338.710588,1484.34824 L338.710588,1903.24706 L756.705882,1484.34824 L1242.24,1484.34824 L1242.24,1032.47059 L1274.99294,1032.47059 L1694.11765,1451.59529 L1694.11765,1032.47059 L1920,1032.47059 L1920,16 L677.647059,16 Z M338.789647,919.563294 L903.495529,919.563294 L903.495529,806.622118 L338.789647,806.622118 L338.789647,919.563294 Z M338.789647,1145.44565 L677.726118,1145.44565 L677.726118,1032.39153 L338.789647,1032.39153 L338.789647,1145.44565 Z M112.941176,580.705882 L1129.41176,580.705882 L1129.41176,1371.40706 L710.4,1371.40706 L451.651765,1631.05882 L451.651765,1371.40706 L112.941176,1371.40706 L112.941176,580.705882 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
+        const quiz_svg = '<svg class="ochre-todo-svg" label="Quiz" name="IconQuiz" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"  ><g role="presentation"><g fill-rule="evenodd" stroke="none" stroke-width="1"><path d="M746.255375,1466.76417 L826.739372,1547.47616 L577.99138,1796.11015 L497.507383,1715.51216 L746.255375,1466.76417 Z M580.35118,1300.92837 L660.949178,1381.52637 L329.323189,1713.15236 L248.725192,1632.55436 L580.35118,1300.92837 Z M414.503986,1135.20658 L495.101983,1215.80457 L80.5979973,1630.30856 L0,1549.71056 L414.503986,1135.20658 Z M1119.32036,264.600006 C1475.79835,-91.8779816 1844.58834,86.3040124 1848.35034,88.1280123 L1848.35034,88.1280123 L1865.45034,96.564012 L1873.88634,113.664011 C1875.71034,117.312011 2053.89233,486.101999 1697.30034,842.693987 L1697.30034,842.693987 L1550.69635,989.297982 L1548.07435,1655.17196 L1325.43235,1877.81395 L993.806366,1546.30196 L415.712386,968.207982 L84.0863971,636.467994 L306.72839,413.826001 L972.602367,411.318001 Z M1436.24035,1103.75398 L1074.40436,1465.70397 L1325.43235,1716.61796 L1434.30235,1607.74796 L1436.24035,1103.75398 Z M1779.26634,182.406009 C1710.18234,156.41401 1457.90035,87.1020124 1199.91836,345.198004 L1199.91836,345.198004 L576.90838,968.207982 L993.806366,1385.10597 L1616.70235,762.095989 C1873.65834,505.139998 1804.68834,250.920007 1779.26634,182.406009 Z M858.146371,525.773997 L354.152388,527.597997 L245.282392,636.467994 L496.310383,887.609985 L858.146371,525.773997 Z"></path><path d="M1534.98715,372.558003 C1483.91515,371.190003 1403.31715,385.326002 1321.69316,466.949999 L1281.22316,507.305998 L1454.61715,680.585992 L1494.97315,640.343994 C1577.16715,558.035996 1591.87315,479.033999 1589.82115,427.164001 L1587.65515,374.610003 L1534.98715,372.558003 Z"></path></g></g></svg>';
+        const announcement_svg = '<svg class="ochre-todo-svg" label="Announcement" name="IconAnnouncement" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false" ><g role="presentation"><path d="M1587.16235,31.2784941 C1598.68235,7.78672942 1624.43294,-4.41091764 1650.63529,1.46202354 C1676.16,7.56084707 1694.11765,30.2620235 1694.11765,56.4643765 L1694.11765,56.4643765 L1694.11765,570.459671 C1822.87059,596.662024 1920,710.732612 1920,847.052612 C1920,983.372612 1822.87059,1097.55614 1694.11765,1123.75849 L1694.11765,1123.75849 L1694.11765,1637.64085 C1694.11765,1663.8432 1676.16,1686.65732 1650.63529,1692.6432 C1646.23059,1693.65967 1641.93882,1694.11144 1637.64706,1694.11144 C1616.52706,1694.11144 1596.87529,1682.36555 1587.16235,1662.93967 C1379.23765,1247.2032 964.178824,1242.34673 960,1242.34673 L960,1242.34673 L564.705882,1242.34673 L564.705882,1807.05261 L652.461176,1807.05261 C640.602353,1716.92555 634.955294,1560.05026 715.934118,1456.37026 C768.338824,1389.2832 845.590588,1355.28791 945.882353,1355.28791 L945.882353,1355.28791 L945.882353,1468.22908 C881.392941,1468.22908 835.312941,1487.09026 805.044706,1525.71614 C736.263529,1613.58438 759.981176,1789.54673 774.776471,1849.97026 C778.955294,1866.79849 775.115294,1884.6432 764.498824,1898.30908 C753.769412,1911.97496 737.28,1919.99379 720,1919.99379 L720,1919.99379 L508.235294,1919.99379 C477.063529,1919.99379 451.764706,1894.80791 451.764706,1863.5232 L451.764706,1863.5232 L451.764706,1242.34673 L395.294118,1242.34673 C239.548235,1242.34673 112.941176,1115.73967 112.941176,959.993788 L112.941176,959.993788 L112.941176,903.5232 L56.4705882,903.5232 C25.2988235,903.5232 0,878.337318 0,847.052612 C0,815.880847 25.2988235,790.582024 56.4705882,790.582024 L56.4705882,790.582024 L112.941176,790.582024 L112.941176,734.111435 C112.941176,578.478494 239.548235,451.758494 395.294118,451.758494 L395.294118,451.758494 L959.887059,451.758494 C976.828235,451.645553 1380.36706,444.756141 1587.16235,31.2784941 Z M1581.17647,249.706729 C1386.46588,492.078494 1128.96,547.871435 1016.47059,560.746729 L1016.47059,560.746729 L1016.47059,1133.47144 C1128.96,1146.34673 1386.46588,1202.02673 1581.17647,1444.51144 L1581.17647,1444.51144 Z M903.529412,564.699671 L395.294118,564.699671 C301.891765,564.699671 225.882353,640.709082 225.882353,734.111435 L225.882353,734.111435 L225.882353,959.993788 C225.882353,1053.39614 301.891765,1129.40555 395.294118,1129.40555 L395.294118,1129.40555 L903.529412,1129.40555 L903.529412,564.699671 Z M1694.11765,688.144376 L1694.11765,1006.07379 C1759.73647,982.694965 1807.05882,920.577318 1807.05882,847.052612 C1807.05882,773.527906 1759.73647,711.5232 1694.11765,688.144376 L1694.11765,688.144376 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
+        const assignment_svg = '<svg class="ochre-todo-svg" label="Assignment" name="IconAssignment" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"><g role="presentation"><path d="M1468.2137,0 L1468.2137,564.697578 L1355.27419,564.697578 L1355.27419,112.939516 L112.939516,112.939516 L112.939516,1807.03225 L1355.27419,1807.03225 L1355.27419,1581.15322 L1468.2137,1581.15322 L1468.2137,1919.97177 L2.5243549e-29,1919.97177 L2.5243549e-29,0 L1468.2137,0 Z M1597.64239,581.310981 C1619.77853,559.174836 1655.46742,559.174836 1677.60356,581.310981 L1677.60356,581.310981 L1903.4826,807.190012 C1925.5058,829.213217 1925.5058,864.902104 1903.4826,887.038249 L1903.4826,887.038249 L1225.8455,1564.67534 C1215.22919,1575.17872 1200.88587,1581.16451 1185.86491,1581.16451 L1185.86491,1581.16451 L959.985883,1581.16451 C928.814576,1581.16451 903.516125,1555.86606 903.516125,1524.69475 L903.516125,1524.69475 L903.516125,1298.81572 C903.516125,1283.79477 909.501919,1269.45145 920.005294,1258.94807 L920.005294,1258.94807 Z M1442.35055,896.29929 L1016.45564,1322.1942 L1016.45564,1468.225 L1162.48643,1468.225 L1588.38135,1042.33008 L1442.35055,896.29929 Z M677.637094,1242.34597 L677.637094,1355.28548 L338.818547,1355.28548 L338.818547,1242.34597 L677.637094,1242.34597 Z M903.516125,1016.46693 L903.516125,1129.40645 L338.818547,1129.40645 L338.818547,1016.46693 L903.516125,1016.46693 Z M1637.62298,701.026867 L1522.19879,816.451052 L1668.22958,962.481846 L1783.65377,847.057661 L1637.62298,701.026867 Z M1129.39516,338.829841 L1129.39516,790.587903 L338.818547,790.587903 L338.818547,338.829841 L1129.39516,338.829841 Z M1016.45564,451.769356 L451.758062,451.769356 L451.758062,677.648388 L1016.45564,677.648388 L1016.45564,451.769356 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
         const x_svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path></svg>';
         const check_svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M5 12l5 5l10 -10"></path></svg>';
         const tag_svg = '<svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7.5 7.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M3 6v5.172a2 2 0 0 0 .586 1.414l7.71 7.71a2.41 2.41 0 0 0 3.408 0l5.592 -5.592a2.41 2.41 0 0 0 0 -3.408l-7.71 -7.71a2 2 0 0 0 -1.414 -.586h-5.172a3 3 0 0 0 -3 3z" /></svg>';
@@ -3842,8 +3842,8 @@ async function loadBetterTodo() {
         const hr24 = options.todo_hr24;
         const now = new Date();
         //const csrfToken = CSRFtoken();
-        let todoAnnouncements = document.querySelector("#canvasrefined-announcement-list");
-        let todoAssignments = document.querySelector("#canvasrefined-todo-list");
+        let todoAnnouncements = document.querySelector("#ochre-announcement-list");
+        let todoAssignments = document.querySelector("#ochre-todo-list");
         let assignmentsToInsert = [];
         let announcementsToInsert = [];
 
@@ -3877,42 +3877,42 @@ async function loadBetterTodo() {
                     if (filter === "todo" && ((itemState && itemState["rem"] === true) || (item.planner_override && item.planner_override.marked_complete === true))) return;
 
                     let listItemContainer = document.createElement("div");
-                    listItemContainer.classList.add("canvasrefined-todo-container");
-                    listItemContainer.innerHTML = '<div class="canvasrefined-hover-preview"><p class="canvasrefined-preview-title"></p><p class="canvasrefined-preview-text"></p></div><div class="canvasrefined-todo-actions"></div><div class="canvasrefined-todo-icon"></div><a class="canvasrefined-todo-item"><div class="canvasrefined-todo-item-header"></div></a><button class="canvasrefined-todo-actions-btn"><i class="icon-more canvasrefined-dots-icon" aria-hidden="true"></i></button>';
-                    listItemContainer.querySelector(".canvasrefined-todo-item").href = item.html_url;
+                    listItemContainer.classList.add("ochre-todo-container");
+                    listItemContainer.innerHTML = '<div class="ochre-hover-preview"><p class="ochre-preview-title"></p><p class="ochre-preview-text"></p></div><div class="ochre-todo-actions"></div><div class="ochre-todo-icon"></div><a class="ochre-todo-item"><div class="ochre-todo-item-header"></div></a><button class="ochre-todo-actions-btn"><i class="icon-more ochre-dots-icon" aria-hidden="true"></i></button>';
+                    listItemContainer.querySelector(".ochre-todo-item").href = item.html_url;
                     listItemContainer.dataset.id = item.plannable_id;
-                    listItemContainer.querySelector('.canvasrefined-todo-icon').innerHTML += svg;
+                    listItemContainer.querySelector('.ochre-todo-icon').innerHTML += svg;
 
-                    let listItem = listItemContainer.querySelector(".canvasrefined-todo-item");
+                    let listItem = listItemContainer.querySelector(".ochre-todo-item");
                     const courseColor =
                         options.custom_cards_3?.[String(item.course_id)]?.color ??
                         options.custom_cards_3?.[item.course_id]?.color ??
                         options.custom_cards_3?.[item.plannable?.course_id]?.color ??
                         "#cccccc";
                     if (itemState?.["lbl"] && itemState["lbl"] !== "") {
-                        makeElement("span", listItem.querySelector(".canvasrefined-todo-item-header"), { "className": "canvasrefined-todo-label", "textContent": itemState["lbl"] });
+                        makeElement("span", listItem.querySelector(".ochre-todo-item-header"), { "className": "ochre-todo-label", "textContent": itemState["lbl"] });
                     }
                     if (itemState?.["crs"] === true) {
-                        listItemContainer.querySelector(".canvasrefined-todo-item").style.textDecoration = "line-through";
+                        listItemContainer.querySelector(".ochre-todo-item").style.textDecoration = "line-through";
                     }
-                    let title = makeElement("a", listItem.querySelector(".canvasrefined-todo-item-header"), { "className": "canvasrefined-todoitem-title", "textContent": item.plannable.title });
+                    let title = makeElement("a", listItem.querySelector(".ochre-todo-item-header"), { "className": "ochre-todoitem-title", "textContent": item.plannable.title });
                     if (options.todo_hide_feedback === true) title.style = "color:" + courseColor + "!important;";
-                    let course = makeElement("p", listItem, { "className": "canvasrefined-todoitem-course", "textContent": item.context_name });
+                    let course = makeElement("p", listItem, { "className": "ochre-todoitem-course", "textContent": item.context_name });
                     course.style.color = courseColor;
                     let format = formatTodoDate(date, item.submissions, hr24);
-                    let todoDate = makeElement("p", listItem, { "className": "canvasrefined-todoitem-date", "textContent": format.date });
-                    if (format.dueSoon) todoDate.classList.add("canvasrefined-due-soon");
+                    let todoDate = makeElement("p", listItem, { "className": "ochre-todoitem-date", "textContent": format.date });
+                    if (format.dueSoon) todoDate.classList.add("ochre-due-soon");
 
                     if (options.hover_preview === true) {
                         const customItem = item.planner_override && item.planner_override.custom && item.planner_override.custom === true;
                         listItem.addEventListener("mouseover", () => {
-                            listItem.classList.add("canvasrefined-todo-hover");
-                            let preview = listItemContainer.querySelector(".canvasrefined-hover-preview");
-                            let previewTitle = preview.querySelector(".canvasrefined-preview-title");
-                            let previewText = preview.querySelector(".canvasrefined-preview-text");
+                            listItem.classList.add("ochre-todo-hover");
+                            let preview = listItemContainer.querySelector(".ochre-hover-preview");
+                            let previewTitle = preview.querySelector(".ochre-preview-title");
+                            let previewText = preview.querySelector(".ochre-preview-text");
                             clearTimeout(delay);
                             delay = setTimeout(async () => {
-                                if (listItem.classList.contains("canvasrefined-todo-hover")) {
+                                if (listItem.classList.contains("ochre-todo-hover")) {
                                     previewTitle.textContent = item.plannable.title;
                                     // custom assignment (planner note): preview its description/details
                                     if (customItem) {
@@ -3955,38 +3955,38 @@ async function loadBetterTodo() {
                         });
 
                         listItem.addEventListener("mouseleave", () => {
-                            listItem.classList.remove("canvasrefined-todo-hover");
-                            listItemContainer.querySelector(".canvasrefined-hover-preview").style.display = "none";
+                            listItem.classList.remove("ochre-todo-hover");
+                            listItemContainer.querySelector(".ochre-hover-preview").style.display = "none";
                         });
                     }
 
-                    const actions = listItemContainer.querySelector(".canvasrefined-todo-actions");
+                    const actions = listItemContainer.querySelector(".ochre-todo-actions");
 
                     let clickOutActions = (e) => {
-                        if (e.target.className.includes("canvasrefined")) return;
+                        if (e.target.className.includes("ochre")) return;
                         document.body.removeEventListener("click", clickOutActions);
                         actions.style.display = "none";
                     }
 
-                    listItemContainer.querySelector(".canvasrefined-todo-actions-btn").addEventListener("click", () => {
+                    listItemContainer.querySelector(".ochre-todo-actions-btn").addEventListener("click", () => {
                         actions.style.display = "block";
                         setTimeout(() => {
                             document.body.addEventListener("click", clickOutActions);
                         }, 100);
                     });
 
-                    let removeBtn = makeElement("div", actions, { "className": "canvasrefined-todo-action", "textContent": "Remove" });
+                    let removeBtn = makeElement("div", actions, { "className": "ochre-todo-action", "textContent": "Remove" });
                     removeBtn.innerHTML += x_svg;
                     const dueAt = new Date(item.plannable_date).getTime();
 
-                    let crossOffBtn = makeElement("div", actions, { "className": "canvasrefined-todo-action", "textContent": "Cross off" });
+                    let crossOffBtn = makeElement("div", actions, { "className": "ochre-todo-action", "textContent": "Cross off" });
                     crossOffBtn.innerHTML += check_svg;
                     crossOffBtn.addEventListener("click", () => {
-                        setAssignmentState(item.plannable_id, { "crs": listItemContainer.querySelector(".canvasrefined-todo-item").style.textDecoration === "line-through" ? false : true, "expire": dueAt });
+                        setAssignmentState(item.plannable_id, { "crs": listItemContainer.querySelector(".ochre-todo-item").style.textDecoration === "line-through" ? false : true, "expire": dueAt });
                     });
-                    let label = makeElement("span", actions, { "className": "canvasrefined-todo-action-tag", "textContent": "Label:" });
+                    let label = makeElement("span", actions, { "className": "ochre-todo-action-tag", "textContent": "Label:" });
                     label.innerHTML += tag_svg;
-                    let labelInput = makeElement("input", actions, { "className": "canvasrefined-todo-input", "type": "text", "placeholder": "Label", "value": itemState && itemState["lbl"] ? itemState["lbl"] : "" });
+                    let labelInput = makeElement("input", actions, { "className": "ochre-todo-input", "type": "text", "placeholder": "Label", "value": itemState && itemState["lbl"] ? itemState["lbl"] : "" });
                     labelInput.addEventListener("change", (e) => {
                         setAssignmentState(item.plannable_id, { "lbl": e.target.value, "expire": dueAt });
                     });
@@ -4017,7 +4017,7 @@ async function loadBetterTodo() {
                     } else {
                         assignmentsToInsert.push(listItemContainer);
                         if (item.submissions && item.submissions.submitted) {
-                            listItemContainer.classList.add("canvasrefined-todo-item-completed");
+                            listItemContainer.classList.add("ochre-todo-item-completed");
                         }
                     }
 
@@ -4033,7 +4033,7 @@ async function loadBetterTodo() {
                     }
                     if (i !== assignmentsToInsert.length) createTodoViewMore(todoAssignments, "assignment");
                 } else {
-                    makeElement("p", todoAssignments, { "className": "canvasrefined-none-due", "textContent": "None" });
+                    makeElement("p", todoAssignments, { "className": "ochre-none-due", "textContent": "None" });
                 }
 
                 // appending announcements all at once
@@ -4045,7 +4045,7 @@ async function loadBetterTodo() {
                     }
                     if (i !== -1) createTodoViewMore(todoAnnouncements, "announcement");
                 } else {
-                    makeElement("p", todoAnnouncements, { "className": "canvasrefined-none-due", "textContent": "None" });
+                    makeElement("p", todoAnnouncements, { "className": "ochre-none-due", "textContent": "None" });
                 }
 
                 cleanCustomAssignments();
@@ -4206,16 +4206,16 @@ function toggleDarkMode() {
         document.documentElement.append(style);
     }
     style.textContent = css;
-    style.className = darkOn ? "canvasrefined-darkmode-enabled" : "";
+    style.className = darkOn ? "ochre-darkmode-enabled" : "";
     darkStyleInserted = true;
     runiframeChecker();
 }
 
 function runDarkModeFixer(override = false) {
     // Quiz safe mode: never auto-run the dark mode fixer on quiz pages.
-    if (quizSafeModeActive()) return { "path": "canvasrefined-none", "time": "" };
-    if (options.dark_mode !== true) return { "path": "canvasrefined-darkmode_off", "time": "" };
-    if (override === false && !options["dark_mode_fix"].includes(window.location.pathname)) return { "path": "canvasrefined-none", "time": "" };
+    if (quizSafeModeActive()) return { "path": "ochre-none", "time": "" };
+    if (options.dark_mode !== true) return { "path": "ochre-darkmode_off", "time": "" };
+    if (override === false && !options["dark_mode_fix"].includes(window.location.pathname)) return { "path": "ochre-none", "time": "" };
     let output = inspectDarkMode();
     return { "path": window.location.pathname, "time": output.time };
 }
@@ -4268,7 +4268,7 @@ function runiframeChecker() {
         document.querySelectorAll('iframe').forEach((frame) => {
             if (frame.contentDocument && frame.contentDocument.documentElement && frame.contentDocument.documentElement.querySelector('#darkcss')) {
                 frame.contentDocument.documentElement.querySelector('#darkcss').textContent = '';
-                frame.contentDocument.body.classList.remove("canvasrefined--darkmode--enabled");
+                frame.contentDocument.body.classList.remove("ochre--darkmode--enabled");
             }
         });
         return;
@@ -4288,7 +4288,7 @@ function runiframeChecker() {
                     const new_style_element = document.createElement("style");
                     new_style_element.textContent = generateDarkModeCSS();
                     new_style_element.id = "darkcss";
-                    doc.body.classList.add("canvasrefined--darkmode--enabled");
+                    doc.body.classList.add("ochre--darkmode--enabled");
                     doc.documentElement.prepend(new_style_element);
                 } catch (_) { /* cross-origin or detached frame: ignore */ }
             }
@@ -4316,11 +4316,11 @@ function insertGrades() {
                             let gradepercent = grade.enrollments[0].has_grading_periods === true ? grade.enrollments[0].current_period_computed_current_score : grade.enrollments[0].computed_current_score;
                             //let gradepercent = grade.enrollments[0].computed_current_score;
                             let percent = (gradepercent || "--") + "%";
-                            let gradeContainer = cards[i].querySelector(".canvasrefined-card-grade") || makeElement("a", cards[i].querySelector(".ic-DashboardCard__header"), { "className": "canvasrefined-card-grade", "textContent": percent });
+                            let gradeContainer = cards[i].querySelector(".ochre-card-grade") || makeElement("a", cards[i].querySelector(".ic-DashboardCard__header"), { "className": "ochre-card-grade", "textContent": percent });
                             if (options.grade_hover === true) {
-                                gradeContainer.classList.add("canvasrefined-hover-only");
+                                gradeContainer.classList.add("ochre-hover-only");
                             } else {
-                                gradeContainer.classList.remove("canvasrefined-hover-only");
+                                gradeContainer.classList.remove("ochre-hover-only");
                             }
                             gradeContainer.setAttribute("href", `${domain}/courses/${course_id}/grades`);
                             gradeContainer.style.display = "block";
@@ -4333,7 +4333,7 @@ function insertGrades() {
             }
         });
     } else {
-        document.querySelectorAll('.canvasrefined-card-grade').forEach(grade => {
+        document.querySelectorAll('.ochre-card-grade').forEach(grade => {
             grade.style.display = "none";
         });
     }
@@ -4346,20 +4346,20 @@ Card assignments
 
 function createCardAssignment(assignment) {
     let assignmentContainer = document.createElement("div");
-    assignmentContainer.className = "canvasrefined-assignment-container";
-    let assignmentName = makeElement("a", assignmentContainer, { "className": "canvasrefined-assignment-link", "textContent": assignment.plannable.title, "href": assignment.html_url });
-    let assignmentDueAt = makeElement("span", assignmentContainer, { "className": "canvasrefined-assignment-dueat", "textContent": formatCardDue(new Date(assignment.plannable_date)) });
-    if (assignment.overdue === true) assignmentDueAt.classList.add("canvasrefined-assignment-overdue");
+    assignmentContainer.className = "ochre-assignment-container";
+    let assignmentName = makeElement("a", assignmentContainer, { "className": "ochre-assignment-link", "textContent": assignment.plannable.title, "href": assignment.html_url });
+    let assignmentDueAt = makeElement("span", assignmentContainer, { "className": "ochre-assignment-dueat", "textContent": formatCardDue(new Date(assignment.plannable_date)) });
+    if (assignment.overdue === true) assignmentDueAt.classList.add("ochre-assignment-overdue");
     if (assignment?.submissions?.submitted === true) {
-        assignmentContainer.classList.add("canvasrefined-completed");
+        assignmentContainer.classList.add("ochre-completed");
     } else {
         if (options.assignment_states[assignment.plannable_id]?.["crs"] === true) {
-            assignmentContainer.classList.add("canvasrefined-completed");
+            assignmentContainer.classList.add("ochre-completed");
         }
     }
     assignmentDueAt.addEventListener('mouseup', function () {
-        assignmentContainer.classList.toggle("canvasrefined-completed");
-        const status = assignmentContainer.classList.contains("canvasrefined-completed");
+        assignmentContainer.classList.toggle("ochre-completed");
+        const status = assignmentContainer.classList.contains("ochre-completed");
         setAssignmentState(assignment.plannable_id, { "crs": status, "expire": assignment.plannable_date });
     });
     return assignmentContainer;
@@ -4379,7 +4379,7 @@ function equalizeCardHeights() {
 
     // Clear prior min-height so we can measure fresh or fully reset.
     cards.forEach(card => {
-        const area = card.querySelector(".canvasrefined-card-assignment");
+        const area = card.querySelector(".ochre-card-assignment");
         if (area) area.style.removeProperty("min-height");
     });
 
@@ -4388,13 +4388,13 @@ function equalizeCardHeights() {
     // Stretch each assignment area to the tallest one.
     let maxHeight = 0;
     cards.forEach(card => {
-        const area = card.querySelector(".canvasrefined-card-assignment");
+        const area = card.querySelector(".ochre-card-assignment");
         if (area) maxHeight = Math.max(maxHeight, area.offsetHeight);
     });
 
     if (maxHeight > 0) {
         cards.forEach(card => {
-            const area = card.querySelector(".canvasrefined-card-assignment");
+            const area = card.querySelector(".ochre-card-assignment");
             if (area) area.style.minHeight = maxHeight + "px";
         });
     }
@@ -4434,7 +4434,7 @@ function preloadAssignmentEls() {
 
 function loadCardAssignments() {
     if (options.assignments_due !== true) {
-        document.querySelectorAll(".canvasrefined-card-assignment").forEach(card => {
+        document.querySelectorAll(".ochre-card-assignment").forEach(card => {
             card.style.display = "none";
         });
         equalizeCardHeights();
@@ -4452,7 +4452,7 @@ function loadCardAssignments() {
                 let link = card.querySelector(".ic-DashboardCard__link");
                 if (!link) return;
                 let course_id = link.href.split("courses/")[1];
-                let cardContainer = card.querySelector('.canvasrefined-card-container');
+                let cardContainer = card.querySelector('.ochre-card-container');
                 if (!cardContainer) return;
                 cardContainer.textContent = "";
                 if (cardContainer.parentElement) {
@@ -4466,15 +4466,15 @@ function loadCardAssignments() {
                         if ((options.card_overdues !== true && now >= assignment.due) || (options.card_overdues === true && assignment.submitted === true)) return;
                         if (assignment.type !== "assignment" && assignment.type !== "quiz" && assignment.type !== "discussion_topic") return;
                         if (assignment.override === true) return;
-                        //assignment.el.querySelector(".canvasrefined-assignment-dueat").textContent = formatCardDue(assignment.due);
+                        //assignment.el.querySelector(".ochre-assignment-dueat").textContent = formatCardDue(assignment.due);
                         cardContainer.appendChild(assignment.el);
                         count++;
                     });
                 }
 
                 if (count === 0) {
-                    let assignmentContainer = makeElement("div", cardContainer, { "className": "canvasrefined-assignment-container" });
-                    let assignmentDivLink = makeElement("a", assignmentContainer, { "className": "canvasrefined-assignment-link", "textContent": "None" });
+                    let assignmentContainer = makeElement("div", cardContainer, { "className": "ochre-assignment-container" });
+                    let assignmentDivLink = makeElement("a", assignmentContainer, { "className": "ochre-assignment-link", "textContent": "None" });
                 }
             });
             // Wait one frame so the browser lays out the freshly appended
@@ -4490,15 +4490,15 @@ function loadCardAssignments() {
 function setupCardAssignments() {
     if (options.assignments_due !== true) return;
     try {
-        let containersCount = document.querySelectorAll('.canvasrefined-card-container').length;
+        let containersCount = document.querySelectorAll('.ochre-card-container').length;
         if (document.querySelectorAll('.ic-DashboardCard').length > 0 && containersCount > 0) return;
         let cards = document.querySelectorAll('.ic-DashboardCard');
         cards.forEach(card => {
-            let assignmentContainer = card.querySelector(".canvasrefined-card-assignment") || makeElement("div", card, { "className": "canvasrefined-card-assignment" });
-            let assignmentsDueHeader = card.querySelector(".canvasrefined-card-header-container") || makeElement("div", assignmentContainer, { "className": "canvasrefined-card-header-container" });
-            let assignmentsDueLabel = card.querySelector(".canvasrefined-card-header") || makeElement("h3", assignmentsDueHeader, { "className": "canvasrefined-card-header", "textContent": chrome.i18n.getMessage("due") });
-            let cardContainer = card.querySelector(".canvasrefined-card-container") || makeElement("div", assignmentContainer, { "className": "canvasrefined-card-container" });
-            let skeletonText = card.querySelector(".canvasrefined-skeleton-text") || makeElement("div", cardContainer, { "className": "canvasrefined-skeleton-text" });
+            let assignmentContainer = card.querySelector(".ochre-card-assignment") || makeElement("div", card, { "className": "ochre-card-assignment" });
+            let assignmentsDueHeader = card.querySelector(".ochre-card-header-container") || makeElement("div", assignmentContainer, { "className": "ochre-card-header-container" });
+            let assignmentsDueLabel = card.querySelector(".ochre-card-header") || makeElement("h3", assignmentsDueHeader, { "className": "ochre-card-header", "textContent": chrome.i18n.getMessage("due") });
+            let cardContainer = card.querySelector(".ochre-card-container") || makeElement("div", assignmentContainer, { "className": "ochre-card-container" });
+            let skeletonText = card.querySelector(".ochre-skeleton-text") || makeElement("div", cardContainer, { "className": "ochre-skeleton-text" });
         });
     } catch (e) {
         logError(e);
@@ -4578,7 +4578,7 @@ function customizeCards(c = null) {
             }
             links = card.querySelectorAll(".ic-DashboardCard__action");
             for (let i = 0; i < 4; i++) {
-                let img = links[i].querySelector(".canvasrefined-link-image") || makeElement("img", links[i], { "className": "canvasrefined-link-image" });
+                let img = links[i].querySelector(".ochre-link-image") || makeElement("img", links[i], { "className": "ochre-link-image" });
                 links[i].style.display = "inherit";
                 if (cardOptions_2.links[i].path === "none") {
                     links[i].style.display = "none";
@@ -4625,10 +4625,10 @@ GPA calculator
 
 function calculateGPA2() {
     let qualityPoints = 0, numCredits = 0, weightedQualityPoints = 0, cumulativePoints = 0, cumulativeCredits = 0;
-    document.querySelectorAll('.canvasrefined-gpa-course').forEach(course => {
-        const weight = course.querySelector('.canvasrefined-course-weight').value;
-        const credits = parseFloat(course.querySelector('.canvasrefined-course-credit').value);
-        const grade = parseFloat(course.querySelector('.canvasrefined-course-percent').value);
+    document.querySelectorAll('.ochre-gpa-course').forEach(course => {
+        const weight = course.querySelector('.ochre-course-weight').value;
+        const credits = parseFloat(course.querySelector('.ochre-course-credit').value);
+        const grade = parseFloat(course.querySelector('.ochre-course-percent').value);
         if (weight === "dnc" || !credits || !grade) return;
         let letter = "--";
         let gpa;
@@ -4672,7 +4672,7 @@ function calculateGPA2() {
             letter = "F";
             gpa = options.gpa_calc_bounds["F"].gpa;
         }
-            course.querySelector(".canvasrefined-gpa-letter-grade").textContent = letter;
+            course.querySelector(".ochre-gpa-letter-grade").textContent = letter;
 
             let weightMultiplier = 0;
             if (weight === "ap") {
@@ -4687,12 +4687,12 @@ function calculateGPA2() {
 
 
     });
-    document.querySelector("#canvasrefined-gpa-unweighted").textContent = (qualityPoints / numCredits).toFixed(2);
-    document.querySelector("#canvasrefined-gpa-weighted").textContent = (weightedQualityPoints / numCredits).toFixed(2);
-    const cGPA = document.querySelector("#canvasrefined-cumulative-gpa");
-    const g = parseFloat(cGPA.querySelector(".canvasrefined-course-percent").value);
-    const c = parseInt(cGPA.querySelector(".canvasrefined-course-credit").value);
-    document.querySelector("#canvasrefined-gpa-cumulative").textContent = (((options.gpa_calc_weighted === true ? weightedQualityPoints : qualityPoints) + (g * c)) / (numCredits + c)).toFixed(2);
+    document.querySelector("#ochre-gpa-unweighted").textContent = (qualityPoints / numCredits).toFixed(2);
+    document.querySelector("#ochre-gpa-weighted").textContent = (weightedQualityPoints / numCredits).toFixed(2);
+    const cGPA = document.querySelector("#ochre-cumulative-gpa");
+    const g = parseFloat(cGPA.querySelector(".ochre-course-percent").value);
+    const c = parseInt(cGPA.querySelector(".ochre-course-credit").value);
+    document.querySelector("#ochre-gpa-cumulative").textContent = (((options.gpa_calc_weighted === true ? weightedQualityPoints : qualityPoints) + (g * c)) / (numCredits + c)).toFixed(2);
 }
 
 function changeGPASettings(course_id, update) {
@@ -4721,15 +4721,15 @@ function createGPACalcCourse(location, course) {
     }
     if (customs.hidden === true) return;
 
-    let courseContainer = makeElement("div", location, { "className": course.id === "cumulative" ? "canvasrefined-gpa-cumulative" : "canvasrefined-gpa-course", "innerHTML": '<div class="canvasrefined-gpa-letter-grade"></div>' });
-    let courseName = makeElement("p", courseContainer, { "className": "canvasrefined-gpa-name", "textContent": customs.name === "" ? course.course_code : customs.name });
-    let changerContainer = makeElement("div", courseContainer, { "className": "canvasrefined-gpa-percent-container" });
+    let courseContainer = makeElement("div", location, { "className": course.id === "cumulative" ? "ochre-gpa-cumulative" : "ochre-gpa-course", "innerHTML": '<div class="ochre-gpa-letter-grade"></div>' });
+    let courseName = makeElement("p", courseContainer, { "className": "ochre-gpa-name", "textContent": customs.name === "" ? course.course_code : customs.name });
+    let changerContainer = makeElement("div", courseContainer, { "className": "ochre-gpa-percent-container" });
 
-    let credits = makeElement("div", courseContainer, { "className": "canvasrefined-course-credits", "innerHTML": '<input class="canvasrefined-course-credit" value="1"></input><span class="canvasrefined-course-percent-sign">cr</span>' });
-    let creditsChanger = credits.querySelector(".canvasrefined-course-credit");
+    let credits = makeElement("div", courseContainer, { "className": "ochre-course-credits", "innerHTML": '<input class="ochre-course-credit" value="1"></input><span class="ochre-course-percent-sign">cr</span>' });
+    let creditsChanger = credits.querySelector(".ochre-course-credit");
     creditsChanger.value = customs.credits;
-    let changer = makeElement("input", changerContainer, { "className": "canvasrefined-course-percent" });
-    let percent = makeElement("span", changerContainer, { "className": "canvasrefined-course-percent-sign", "textContent": course.id === "cumulative" ? "/4" : "%" });
+    let changer = makeElement("input", changerContainer, { "className": "ochre-course-percent" });
+    let percent = makeElement("span", changerContainer, { "className": "ochre-course-percent-sign", "textContent": course.id === "cumulative" ? "/4" : "%" });
     let courseGrade = course?.enrollments[0].has_grading_periods === true ? course.enrollments[0].current_period_computed_current_score : course.enrollments[0].computed_current_score;
 
     if (customs["gr"] !== null) {
@@ -4741,14 +4741,14 @@ function createGPACalcCourse(location, course) {
     }
 
     if (course.id !== "cumulative") {
-        let weightSelections = makeElement("form", courseContainer, { "className": "canvasrefined-course-weights" });
-        weightSelections.innerHTML = '<select name="weight-selection" class="canvasrefined-course-weight"><option value="dnc">Do not count</option><option value="regular">Regular/College</option><option value="honors">Honors</option><option value="ap">AP/IB</option></select>';
-        let weightChanger = weightSelections.querySelector(".canvasrefined-course-weight");
+        let weightSelections = makeElement("form", courseContainer, { "className": "ochre-course-weights" });
+        weightSelections.innerHTML = '<select name="weight-selection" class="ochre-course-weight"><option value="dnc">Do not count</option><option value="regular">Regular/College</option><option value="honors">Honors</option><option value="ap">AP/IB</option></select>';
+        let weightChanger = weightSelections.querySelector(".ochre-course-weight");
         weightChanger.value = changer.value === "--" ? "dnc" : customs.weight;   
-        weightChanger.addEventListener('change', () => changeGPASettings(course.id, { "weight": weightSelections.querySelector(".canvasrefined-course-weight").value }));
+        weightChanger.addEventListener('change', () => changeGPASettings(course.id, { "weight": weightSelections.querySelector(".ochre-course-weight").value }));
 
-        let useCustomGr = makeElement("input", courseContainer, { "className": "canvasrefined-course-customgr", "type": "checkbox", "checked": customs.gr !== null ? true : false });
-        let useCustomGrLabel = makeElement("span", courseContainer, { "className": "canvasrefined-course-customgr-label", "textContent": "Save custom grade" });
+        let useCustomGr = makeElement("input", courseContainer, { "className": "ochre-course-customgr", "type": "checkbox", "checked": customs.gr !== null ? true : false });
+        let useCustomGrLabel = makeElement("span", courseContainer, { "className": "ochre-course-customgr-label", "textContent": "Save custom grade" });
         useCustomGr.addEventListener("input", () => {
             if (options["custom_cards"][course.id]) {
                 if (options["custom_cards"][course.id]["gr"] !== undefined && options["custom_cards"][course.id]["gr"] !== null) {
@@ -4769,7 +4769,7 @@ function createGPACalcCourse(location, course) {
         }
     });
 
-    credits.querySelector(".canvasrefined-course-credit").addEventListener('input', () => changeGPASettings(course.id, { "credits": credits.querySelector(".canvasrefined-course-credit").value }));
+    credits.querySelector(".ochre-course-credit").addEventListener('input', () => changeGPASettings(course.id, { "credits": credits.querySelector(".ochre-course-credit").value }));
     return courseContainer;
 }
 
@@ -4782,26 +4782,26 @@ function setupGPACalc() {
             const dashboardContainer = sortableContainer || document.querySelector("#DashboardCard_Container");
             if (!dashboardContainer) return;
 
-            let container2 = document.querySelector(".canvasrefined-gpa-card");
-            let container = document.querySelector(".canvasrefined-gpa");
-            const alreadyRendered = container2?.dataset?.canvasrefinedGpaRendered === "true" && container?.dataset?.canvasrefinedGpaRendered === "true";
+            let container2 = document.querySelector(".ochre-gpa-card");
+            let container = document.querySelector(".ochre-gpa");
+            const alreadyRendered = container2?.dataset?.ochreGpaRendered === "true" && container?.dataset?.ochreGpaRendered === "true";
 
             if (!container2) {
                 container2 = document.createElement("div");
-                container2.className = "canvasrefined-gpa-card";
+                container2.className = "ochre-gpa-card";
             }
             if (!container) {
                 container = document.createElement("div");
-                container.className = "canvasrefined-gpa";
+                container.className = "ochre-gpa";
             }
 
             container2.style.display = options.gpa_calc === true ? "inline-block" : "none";
 
             if (!alreadyRendered) {
-                container2.innerHTML = `<h3 class="canvasrefined-gpa-header">GPA</h3><div><div><p id="canvasrefined-gpa-unweighted"></p><p>Current</p></div><div style="display:${options["gpa_calc_weighted"] ? "block" : "none"}"><p id="canvasrefined-gpa-weighted"></p><p>Weighted</p></div><div style="display:${options["gpa_calc_cumulative"] ? "block" : "none"}"><p id="canvasrefined-gpa-cumulative"></p><p>Cumulative</p></div></div>`;
-                let editBtn = makeElement("button", container2, { "className": "canvasrefined-gpa-edit-btn", "textContent": "Edit Calculator" });
+                container2.innerHTML = `<h3 class="ochre-gpa-header">GPA</h3><div><div><p id="ochre-gpa-unweighted"></p><p>Current</p></div><div style="display:${options["gpa_calc_weighted"] ? "block" : "none"}"><p id="ochre-gpa-weighted"></p><p>Weighted</p></div><div style="display:${options["gpa_calc_cumulative"] ? "block" : "none"}"><p id="ochre-gpa-cumulative"></p><p>Cumulative</p></div></div>`;
+                let editBtn = makeElement("button", container2, { "className": "ochre-gpa-edit-btn", "textContent": "Edit Calculator" });
 
-                container.innerHTML = '<h3 class="canvasrefined-gpa-header">GPA Calculator</h3><div class="canvasrefined-gpa-courses-container"><div class="canvasrefined-gpa-courses"></div></div>';
+                container.innerHTML = '<h3 class="ochre-gpa-header">GPA Calculator</h3><div class="ochre-gpa-courses-container"><div class="ochre-gpa-courses"></div></div>';
 
                 if (options.gpa_calc_prepend === true) {
                     dashboardContainer.prepend(container2);
@@ -4811,11 +4811,11 @@ function setupGPACalc() {
                     dashboardContainer.appendChild(container);
                 }
 
-                let location = document.querySelector(".canvasrefined-gpa-courses");
+                let location = document.querySelector(".ochre-gpa-courses");
                 if (!location) return;
 
                 let cumulative = createGPACalcCourse(location, { "id": "cumulative", "enrollments": [{ "has_grading_periods": true, "current_period_computed_current_score": 0 }] });
-                cumulative.id = "canvasrefined-cumulative-gpa";
+                cumulative.id = "ochre-cumulative-gpa";
                 result.forEach(course => createGPACalcCourse(location, course));
 
                 container.style.display = "none";
@@ -4830,11 +4830,11 @@ function setupGPACalc() {
                     }
                 });
 
-                container2.dataset.canvasrefinedGpaRendered = "true";
-                container.dataset.canvasrefinedGpaRendered = "true";
+                container2.dataset.ochreGpaRendered = "true";
+                container.dataset.ochreGpaRendered = "true";
             } else {
-                const weighted = container2.querySelector("#canvasrefined-gpa-weighted")?.parentElement;
-                const cumulative = container2.querySelector("#canvasrefined-gpa-cumulative")?.parentElement;
+                const weighted = container2.querySelector("#ochre-gpa-weighted")?.parentElement;
+                const cumulative = container2.querySelector("#ochre-gpa-cumulative")?.parentElement;
                 if (weighted) weighted.style.display = options.gpa_calc_weighted ? "block" : "none";
                 if (cumulative) cumulative.style.display = options.gpa_calc_cumulative ? "block" : "none";
 
@@ -5051,8 +5051,8 @@ function toggleDashboardNoteTask(editor, taskIndex) {
             lines[idx] = m[1] + "[" + newMark + "]" + m[3] + line.slice(m[0].length);
             editor.value = lines.join("\n");
             editor.dispatchEvent(new Event("input", { bubbles: true }));
-            const notes = editor.closest(".canvasrefined-dashboard-notes");
-            const rendered = notes ? notes.querySelector(".canvasrefined-notes-rendered") : null;
+            const notes = editor.closest(".ochre-dashboard-notes");
+            const rendered = notes ? notes.querySelector(".ochre-notes-rendered") : null;
             if (rendered) renderDashboardNotesPreview(rendered, editor.value);
             return;
         }
@@ -5061,7 +5061,7 @@ function toggleDashboardNoteTask(editor, taskIndex) {
 }
 
 const DASHBOARD_NOTES_HTML = `
-    <div class="canvasrefined-notes-toolbar" role="toolbar" aria-label="Format notes">
+    <div class="ochre-notes-toolbar" role="toolbar" aria-label="Format notes">
         <button type="button" class="cr-fmt" data-action="bold" title="Bold (Ctrl/Cmd+B)"><strong>B</strong></button>
         <button type="button" class="cr-fmt" data-action="italic" title="Italic (Ctrl/Cmd+I)"><em>I</em></button>
         <button type="button" class="cr-fmt" data-action="strike" title="Strikethrough"><s>S</s></button>
@@ -5079,15 +5079,15 @@ const DASHBOARD_NOTES_HTML = `
         <button type="button" class="cr-fmt" data-action="hr" title="Horizontal rule">&mdash;</button>
         <button type="button" class="cr-fmt" data-action="codeblock" title="Code block">&#96;&#96;&#96;</button>
     </div>
-    <div class="canvasrefined-notes-surface">
-        <div class="canvasrefined-notes-rendered" tabindex="0" aria-label="Dashboard notes — click to edit" title="Click to edit"></div>
-        <textarea class="canvasrefined-notes-editor" placeholder="Type away!" spellcheck="false"></textarea>
+    <div class="ochre-notes-surface">
+        <div class="ochre-notes-rendered" tabindex="0" aria-label="Dashboard notes — click to edit" title="Click to edit"></div>
+        <textarea class="ochre-notes-editor" placeholder="Type away!" spellcheck="false"></textarea>
     </div>
 `;
 
 function wireDashboardNotes(notes) {
-    const editor = notes.querySelector(".canvasrefined-notes-editor");
-    const rendered = notes.querySelector(".canvasrefined-notes-rendered");
+    const editor = notes.querySelector(".ochre-notes-editor");
+    const rendered = notes.querySelector(".ochre-notes-rendered");
     editor.value = options.dashboard_notes_text || "";
     renderDashboardNotesPreview(rendered, editor.value);
 
@@ -5123,7 +5123,7 @@ function wireDashboardNotes(notes) {
     });
 
     // preventDefault on the toolbar keeps focus in the editor across misclicks.
-    const toolbar = notes.querySelector(".canvasrefined-notes-toolbar");
+    const toolbar = notes.querySelector(".ochre-notes-toolbar");
     if (toolbar) toolbar.addEventListener("mousedown", e => e.preventDefault());
     notes.querySelectorAll(".cr-fmt").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -5147,15 +5147,15 @@ function loadDashboardNotes() {
     const container = document.querySelector("#DashboardCard_Container");
     if (options.dashboard_notes === true) {
         if (!container) return;
-        let notes = document.querySelector('.canvasrefined-dashboard-notes');
+        let notes = document.querySelector('.ochre-dashboard-notes');
         // Rebuild older (split edit/preview) markup into the new single-surface layout.
-        if (notes && !notes.querySelector(".canvasrefined-notes-surface")) {
+        if (notes && !notes.querySelector(".ochre-notes-surface")) {
             notes.remove();
             notes = null;
         }
         if (!notes) {
             notes = document.createElement("div");
-            notes.classList.add("canvasrefined-dashboard-notes");
+            notes.classList.add("ochre-dashboard-notes");
             notes.innerHTML = DASHBOARD_NOTES_HTML;
             // Mount as a full-width sibling above the card grid. Prepending inside the
             // DashboardCard_Container makes the notes a masonry/grid cell (narrow & broken).
@@ -5165,8 +5165,8 @@ function loadDashboardNotes() {
             wireDashboardNotes(notes);
         } else {
             notes.style.display = "";
-            const editor = notes.querySelector(".canvasrefined-notes-editor");
-            const rendered = notes.querySelector(".canvasrefined-notes-rendered");
+            const editor = notes.querySelector(".ochre-notes-editor");
+            const rendered = notes.querySelector(".ochre-notes-rendered");
             // Only sync and render in view mode; the textarea is the source of truth while editing.
             if (!notes.classList.contains("is-editing")) {
                 if (editor && editor.value !== (options.dashboard_notes_text || "")) {
@@ -5176,7 +5176,7 @@ function loadDashboardNotes() {
             }
         }
     } else {
-        let notes = document.querySelector('.canvasrefined-dashboard-notes');
+        let notes = document.querySelector('.ochre-dashboard-notes');
         if (notes) notes.style.display = "none";
     }
 }
@@ -5243,8 +5243,8 @@ function debouncedApplyAestheticChanges(delay = 150) {
 function applyAestheticChanges() {
     // Quiz safe mode: don't inject custom layout/aesthetic CSS on quiz pages.
     if (quizSafeModeActive()) return;
-    let style = document.querySelector("#canvasrefined-aesthetics") || document.createElement('style');
-    style.id = "canvasrefined-aesthetics";
+    let style = document.querySelector("#ochre-aesthetics") || document.createElement('style');
+    style.id = "ochre-aesthetics";
     style.textContent = "";
     if (options.condensed_cards === true) style.textContent += ".ic-DashboardCard__header_hero {height:60px!important}.ic-DashboardCard__header-subtitle, .ic-DashboardCard__header-term{display:none}";
     if (options.remlogo === true) style.textContent += ".ic-app-header__logomark-container{display:none}";
@@ -5267,9 +5267,9 @@ function applyAestheticChanges() {
         if (options.cardHeight !== undefined && options.cardHeight !== null && options.cardHeight !== "") {
             style.textContent += `.ic-DashboardCard {height: ${options.cardHeight}px!important;}`;
             // Canvas sets overflow:hidden on .ic-DashboardCard. With a fixed
-            // height that clips the appended .canvasrefined-card-assignment area
+            // height that clips the appended .ochre-card-assignment area
             // (the assignment rows live at the bottom of the card), making the
-            // .canvasrefined-assignment-link anchors unclickable for users with
+            // .ochre-assignment-link anchors unclickable for users with
             // custom card styles enabled. Allow overflow so those rows stay
             // visible and interactive when card assignments are shown.
             if (options.assignments_due === true) style.textContent += `.ic-DashboardCard {overflow: visible!important;}`;
@@ -5295,7 +5295,7 @@ with a toggle for Quiz Safe Mode and a "Don't show again" button.
 */
 function setupQuizSafeModeBanner() {
     if (!isQuizPreTakePage()) return;
-    if (document.getElementById("canvasrefined-quiz-safe-banner")) return;
+    if (document.getElementById("ochre-quiz-safe-banner")) return;
 
     chrome.storage.local.get("quiz_safe_mode_reminder_dismissed", local => {
         if (local && local.quiz_safe_mode_reminder_dismissed === true) return;
@@ -5316,25 +5316,25 @@ function injectQuizSafeModeBanner(safeModeOn) {
 
     const insertInto = (container) => {
         if (!container) return false;
-        if (document.getElementById("canvasrefined-quiz-safe-banner")) return true;
+        if (document.getElementById("ochre-quiz-safe-banner")) return true;
 
         const banner = makeElement("div", container, {
-            id: "canvasrefined-quiz-safe-banner",
-            className: "canvasrefined-quiz-safe-banner",
+            id: "ochre-quiz-safe-banner",
+            className: "ochre-quiz-safe-banner",
         }, true);
 
         makeElement("div", banner, {
-            className: "canvasrefined-quiz-safe-title",
+            className: "ochre-quiz-safe-title",
             textContent: "Canvas Refined — Quiz Safe Mode",
         });
 
         makeElement("p", banner, {
-            className: "canvasrefined-quiz-safe-info",
+            className: "ochre-quiz-safe-info",
             textContent: "This extension hasn't been 100% approved by all teachers. Quiz Safe Mode turns off most Canvas Refined features that could interfere with this quiz page, giving you the default Canvas quiz experience.",
         });
 
-        const toggleRow = makeElement("div", banner, { className: "canvasrefined-quiz-safe-row" });
-        const toggleWrap = makeElement("label", toggleRow, { className: "canvasrefined-quiz-safe-toggle" });
+        const toggleRow = makeElement("div", banner, { className: "ochre-quiz-safe-row" });
+        const toggleWrap = makeElement("label", toggleRow, { className: "ochre-quiz-safe-toggle" });
         const checkbox = makeElement("input", toggleWrap, { type: "checkbox" });
         checkbox.checked = !!safeModeOn;
         checkbox.addEventListener("change", () => {
@@ -5342,12 +5342,12 @@ function injectQuizSafeModeBanner(safeModeOn) {
             // The storage.onChanged listener (applyOptionsChanges) reloads quiz pages.
         });
         makeElement("span", toggleWrap, {
-            className: "canvasrefined-quiz-safe-toggle-label",
+            className: "ochre-quiz-safe-toggle-label",
             textContent: "Enable Quiz Safe Mode",
         });
 
         const dismissBtn = makeElement("button", toggleRow, {
-            className: "canvasrefined-quiz-safe-dismiss",
+            className: "ochre-quiz-safe-dismiss",
  type: "button",
             textContent: "Don't show again",
             title: "Hides this reminder permanently. You can still toggle Quiz Safe Mode in the extension popup.",
@@ -5412,7 +5412,7 @@ function showUpdateMsg() {
     if (!el) return;
 
     // option off or div already created
-    let div = document.getElementById("canvasrefined-update-msg");
+    let div = document.getElementById("ochre-update-msg");
     if (options.show_updates !== true || options.update_msg === "") {
         if (div) div.style.display = "none";
         return;
@@ -5422,9 +5422,9 @@ function showUpdateMsg() {
     }
 
     // first creation
-    div = makeElement("div", el, { "id": "canvasrefined-update-msg" });
+    div = makeElement("div", el, { "id": "ochre-update-msg" });
     makeElement("p", div, { "textContent": options.update_msg });
-    const close = makeElement("button", div, { "id": "canvasrefined-update-close", "textContent": "Close" });
+    const close = makeElement("button", div, { "id": "ochre-update-close", "textContent": "Close" });
     close.addEventListener("click", () => {
         readUpdate();
         div.remove();

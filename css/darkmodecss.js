@@ -9,7 +9,7 @@ const DARKMODE_CSS = `
 #calendar-drag-and-drop-container .fc-month-view .fc-body,
 #content-wrapper .user_content.not_design_tools h3,
 #context-list-holder,
-.canvasrefined-course-credit,
+.ochre-course-credit,
 #kl_banner,
 #kl_banner_left,
 #kl_banner_right,
@@ -42,7 +42,7 @@ const DARKMODE_CSS = `
 .ac-result-container,
 .agenda-wrapper,
 .al-options,
-.canvasrefined-assignment-container,
+.ochre-assignment-container,
 .bjXfh_daKB,
 .bjXfh_daKB span,
 .bottom-reply-with-box,
@@ -127,7 +127,7 @@ body,
 code,
 img.kl_image_round_white_border,
 img.kl_image_white_border,
-.canvasrefined-course-percent,
+.ochre-course-percent,
 pre,
 table.summary tbody th,
 table.summary td,
@@ -159,8 +159,8 @@ table.seas-homepage-table,
 .ic-app-course-menu.with-left-side #left-side.XOwIb_eLeB:not([aria-selected]):not([aria-disabled]):hover,
 .XOwIb_eLeB[aria-selected],
 span.fOyUs_bGBk.fOyUs_desw.bDzpk_bGBk.bDzpk_busO.bDzpk_cQFX.bDzpk_bZNM,
-.canvasrefined-todo-complete-btn,
-.canvasrefined-card-grade,
+.ochre-todo-complete-btn,
+.ochre-card-grade,
 div[style*='background-color: #fff'],
 div[style*='background: #fff'],
 div[style*='background-color: #ffffff'],
@@ -175,7 +175,7 @@ span[style*='background: #fff'],
 #comments-tray,
 .css-d76rpr-view--inlineBlock[data-testid='tool-bar'],
 .css-vxe90h-view--inlineBlock,
-.canvasrefined-todo-actions,
+.ochre-todo-actions,
 .css-sg1rn7-view {
     background:var(--bcbackground-0)!important
 }
@@ -191,7 +191,7 @@ span[style*='background: #fff'],
 
 #submit_file_button,
 span[style*='background-color: #fbeeb8'],
-.canvasrefined-todo-label {
+.ochre-todo-label {
     color:var(--bcbackground-0)!important
 }
 
@@ -212,7 +212,7 @@ span[style*='background-color: #fbeeb8'],
 .Button,
 .ac-input-box,
 .agenda-day.agenda-today,
-.canvasrefined-assignment-container:hover,
+.ochre-assignment-container:hover,
 .btn,
 .discussion-reply-box,
 .discussions-v2__wrapper>span>span>span>span>button>span,
@@ -275,11 +275,11 @@ table.seas-homepage-table tr:nth-child(odd),
 .list-view a.active,
 #calendars-context-list .context_list_context:hover,
 #other-calendars-context-list .context_list_context:hover,
-.canvasrefined-todo-complete-btn:hover,
-.canvasrefined-custom-btn,
-.canvasrefined-skeleton-text,
-.canvasrefined-hover-preview,
-.canvasrefined-gpa-edit-btn,
+.ochre-todo-complete-btn:hover,
+.ochre-custom-btn,
+.ochre-skeleton-text,
+.ochre-hover-preview,
+.ochre-gpa-edit-btn,
 div[style*='background-color: rgb(229, 242, 248)'],
 div[style*='background-color: rgb(245, 245, 245)'],
 .css-7naoe-textInp,
@@ -288,7 +288,7 @@ div[style*='background-color: rgb(245, 245, 245)'],
 #course_select_menu,
 .css-1dn3ise-textInput__facade,
 .css-1veueey-textInput__facade,
-.canvasrefined-todo-action:hover {
+.ochre-todo-action:hover {
     background:var(--bcbackground-1)!important
 }
 
@@ -296,7 +296,7 @@ div[style*='background-color: rgb(245, 245, 245)'],
     fill:var(--bcbackground-1)!important
 }
 
-.canvasrefined-hover-preview::after {
+.ochre-hover-preview::after {
     background:linear-gradient(0deg,  var(--bcbackground-1) 50%,  transparent)
 }
 
@@ -376,7 +376,7 @@ ul.outcome-level li:hover {
 
 #calendar-drag-and-drop-container .fc-row .fc-content-skeleton td,
 #calendar-drag-and-drop-container .fc-row .fc-helper-skeleton td,
-.canvasrefined-course-credit,
+.ochre-course-credit,
 #kl_content_block_0,
 #kl_custom_block_0,
 #kl_custom_block_1,
@@ -431,7 +431,7 @@ ul.outcome-level li:hover {
 .uneditable-input,
 .unpinned-discussions-v2__wrapper,
 form.question_form .form_answers .answer,
-.canvasrefined-course-percent,
+.ochre-course-percent,
 input[type=color],
 input[type=date],
 input[type=datetime-local],
@@ -459,11 +459,11 @@ textarea,
 .ui-state-default,
 .ui-widget-header .ui-state-default,
 .ui-widget-content,
-.canvasrefined-custom-btn,
-.canvasrefined-gpa-edit-btn,
+.ochre-custom-btn,
+.ochre-gpa-edit-btn,
 .css-26xxi8-view--block,
 .css-9fqfm7-view--block,
-.canvasrefined-todo-actions {
+.ochre-todo-actions {
     border:1px solid var(--bcborders)!important
 }
 
@@ -541,7 +541,7 @@ table.summary thead th,
 .submission-details-header__heading-and-grades,
 #right_side .content_box,
 .assignment-student-header,
-.canvasrefined-gpa-course {
+.ochre-gpa-course {
     border-bottom:1px solid var(--bcborders)!important
 }
 
@@ -701,8 +701,8 @@ ul.outcome-level {
 #kl_wrapper_3.kl_colored_headings_box_left>div>h3 i,
 #kl_wrapper_3.kl_colored_headings_box_left>div>h3:not(.ui-state-default),
 #kl_wrapper_3.kl_emta h3:not(.ui-state-default),
-.canvasrefined-card-grade,
-.canvasrefined-card-header,
+.ochre-card-grade,
+.ochre-card-header,
 .discussion-fyi,
 .ic-DashboardCard__action-badge,
 .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active .menu-item__text,
@@ -711,13 +711,13 @@ ul.outcome-level {
 .menu-item__badge,
 .mini_calendar .day.other_month,
 .ui-tabs .ui-tabs-nav li.ui-tabs-active a,
-.canvasrefined-course-percent,
-.canvasrefined-todo-container,
-.canvasrefined-todo-container:hover,
+.ochre-course-percent,
+.ochre-todo-container,
+.ochre-todo-container:hover,
 .MlJlv_ebWM,
-.canvasrefined-todo-item,
-.canvasrefined-todo-item:hover,
-.canvasrefined-hover-preview,
+.ochre-todo-item,
+.ochre-todo-item:hover,
+.ochre-hover-preview,
 .baylorMainContainer,
 .baylor-table td,
 .fOyUs_dUgE,
@@ -742,13 +742,13 @@ h5,
 h6,
 #tinymce,
 .PlannerItem-styles__type > span,
-.canvasrefined-todo-actions {
+.ochre-todo-actions {
     color:var(--bctext-0)!important
 }
 
 .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active svg,
 .ToDoSidebarItem__Icon,
-.canvasrefined-todo-svg {
+.ochre-todo-svg {
     fill:var(--bctext-0)!important
 }
 
@@ -764,7 +764,7 @@ h6,
 #calendar-drag-and-drop-container .fc-agendaWeek-view .fc-widget-header,
 #calendar-drag-and-drop-container .fc-month-view .fc-widget-header,
 #content-wrapper .user_content.not_design_tools h3,
-.canvasrefined-course-credit,
+.ochre-course-credit,
 #kl_banner,
 #kl_banner h2,
 #kl_banner_left,
@@ -798,8 +798,8 @@ h6,
 .ToDoSidebarItem__Info li,
 .ac-input-box,
 .accessible-toggler,
-.canvasrefined-assignment-container,
-.canvasrefined-assignment-container:hover,
+.ochre-assignment-container,
+.ochre-assignment-container:hover,
 .bjXfh_daKB,
 .bjXfh_daKB span,
 .cWmNi_bGBk,
@@ -919,13 +919,13 @@ ic-tokeninput-input,
 .dUOHu_eCSh,
 .blnAQ_eCSh,
 #gradebook_header,
-.canvasrefined-assignment-link,
-.canvasrefined-assignment-link:hover,
+.ochre-assignment-link,
+.ochre-assignment-link:hover,
 .jumbotron,
 .card,
 .ac-token,
 span[style='color: #000000;'],
-.canvasrefined-gpa-edit-btn {
+.ochre-gpa-edit-btn {
     color:var(--bctext-1)!important
 }
 
@@ -1005,7 +1005,7 @@ ul.outcome-level li.selected a::before,
 .ic-unread-badge,
 .cECYn_bXiG,
 .unread-grade,
-.canvasrefined-todo-label {
+.ochre-todo-label {
     background:var(--bclinks)!important
 }
 
@@ -1097,7 +1097,7 @@ input[type=color].ic-Input:focus,
 .extension-aldue:hover,
 .ic-DashboardCard,
 .navigation-tray-container,
-.canvasrefined-gpa-card {
+.ochre-gpa-card {
     box-shadow:0 2px 5px #00000080!important
 }
 
@@ -1180,7 +1180,7 @@ hr {
 
 .ic-DashboardCard,
 .ic-DashboardCard__header_content,
-.canvasrefined-assignment-container,
+.ochre-assignment-container,
 .recent_feedback .event-details {
     background:none!important
 }

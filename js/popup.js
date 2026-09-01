@@ -1160,7 +1160,7 @@ function setup() {
     // activate dark mode fixer button
     document.querySelector("#fix-dm-btn").addEventListener("click", async function () {
         let output = await sendFromPopup("fixdm");
-        if (output.path === "canvasrefined-none" || output.path === "canvasrefined-darkmode_off") return;
+        if (output.path === "ochre-none" || output.path === "ochre-darkmode_off") return;
         let rating = "bad";
         if (output.time < 100) {
             rating = "good";
