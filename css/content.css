@@ -402,3 +402,25 @@
     text-decoration: line-through !important;
     text-decoration-thickness: 2.5px !important;
 }
+
+/* API failure notice. Shown in place of a feature that could not load its
+   data, replacing a silent no-op that left the user with a blank panel and
+   no indication anything had gone wrong. */
+.ochre-api-error {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin: 8px 0; padding: 10px 12px;
+    border: 1px solid var(--ochre-borders, #c7cdd1);
+    border-radius: 6px;
+    background: var(--ochre-background-2, #f5f7f8);
+    color: var(--ochre-text-1, #2d3b45);
+    font-size: 13px; line-height: 1.4;
+}
+.ochre-api-error-text { flex: 1 1 auto; }
+.ochre-api-error-retry {
+    flex: 0 0 auto; padding: 4px 12px; cursor: pointer;
+    border: 1px solid var(--ochre-borders, #c7cdd1); border-radius: 4px;
+    background: var(--ochre-background-1, #fff);
+    color: inherit; font: inherit; font-size: 12px;
+}
+.ochre-api-error-retry:hover { filter: brightness(95%); }
+.ochre-api-error-retry:focus-visible { outline: 2px solid var(--ochre-links, #0374b5); outline-offset: 2px; }

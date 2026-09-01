@@ -924,7 +924,7 @@ function updateReminders() {
     const fiveDays = 1000 * 60 * 60 * 24 * 5;
     const now = (new Date()).getTime();
     const list = [];
-    assignments.then(data => {
+    withApiData(assignments, data => {
         data.forEach(item => {
             const due = (new Date(item.plannable_date)).getTime();
             if (item.plannable_type === "announcement") return;
@@ -935,7 +935,7 @@ function updateReminders() {
             list.push({ "d": due, "t": item.plannable.title, "h": domain + item.html_url, "c": item?.submissions?.submitted || false ? -1 : 0 });
         });
         insertReminders(list);
-    });
+    }, { feature: "Reminders" });
 }
 
 function showExampleReminder() {
@@ -1319,11 +1319,11 @@ function applyOptionsChanges(changes) {
                     if (!placeholder) break;
                     if (progressRingsEnabled()) {
                         if (typeof assignments?.then === 'function') {
-                            assignments.then(data => {
+                            withApiData(assignments, data => {
                                 const courseId = getCurrentCourseId();
                                 const scopedData = getTodoScopedData(data, courseId);
                                 renderProgressRings(placeholder, scopedData);
-                            });
+                            }, { feature: "Progress rings", container: document.getElementById("better-todo-main") });
                         }
                     } else {
                         placeholder.innerHTML = "";
@@ -2056,7 +2056,7 @@ function getCardsFromDashboard() {
 }
 
 async function getCards(api = null) {
-    let dashboard_cards = api ? api : await getData(`${domain}/api/v1/courses?${/*enrollment_state=active&*/""}per_page=100`);
+    let dashboard_cards = api ? api : await canvasApi.getAll(`${domain}/api/v1/courses?${/*enrollment_state=active&*/""}per_page=100`);
     await new Promise(resolve => {
     chrome.storage.sync.get(["custom_cards", "custom_cards_2", "custom_cards_3"], storage => {
         let cards = storage["custom_cards"] || {};
@@ -2874,7 +2874,8 @@ function buildPlannerNotePayload(form) {
 }
 
 async function createCanvasPlannerNote(payload) {
-    const csrfToken = CSRFtoken();
+    // The CSRF token is attached by canvasApi.mutate.
+    
     const plannerNote = {
         title: payload.title,
         todo_date: payload.todoDate,
@@ -2887,7 +2888,6 @@ async function createCanvasPlannerNote(payload) {
             headers: {
                 "content-type": "application/json",
                 "accept": "application/json",
-                "X-CSRF-Token": csrfToken,
             },
             body: JSON.stringify({ planner_note: plannerNote }),
         },
@@ -2895,7 +2895,6 @@ async function createCanvasPlannerNote(payload) {
             headers: {
                 "content-type": "application/json",
                 "accept": "application/json",
-                "X-CSRF-Token": csrfToken,
             },
             body: JSON.stringify(plannerNote),
         },
@@ -2903,7 +2902,6 @@ async function createCanvasPlannerNote(payload) {
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 "accept": "application/json",
-                "X-CSRF-Token": csrfToken,
             },
             body: (() => {
                 const formBody = new URLSearchParams();
@@ -2916,31 +2914,21 @@ async function createCanvasPlannerNote(payload) {
         },
     ];
 
-    let lastError = "Canvas rejected task creation.";
-    for (const attempt of attempts) {
-        const response = await fetch(domain + "/api/v1/planner_notes", {
+    // The encoding fallback now lives in canvasApi.mutate, which applies the
+    // same "4xx means try the next encoding, anything else aborts" rule. The
+    // loop that used to be here retried every encoding even on a 401, which
+    // meant three requests to confirm the user was signed out.
+    try {
+        return await canvasApi.mutate(domain + "/api/v1/planner_notes", {
             method: "POST",
-            headers: attempt.headers,
-            body: attempt.body,
+            bodies: attempts,
         });
-
-        if (response.status === 200 || response.status === 201) {
-            return response.json();
+    } catch (e) {
+        if (e instanceof CanvasApiError && e.isAuth) {
+            throw new Error("You appear to be signed out of Canvas.");
         }
-
-        try {
-            const errData = await response.json();
-            if (errData?.errors?.length) {
-                lastError = errData.errors.join(" ");
-            } else if (errData?.message) {
-                lastError = errData.message;
-            }
-        } catch (_) {
-            // Keep prior error text when body is not JSON.
-        }
+        throw new Error("Canvas rejected task creation.");
     }
-
-    throw new Error(lastError || "Canvas rejected task creation.");
 }
 
 /* Custom task links: Canvas planner notes have no link field, so store a
@@ -3015,7 +3003,6 @@ async function updateCanvasPlannerNote(id, payload) {
             headers: {
                 "content-type": "application/json",
                 "accept": "application/json",
-                "X-CSRF-Token": csrfToken,
             },
             body: JSON.stringify(plannerNote),
         },
@@ -3023,7 +3010,6 @@ async function updateCanvasPlannerNote(id, payload) {
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 "accept": "application/json",
-                "X-CSRF-Token": csrfToken,
             },
             body: (() => {
                 const formBody = new URLSearchParams();
@@ -3432,7 +3418,7 @@ async function createTodoSections(location) {
 		mainSection.style = "display:flex;flex-direction:column;";
 	}
 	let mainSection = location.querySelector("#better-todo-main");
-	assignments.then(data => {
+	withApiData(assignments, data => {
         const courseId = getCurrentCourseId();
         const scopedData = getTodoScopedData(data, courseId);
 
@@ -3564,7 +3550,7 @@ async function createTodoSections(location) {
 			sidebar.style.overflowY = "";
 			// maybe invisible scrollbar?
 		}
-	});
+	}, { feature: "To-do list", container: mainSection });
 }
 
 function ensureRightSideWrapperScrollbarHidden() {
@@ -4110,7 +4096,7 @@ function markAs(item, element) {
     // update progress rings immediately so they animate while the item slides/fades
     const progressPlaceholder = document.getElementById("better-todo-progress-placeholder");
     if (progressPlaceholder && typeof assignments?.then === 'function' && progressRingsEnabled()) {
-        assignments.then(data => {
+        withApiData(assignments, data => {
             const courseId = getCurrentCourseId();
             const scopedData = getTodoScopedData(data.map(d => Object.assign({}, d)), courseId);
 
@@ -4124,7 +4110,7 @@ function markAs(item, element) {
             }
 
             renderProgressRings(progressPlaceholder, scopedData);
-        });
+        }, { feature: "Progress rings", container: progressPlaceholder });
     }
 
     setTimeout(() => {
@@ -4618,7 +4604,7 @@ async function loadBetterTodo() {
         let assignmentsToInsert = [];
         let announcementsToInsert = [];
 
-        assignments.then(data => {
+        withApiData(assignments, data => {
             chrome.storage.sync.get(options.custom_assignments_overflow, storage => {
                 //assignmentData = assignmentData === null ? data : assignmentData;
                 let items = combineAssignments(data);
@@ -4821,7 +4807,7 @@ async function loadBetterTodo() {
 
                 cleanCustomAssignments();
             });
-        });
+        }, { feature: "To-do list", container: document.getElementById("better-todo-main") });
 
     } catch (e) {
         logError(e);
@@ -5157,7 +5143,7 @@ function percentToLetterGrade(percent) {
 
 function insertGrades() {
     if (options.dashboard_grades === true) {
-        grades.then(data => {
+        withApiData(grades, data => {
             try {
                 let cards = document.querySelectorAll('.ic-DashboardCard');
                 if (cards.length === 0 || cards[0].querySelectorAll(".ic-DashboardCard__link").length === 0) return;
@@ -5188,7 +5174,7 @@ function insertGrades() {
             } catch (e) {
                 logError(e);
             }
-        });
+        }, { feature: "Dashboard grades", container: document.querySelector("#DashboardCard_Container") });
     } else {
         document.querySelectorAll('.ochre-card-grade').forEach(grade => {
             grade.style.display = "none";
@@ -5263,10 +5249,15 @@ window.addEventListener("resize", () => {
 });
 
 function preloadAssignmentEls() {
-    return new Promise((resolve, reject) => {
-        let assignmentEls = {};
-        const now = new Date();
-        assignments.then((data) => {
+    // Returns assignments.then(...) directly. This used to wrap the whole thing
+    // in `new Promise((resolve, reject) => ...)` and only ever call resolve():
+    // if `assignments` rejected, reject() was never called, so the returned
+    // promise stayed pending forever. cardAssignments then never settled and
+    // loadCardAssignments' .then() never ran -- a hang rather than an error,
+    // which is why it produced no console output at all.
+    let assignmentEls = {};
+    const now = new Date();
+    return assignments.then((data) => {
             data = combineAssignments(data);
             data.forEach(item => {
                 let due = new Date(item.plannable_date);
@@ -5284,8 +5275,7 @@ function preloadAssignmentEls() {
                     assignmentEls[item.course_id] = [o];
                 }
             });
-            resolve(assignmentEls);
-        });
+        return assignmentEls;
     });
 }
 
@@ -5298,7 +5288,7 @@ function loadCardAssignments() {
         return;
     }
     setupCardAssignments();
-    cardAssignments.then(els => {
+    withApiData(cardAssignments, els => {
         try {
             let cards = document.querySelectorAll('.ic-DashboardCard');
             if (cards.length === 0) return;
@@ -5340,7 +5330,7 @@ function loadCardAssignments() {
         } catch (e) {
             logError(e);
         }
-    });
+    }, { feature: "Card assignments", container: document.querySelector("#DashboardCard_Container") });
 }
 
 
@@ -6606,7 +6596,7 @@ async function buildGlobalSearchIndex() {
     try {
         // enrollment_state=active excludes concluded/inactive enrollments at the
         // source so we never index (or waste requests on) past-term courses.
-        courses = await getData(`${domain}/api/v1/courses?enrollment_state=active&per_page=100`);
+        courses = await canvasApi.getAll(`${domain}/api/v1/courses?enrollment_state=active&per_page=100`);
     } catch (e) {
         console.warn("[Ochre] global search: failed to load courses", e);
         return [];
@@ -6667,7 +6657,7 @@ async function buildGlobalSearchIndex() {
         // Assignments first so their direct URLs win over the module-item
         // versions of the same assignment.
         try {
-            const assignments = await getData(`${domain}/api/v1/courses/${courseId}/assignments?per_page=100`);
+            const assignments = await canvasApi.getAll(`${domain}/api/v1/courses/${courseId}/assignments?per_page=100`);
             if (Array.isArray(assignments)) {
                 for (const a of assignments) {
                     if (!a || !a.name || !a.html_url) continue;
@@ -6688,7 +6678,7 @@ async function buildGlobalSearchIndex() {
 
         // Modules + their items.
         try {
-            const modules = await getData(`${domain}/api/v1/courses/${courseId}/modules?per_page=100`);
+            const modules = await canvasApi.getAll(`${domain}/api/v1/courses/${courseId}/modules?per_page=100`);
             if (Array.isArray(modules)) {
                 for (const m of modules) {
                     if (!m || !m.name) continue;
@@ -6705,7 +6695,7 @@ async function buildGlobalSearchIndex() {
                         });
                     }
                     try {
-                        const items = await getData(`${domain}/api/v1/courses/${courseId}/modules/${m.id}/items?per_page=100`);
+                        const items = await canvasApi.getAll(`${domain}/api/v1/courses/${courseId}/modules/${m.id}/items?per_page=100`);
                         if (Array.isArray(items)) {
                             for (const it of items) {
                                 if (!it || !it.title) continue;
@@ -6962,7 +6952,7 @@ function cleanCustomAssignments() {
 
 function getGrades() {
     if (options.gpa_calc === true || options.dashboard_grades === true) {
-        grades = getData(`${domain}/api/v1/courses?${/*enrollment_state=active&*/""}include[]=concluded&include[]=total_scores&include[]=computed_current_score&include[]=current_grading_period_scores&per_page=100`);
+        grades = canvasApi.getAll(`${domain}/api/v1/courses?${/*enrollment_state=active&*/""}include[]=concluded&include[]=total_scores&include[]=computed_current_score&include[]=current_grading_period_scores&per_page=100`);
     }
 }
 
@@ -7037,41 +7027,14 @@ const PLANNER_MAX_PAGES = 50;
 // Uses the same session/headers as getData but follows the Link "next"
 // headers until exhausted.
 async function getAllPlannerItems() {
-    const allItems = [];
-    let url = `${domain}/api/v1/planner/items?start_date=${PLANNER_START_DATE}&per_page=100`;
-    for (let page = 0; page < PLANNER_MAX_PAGES && url; page++) {
-        let response;
-        let data;
-        try {
-            response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            });
-            data = await response.json();
-        } catch (e) {
-            break;
-        }
-        if (!response.ok || !Array.isArray(data)) break;
-        // Deep-clone via JSON to unwrap Firefox Xray objects so nested props
-        // are mutable (same as getData).
-        try {
-            data = JSON.parse(JSON.stringify(data));
-        } catch (_) { /* keep original */ }
-        allItems.push(...data);
-        url = getNextPageUrl(response.headers.get("Link"));
-    }
-    return allItems;
-}
-
-// Extracts the rel="next" URL from a Canvas pagination Link header, or
-// returns null when on the last page.
-function getNextPageUrl(linkHeader) {
-    if (!linkHeader) return null;
-    const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
-    return match ? match[1] : null;
+    // Was a one-off paginator with its own fetch, its own Link parsing, and a
+    // `break` on error that returned whatever it had collected so far -- so a
+    // failure on page three was indistinguishable from there being three
+    // pages. canvasApi.getAll follows Link, enforces same-origin, and throws
+    // rather than silently truncating.
+    return canvasApi.getAll(
+        `${domain}/api/v1/planner/items?start_date=${PLANNER_START_DATE}&per_page=100`,
+        { maxPages: PLANNER_MAX_PAGES });
 }
 
 // ===================== Grade Analytics =====================
@@ -8871,21 +8834,359 @@ function makeElement(element, location, options, prepend = false) {
 }
 
 
-async function getData(url) {
-    let response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+// ===========================================================================
+// canvasApi
+//
+// Replaces getData(), which fetched, called response.json(), and returned.
+// It never checked response.ok, so an auth redirect returning HTML threw an
+// opaque JSON parse error; it never followed the Link header, so
+// courses?per_page=100 and planner/items silently truncated for students with
+// heavy loads; and it had no timeout, no retry, and no error type a caller
+// could branch on.
+// ===========================================================================
+
+const CANVAS_API_TIMEOUT_MS = 15000;
+const CANVAS_API_MAX_PAGES = 50;
+const CANVAS_API_CACHE_TTL_MS = 30000;
+
+class CanvasApiError extends Error {
+    constructor(kind, message, details = {}) {
+        super(message);
+        this.name = "CanvasApiError";
+        this.kind = kind;           // network | timeout | auth | http | parse | ratelimit
+        this.status = details.status ?? null;
+        this.url = details.url ?? null;
+        this.retryAfter = details.retryAfter ?? null;
+    }
+    get isAuth() { return this.kind === "auth"; }
+    get isRateLimit() { return this.kind === "ratelimit"; }
+    /** Wording shown to the user; see showApiError. */
+    get userMessage() {
+        switch (this.kind) {
+            case "auth": return "You appear to be signed out of Canvas.";
+            case "timeout": return "Canvas took too long to respond.";
+            case "ratelimit": return "Canvas is rate limiting requests.";
+            case "network": return "Couldn't reach Canvas.";
+            default: return "Canvas returned an error.";
         }
-    });
-    let data = await response.json();
-    // Deep-clone via JSON to unwrap Firefox Xray objects so nested props are mutable.
+    }
+}
+
+/**
+ * Parse an RFC 8288 Link header into { rel: url }.
+ *
+ * Written to the spec rather than to Canvas' current output, because the
+ * failure mode of a too-strict parser is silent truncation: pagination stops
+ * at page one and the user simply never sees the rest of their assignments.
+ * The previous one-off implementation required `>;` with no space, required
+ * rel to be double-quoted, required lowercase `rel`, and did not handle
+ * multiple rel values -- four ways to truncate silently.
+ */
+function parseLinkHeader(header) {
+    const out = {};
+    if (!header) return out;
+    for (const part of String(header).split(/,\s*(?=<)/)) {
+        const m = /^\s*<([^>]*)>\s*;\s*(.*)$/.exec(part);
+        if (!m) continue;
+        const url = m[1].trim();
+        const relMatch = /(?:^|;)\s*rel\s*=\s*(?:"([^"]*)"|'([^']*)'|([^;,\s]+))/i.exec(m[2]);
+        if (!relMatch) continue;
+        const rels = (relMatch[1] ?? relMatch[2] ?? relMatch[3] ?? "").trim().toLowerCase();
+        for (const rel of rels.split(/\s+/)) if (rel) out[rel] = url;
+    }
+    return out;
+}
+
+/**
+ * The rel="next" URL, or null.
+ *
+ * Same-origin is enforced. A Link header is server-controlled, and these
+ * requests carry the user's Canvas session, so following a cross-origin
+ * rel="next" would hand those credentials to whatever host it named. Same
+ * class of bug as the domain probe removed earlier.
+ */
+function getNextPageUrl(linkHeader, expectedOrigin = domain) {
+    const next = parseLinkHeader(linkHeader).next;
+    if (!next) return null;
+    let parsed;
+    try {
+        parsed = new URL(next, expectedOrigin);
+    } catch (_) {
+        return null;
+    }
+    if (parsed.origin !== expectedOrigin) {
+        console.warn("[Ochre] refusing cross-origin pagination link:", parsed.origin);
+        return null;
+    }
+    return parsed.href;
+}
+
+/**
+ * The rel="next" URL, or null.
+ *
+ * Same-origin is enforced. A Link header is server-controlled, and these
+ * requests carry the user's Canvas session, so following a cross-origin
+ * rel="next" would hand those credentials to whatever host it named. Same
+ * class of bug as the domain probe removed earlier.
+ */
+const canvasApiCache = new Map();   // url -> { at, promise }
+
+function cacheGet(url) {
+    const hit = canvasApiCache.get(url);
+    if (!hit) return null;
+    if (Date.now() - hit.at > CANVAS_API_CACHE_TTL_MS) { canvasApiCache.delete(url); return null; }
+    return hit.promise;
+}
+
+function clearCanvasApiCache() { canvasApiCache.clear(); }
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+/** One HTTP round trip, with timeout and error typing. No retry here. */
+async function canvasFetchOnce(url, init = {}) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), init.timeoutMs || CANVAS_API_TIMEOUT_MS);
+    let response;
+    try {
+        response = await fetch(url, {
+            method: init.method || "GET",
+            headers: { "Accept": "application/json", ...(init.headers || {}) },
+            body: init.body,
+            credentials: "same-origin",
+            redirect: "follow",
+            signal: controller.signal,
+        });
+    } catch (e) {
+        throw new CanvasApiError(
+            e && e.name === "AbortError" ? "timeout" : "network",
+            e && e.message ? e.message : String(e), { url });
+    } finally {
+        clearTimeout(timer);
+    }
+
+    if (response.status === 401 || response.status === 403) {
+        throw new CanvasApiError("auth", `Canvas returned ${response.status}`,
+            { status: response.status, url });
+    }
+    if (response.status === 429) {
+        const ra = parseInt(response.headers.get("Retry-After") || "", 10);
+        throw new CanvasApiError("ratelimit", "Canvas rate limited the request",
+            { status: 429, url, retryAfter: Number.isFinite(ra) ? ra : null });
+    }
+    if (!response.ok) {
+        throw new CanvasApiError("http", `Canvas returned ${response.status}`,
+            { status: response.status, url });
+    }
+
+    // An auth redirect lands here as HTML with a 200. Reading it as JSON threw
+    // an opaque SyntaxError before; type it instead.
+    const text = await response.text();
+    let data;
+    try {
+        data = text === "" ? null : JSON.parse(text);
+    } catch (_) {
+        const looksLikeLogin = /<html|<!doctype/i.test(text.slice(0, 200));
+        throw new CanvasApiError(looksLikeLogin ? "auth" : "parse",
+            looksLikeLogin ? "Canvas returned a sign-in page" : "Canvas returned a non-JSON response",
+            { status: response.status, url });
+    }
+    return { data, response };
+}
+
+/** canvasFetchOnce plus one retry, on 5xx, timeout, network error, and 429. */
+async function canvasFetch(url, init = {}) {
+    const maxAttempts = init.retries === 0 ? 1 : 2;
+    let lastError;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+            return await canvasFetchOnce(url, init);
+        } catch (e) {
+            lastError = e;
+            const retryable = e instanceof CanvasApiError && (
+                e.kind === "network" || e.kind === "timeout" ||
+                e.kind === "ratelimit" || (e.kind === "http" && e.status >= 500));
+            if (!retryable || attempt === maxAttempts - 1) throw e;
+            // Honour Retry-After when Canvas sends one, but cap it: a long
+            // server-supplied delay must not wedge the page.
+            const backoff = e.kind === "ratelimit" && e.retryAfter
+                ? Math.min(e.retryAfter * 1000, 5000)
+                : 600;
+            await sleep(backoff);
+        }
+    }
+    throw lastError;
+}
+
+/** GET one page of JSON. Cached briefly so a page load does not refetch. */
+function canvasGet(url, { force = false, timeoutMs } = {}) {
+    if (!force) {
+        const hit = cacheGet(url);
+        if (hit) return hit;
+    }
+    const promise = canvasFetch(url, { timeoutMs })
+        .then(({ data }) => unwrapXray(data))
+        .catch(e => { canvasApiCache.delete(url); throw e; });
+    canvasApiCache.set(url, { at: Date.now(), promise });
+    return promise;
+}
+
+/**
+ * GET every page, following Link rel="next".
+ *
+ * Truncation is reported, not silently returned: a caller that receives a
+ * short array otherwise cannot tell "this is all of it" from "the third page
+ * failed". That ambiguity is what made the old silent truncation so hard to
+ * notice.
+ */
+async function canvasGetAll(url, { force = false, maxPages = CANVAS_API_MAX_PAGES, timeoutMs } = {}) {
+    if (!force) {
+        const hit = cacheGet("all:" + url);
+        if (hit) return hit;
+    }
+    const run = (async () => {
+        const items = [];
+        let next = url;
+        for (let page = 0; page < maxPages && next; page++) {
+            const { data, response } = await canvasFetch(next, { timeoutMs });
+            const chunk = unwrapXray(data);
+            if (!Array.isArray(chunk)) {
+                throw new CanvasApiError("parse", "Expected a JSON array from a paginated endpoint",
+                    { url: next });
+            }
+            items.push(...chunk);
+            next = getNextPageUrl(response.headers.get("Link"));
+            if (next && page === maxPages - 1) {
+                console.warn(`[Ochre] pagination stopped at the ${maxPages}-page cap for ${url}`);
+            }
+        }
+        return items;
+    })();
+    const promise = run.catch(e => { canvasApiCache.delete("all:" + url); throw e; });
+    canvasApiCache.set("all:" + url, { at: Date.now(), promise });
+    return promise;
+}
+
+/**
+ * A mutating request, with the CSRF token and the body-encoding fallback.
+ *
+ * Canvas instances disagree about how planner_note bodies must be encoded, so
+ * createCanvasPlannerNote tried three shapes in sequence. That behaviour is
+ * preserved here rather than duplicated at each call site: pass `bodies` as an
+ * ordered list and the first that is accepted wins. A 4xx other than 401/403
+ * means "this encoding was rejected, try the next"; anything else aborts.
+ */
+async function canvasMutate(url, { method = "POST", bodies = [], timeoutMs } = {}) {
+    const csrfToken = CSRFtoken();
+    let lastError;
+    for (const attempt of bodies) {
+        try {
+            const { data } = await canvasFetch(url, {
+                method,
+                headers: { ...(attempt.headers || {}), "X-CSRF-Token": csrfToken },
+                body: attempt.body,
+                timeoutMs,
+                retries: 0,
+            });
+            return unwrapXray(data);
+        } catch (e) {
+            lastError = e;
+            const worthNextEncoding = e instanceof CanvasApiError &&
+                e.kind === "http" && e.status >= 400 && e.status < 500;
+            if (!worthNextEncoding) throw e;
+        }
+    }
+    throw lastError || new CanvasApiError("http", "No request body encoding was accepted", { url });
+}
+
+/** Deep-clone via JSON to unwrap Firefox Xray objects so nested props are mutable. */
+function unwrapXray(data) {
     try {
         return JSON.parse(JSON.stringify(data));
     } catch (_) {
         return data;
     }
+}
+
+/**
+ * Consume one of the promise-typed data globals with a failure path that the
+ * user can actually see.
+ *
+ * Every consumer of `assignments` and `grades` previously called .then() with
+ * no .catch(). Those globals hold a single shared promise, so one rejection --
+ * an auth redirect returning HTML was enough -- silently disabled the to-do
+ * list, card assignments, dashboard grades and the sidebar for the rest of the
+ * page's life, with nothing but an unhandled rejection in a console the user
+ * never opens.
+ *
+ * The replacement is deliberately not a quieter no-op: it tells the user which
+ * feature failed and why, and offers a retry that clears the cache and refetches
+ * rather than requiring a page reload.
+ */
+function withApiData(promise, onData, { feature = "Canvas data", container = null } = {}) {
+    if (!promise || typeof promise.then !== "function") return Promise.resolve();
+    return promise.then(
+        (data) => { clearApiError(feature); return onData(data); },
+        (error) => { showApiError(error, { feature, container }); }
+    );
+}
+
+function apiErrorId(feature) {
+    return "ochre-api-error-" + String(feature).replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+}
+
+function clearApiError(feature) {
+    document.getElementById(apiErrorId(feature))?.remove();
+}
+
+function showApiError(error, { feature = "Canvas data", container = null } = {}) {
+    console.warn(`[Ochre] ${feature} failed to load:`, error);
+
+    const detail = error instanceof CanvasApiError
+        ? error.userMessage
+        : "Couldn't load Canvas data.";
+    const parent = (container && container.isConnected) ? container : document.body;
+
+    const box = ensureInjected(apiErrorId(feature), parent, () => {
+        const el = document.createElement("div");
+        el.className = "ochre-api-error";
+        el.setAttribute("role", "status");
+        return el;
+    });
+    if (!box) return;
+
+    box.textContent = "";
+    const text = document.createElement("span");
+    text.className = "ochre-api-error-text";
+    text.textContent = `${detail} ${feature} couldn't load.`;
+    box.appendChild(text);
+
+    // An auth failure is not worth a retry button; the user has to sign in.
+    if (!(error instanceof CanvasApiError && error.isAuth)) {
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "ochre-api-error-retry";
+        retry.textContent = "Retry";
+        retry.addEventListener("click", () => {
+            box.remove();
+            canvasApi.clearCache();
+            getApiData();
+            applyRoute();
+        });
+        box.appendChild(retry);
+    }
+}
+
+const canvasApi = {
+    get: canvasGet,
+    getAll: canvasGetAll,
+    mutate: canvasMutate,
+    clearCache: clearCanvasApiCache,
+    Error: CanvasApiError,
+};
+
+/** Back-compat shim for call sites not yet migrated. */
+async function getData(url) {
+    return canvasGet(url);
 }
 
 
