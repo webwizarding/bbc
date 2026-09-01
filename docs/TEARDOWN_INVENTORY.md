@@ -208,3 +208,61 @@ intervals must return to their post-init count.
 
 Automatable against a fake DOM by driving the route change directly; the
 counts are what matter, not real Canvas markup.
+
+---
+
+## I. Idempotence guard audit (Phase 1.1, commit 3)
+
+Every route-scoped insertion site was checked. **All have a guard.** They use
+six different shapes, which is the problem — the shapes are not equivalent and
+one was unsound.
+
+| Site | Guard shape | Sound for reapply |
+|---|---|---|
+| `createNasaInfoOverlay` | module-variable ref → **now** `+ isConnected` | was **no**, now yes |
+| `applyCustomBackground` | reference + `isConnected` | yes |
+| `ensureRightSideWrapperScrollbarHidden` | `getElementById \|\| make` | yes |
+| `injectQuizSafeModeBanner` | `getElementById` early-return | yes |
+| `showUpdateMsg` | `getElementById` + branch-and-return | yes |
+| `insertGrades` | `querySelector \|\| make` | yes |
+| `setupCardAssignments` | container count early-return | yes |
+| `createTodoSections`, `setupBetterTodo`, `setupBetterSidebar` | `querySelector` check | yes |
+| `ensureProfileLogoutPageButton`, `addSubmissionPageButton` | `querySelector` check | yes |
+| `setupGPACalc` | dataset marker (`ochreGpaRendered`) | yes |
+| `populateSidebarFromNav` | dataset marker | yes |
+| `changeFavicon` | dataset marker (`ochreOriginalHref`) | yes |
+| `createCardAssignment`, `loadDashboardNotes`, `ensureTodoTaskMenu` | marker class | weak — see below |
+
+### The unsound shape
+
+`createNasaInfoOverlay` guarded on holding a reference (`if (nasaInfoOverlayEl)
+return`), not on that node being in the document. Canvas destroys the content
+subtree on navigation, so the reference outlived the node and the guard would
+report "already created" forever — the overlay would never come back after the
+first navigation away from the dashboard. `removeNasaInfoOverlay()`, which
+nulls the variable, is only called from the options-change handler, never on
+navigation. Fixed by checking `isConnected`.
+
+This is the shape that only fails once client-side navigation exists, which is
+why it survived until now.
+
+### Marker-class guards: checked, not broken
+
+Three sites guard on a marker class. That shape fails silently if a class name
+changes on one side only — which is exactly what the rebrand did to 503
+identifiers. **Checked: none are broken.** Every class and id name in the file
+is a string literal; there is no dynamic construction (`className = "a" + b`,
+`classList.add(prefix + x)`), so the rename rewrote creation and check
+together. They remain the shape most likely to break silently in future,
+which is the argument for migrating them to `ensureInjected`.
+
+### `ensureInjected`
+
+Added as the shared, sound-by-construction helper: it looks the node up by id
+and treats a **detached** node as absent, removing the leftover before
+recreating. New per-route injection should use it.
+
+**Not yet migrated:** the sites above keep their own guards for now. All were
+verified sound, so migrating them is cleanup rather than a fix, and doing it
+inside the routing commit would have mixed a wide mechanical change into the
+commit that introduces the behaviour it would be testing. Tracked for Phase 2.

@@ -108,6 +108,139 @@ function lifecycleCounts() {
     };
 }
 
+// ---------------------------------------------------------------------------
+// Idempotent injection
+//
+// Per-route features are reapplied on navigation, and reapply may run on a
+// route Canvas did NOT clear, so every insertion point has to tolerate being
+// called again. Before this helper each site invented its own guard; five
+// distinct shapes existed (getElementById||make, querySelector early-return,
+// marker class, dataset marker, and a module-variable reference). The last is
+// unsound for routing: it holds a reference to a node Canvas has since
+// destroyed, so the guard reports "already present" forever and the feature
+// silently never returns. See docs/TEARDOWN_INVENTORY.md for which sites still
+// use their own guard.
+//
+// Looking the node up by id each time is what makes this sound: unlike a held
+// reference, the lookup cannot outlive the node. getElementById searches the
+// document, so it never returns a detached node -- the isConnected check below
+// is belt-and-braces for a caller that passes a node in rather than looking it
+// up, not the load-bearing part.
+// ---------------------------------------------------------------------------
+function ensureInjected(id, parent, factory) {
+    const existing = document.getElementById(id);
+    if (existing && existing.isConnected) return existing;
+    if (existing) existing.remove();
+    if (!parent) return null;
+    const el = factory();
+    el.id = id;
+    parent.appendChild(el);
+    return el;
+}
+
+// ---------------------------------------------------------------------------
+// Route cycle
+//
+// Canvas' "New Canvas" UI navigates client-side, replacing the content subtree
+// without a document load. Features living in that subtree are destroyed and
+// must be reapplied; features attached above it survive and must NOT be, since
+// re-running them is at best wasted work and at worst a visible regression
+// (re-injecting the dark mode stylesheet would cause the flash of light
+// content it exists to prevent).
+//
+// Detection is deliberately belt-and-braces because no single signal is
+// reliable across Canvas versions and browsers: patched pushState/replaceState
+// catch programmatic navigation, popstate catches back/forward, hashchange
+// catches in-page anchors, and the Navigation API is used where available.
+// ---------------------------------------------------------------------------
+let currentRoute = null;
+let routeChangeScheduled = false;
+
+/** Per-route module state that gates re-setup and must not survive a navigation. */
+function resetRouteState() {
+    // Without this, returning to the dashboard skips setup entirely: the card
+    // signature still matches the previous visit, so checkDashboardReady's
+    // guard concludes nothing changed.
+    lastDashboardCardSignature = null;
+
+    // Held a reference to a node Canvas destroyed, so createNasaInfoOverlay's
+    // guard would report "already created" and never rebuild it.
+    nasaInfoOverlayEl = null;
+
+    domContainers = {};
+    betterSidebarLoading = false;
+    sidebarBadgeWatchRetries = 0;
+    moreAssignmentCount = 0;
+    moreAnnouncementCount = 0;
+
+    if (dashboardReadyTimer) { clearTimeout(dashboardReadyTimer); dashboardReadyTimer = null; }
+    if (sidebarReadyTimer) { clearTimeout(sidebarReadyTimer); sidebarReadyTimer = null; }
+}
+
+function teardownRoute() {
+    stopRouteScoped();
+    resetRouteState();
+}
+
+/** Route-scoped initialisers. Document-scoped work is not in this list by design. */
+function applyRoute() {
+    try { checkDashboardReady(); } catch (e) { logError(e); }
+    try { ensureBetterSidebar(); } catch (e) { logError(e); }
+    try { watchNewCanvasButton(); } catch (e) { logError(e); }
+    try { watchSequenceFooter(); } catch (e) { logError(e); }
+    try { watchSubmissionPageButton(); } catch (e) { logError(e); }
+    try { watchProfileLogoutPageButton(); } catch (e) { logError(e); }
+    try { watchGradeAnalytics(); } catch (e) { logError(e); }
+    try { changeFavicon(); } catch (e) { logError(e); }
+    try { setupQuizSafeModeBanner(); } catch (e) { logError(e); }
+    try { setupGlobalSearch(); } catch (e) { logError(e); }
+}
+
+/** Compare the live route against the last one handled; cycle if it moved. */
+function checkRouteChange() {
+    const next = getRoute();
+    if (next === currentRoute) return;
+    currentRoute = next;
+    teardownRoute();
+    applyRoute();
+}
+
+/** Coalesce bursts of navigation signals into one cycle per frame. */
+function scheduleRouteCheck() {
+    if (routeChangeScheduled) return;
+    routeChangeScheduled = true;
+    requestAnimationFrame(() => {
+        routeChangeScheduled = false;
+        checkRouteChange();
+    });
+}
+
+function setupNavigation() {
+    currentRoute = getRoute();
+
+    for (const method of ["pushState", "replaceState"]) {
+        const original = history[method];
+        if (typeof original !== "function" || original.__ochrePatched) continue;
+        const patched = function (...args) {
+            const result = original.apply(this, args);
+            scheduleRouteCheck();
+            return result;
+        };
+        patched.__ochrePatched = true;
+        history[method] = patched;
+    }
+
+    registerListener("nav:popstate", window, "popstate", scheduleRouteCheck, undefined, "document");
+    registerListener("nav:hashchange", window, "hashchange", scheduleRouteCheck, undefined, "document");
+
+    // Navigation API, where the browser has it. Covers navigations that do not
+    // go through history.pushState at all.
+    if (typeof navigation !== "undefined" && navigation && typeof navigation.addEventListener === "function") {
+        registerListener("nav:navigate", navigation, "navigatesuccess", scheduleRouteCheck, undefined, "document");
+    }
+}
+
+
 function getCurrentCourseId() {
     const match = getRoute().match(/^\/courses\/(\d+)(?:\/|$)/);
     return match ? parseInt(match[1]) : null;
@@ -564,7 +697,13 @@ function isDashboardPage() {
 
 function createNasaInfoOverlay() {
     if (options.customBackgroundNasaDaily !== true) return;
-    if (nasaInfoOverlayEl || !isDashboardPage()) return;
+    // Guard on whether the node is actually in the document, not merely on
+    // holding a reference to one. Canvas destroys the content subtree on
+    // client-side navigation, and a reference to the detached node would make
+    // this report "already created" forever, so the overlay would never come
+    // back after the first navigation away from the dashboard.
+    if ((nasaInfoOverlayEl && nasaInfoOverlayEl.isConnected) || !isDashboardPage()) return;
+    nasaInfoOverlayEl = null;
     
     const contentMain = document.querySelector("#content.ic-Layout-contentMain, .ic-Layout-contentMain");
     if (!contentMain) return;
@@ -910,8 +1049,17 @@ function startExtension() {
         requestAnimationFrame(() => {
             footerScheduled = false;
             removeFooter();
+            // Backstop for navigations that reach neither the patched history
+            // methods nor popstate. Piggybacked here rather than given its own
+            // observer: this one is already document-scoped and already
+            // rAF-throttled, and a second documentElement/subtree observer is
+            // the most expensive shape available. Phase 1.5 folds the several
+            // independent observers into one coordinated lifecycle.
+            checkRouteChange();
         });
     }), document.documentElement, { childList: true, subtree: true }, "document");
+
+    setupNavigation();
 
     // Start the submission-page "Back to Assignment" button watcher and the SPA
     // navigation hook immediately, before the async storage callbacks below.
@@ -5943,9 +6091,15 @@ function loadCustomFont() {
         if (document.readyState !== 'loading') {
             createEls();
         } else {
+            // once:true so a re-entry while still loading cannot stack handlers.
+            // Note this branch is only reachable on a cold document load;
+            // DOMContentLoaded never fires again after it has fired once, so a
+            // call arriving later takes the branch above. loadCustomFont is
+            // document-scoped and is not part of the route cycle for exactly
+            // this reason.
             document.addEventListener("DOMContentLoaded", () => {
                 createEls();
-            });
+            }, { once: true });
         }
     }
 }
@@ -6826,10 +6980,33 @@ function getColors() {
 }
 
 function changeFavicon() {
-    if (options.tab_icons !== true) return;
+    const link = document.querySelector('link[rel="icon"]');
+    if (!link) return;
+
+    // Save Canvas' own favicon the first time we touch it, so leaving a course
+    // can put it back. Pre-existing bug, not introduced by routing: nothing
+    // ever restored the icon, so navigating from a course to the dashboard left
+    // the course's colour in the tab until a full page load. It only becomes
+    // visible now because the route cycle makes leaving a course a thing that
+    // happens without a reload. Saved rather than reconstructed because the
+    // original href varies by Canvas instance and version.
+    if (link.dataset.ochreOriginalHref == null) {
+        link.dataset.ochreOriginalHref = link.getAttribute("href") || "";
+    }
+
+    const restore = () => {
+        const original = link.dataset.ochreOriginalHref;
+        if (original && link.getAttribute("href") !== original) link.setAttribute("href", original);
+    };
+
+    if (options.tab_icons !== true) { restore(); return; }
     let match = getRoute().match(/courses\/(?<id>\d*)/);
+    if (!(match && match.groups.id && options.custom_cards_3?.[match.groups.id]?.color)) {
+        restore();
+        return;
+    }
     if (match && match.groups.id && options.custom_cards_3[match.groups.id]?.color) {
-        document.querySelector('link[rel="icon"').href = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="128px" height="128px" viewBox="-192 -192 2304.00 2304.00" stroke="white"><g stroke-width="0"><rect x="-192" y="-192" width="2304.00" height="2304.00" rx="0" fill="${options.custom_cards_3[match.groups.id].color.replace("#", "%23")}" strokewidth="0"/></g><g stroke-linecap="round" stroke-linejoin="round"/><g> <path d="M958.568 277.97C1100.42 277.97 1216.48 171.94 1233.67 34.3881 1146.27 12.8955 1054.57 0 958.568 0 864.001 0 770.867 12.8955 683.464 34.3881 700.658 171.94 816.718 277.97 958.568 277.97ZM35.8207 682.031C173.373 699.225 279.403 815.285 279.403 957.136 279.403 1098.99 173.373 1215.05 35.8207 1232.24 12.8953 1144.84 1.43262 1051.7 1.43262 957.136 1.43262 862.569 12.8953 769.434 35.8207 682.031ZM528.713 957.142C528.713 1005.41 489.581 1044.55 441.31 1044.55 393.038 1044.55 353.907 1005.41 353.907 957.142 353.907 908.871 393.038 869.74 441.31 869.74 489.581 869.74 528.713 908.871 528.713 957.142ZM1642.03 957.136C1642.03 1098.99 1748.06 1215.05 1885.61 1232.24 1908.54 1144.84 1920 1051.7 1920 957.136 1920 862.569 1908.54 769.434 1885.61 682.031 1748.06 699.225 1642.03 815.285 1642.03 957.136ZM1567.51 957.142C1567.51 1005.41 1528.38 1044.55 1480.11 1044.55 1431.84 1044.55 1392.71 1005.41 1392.71 957.142 1392.71 908.871 1431.84 869.74 1480.11 869.74 1528.38 869.74 1567.51 908.871 1567.51 957.142ZM958.568 1640.6C816.718 1640.6 700.658 1746.63 683.464 1884.18 770.867 1907.11 864.001 1918.57 958.568 1918.57 1053.14 1918.57 1146.27 1907.11 1233.67 1884.18 1216.48 1746.63 1100.42 1640.6 958.568 1640.6ZM1045.98 1480.11C1045.98 1528.38 1006.85 1567.51 958.575 1567.51 910.304 1567.51 871.172 1528.38 871.172 1480.11 871.172 1431.84 910.304 1392.71 958.575 1392.71 1006.85 1392.71 1045.98 1431.84 1045.98 1480.11ZM1045.98 439.877C1045.98 488.148 1006.85 527.28 958.575 527.28 910.304 527.28 871.172 488.148 871.172 439.877 871.172 391.606 910.304 352.474 958.575 352.474 1006.85 352.474 1045.98 391.606 1045.98 439.877ZM1441.44 1439.99C1341.15 1540.29 1333.98 1697.91 1418.52 1806.8 1579 1712.23 1713.68 1577.55 1806.82 1418.5 1699.35 1332.53 1541.74 1339.7 1441.44 1439.99ZM1414.21 1325.37C1414.21 1373.64 1375.08 1412.77 1326.8 1412.77 1278.53 1412.77 1239.4 1373.64 1239.4 1325.37 1239.4 1277.1 1278.53 1237.97 1326.8 1237.97 1375.08 1237.97 1414.21 1277.1 1414.21 1325.37ZM478.577 477.145C578.875 376.846 586.039 219.234 501.502 110.339 341.024 204.906 206.338 339.592 113.203 498.637 220.666 584.607 378.278 576.01 478.577 477.145ZM679.155 590.32C679.155 638.591 640.024 677.723 591.752 677.723 543.481 677.723 504.349 638.591 504.349 590.32 504.349 542.048 543.481 502.917 591.752 502.917 640.024 502.917 679.155 542.048 679.155 590.32ZM1440 475.712C1540.3 576.01 1697.91 583.174 1806.8 498.637 1712.24 338.159 1577.55 203.473 1418.51 110.339 1332.54 217.801 1341.13 375.413 1440 475.712ZM1414.21 590.32C1414.21 638.591 1375.08 677.723 1326.8 677.723 1278.53 677.723 1239.4 638.591 1239.4 590.32 1239.4 542.048 1278.53 502.917 1326.8 502.917 1375.08 502.917 1414.21 542.048 1414.21 590.32ZM477.145 1438.58C376.846 1338.28 219.234 1331.12 110.339 1415.65 204.906 1576.13 339.593 1710.82 498.637 1805.39 584.607 1696.49 577.443 1538.88 477.145 1438.58ZM679.155 1325.37C679.155 1373.64 640.024 1412.77 591.752 1412.77 543.481 1412.77 504.349 1373.64 504.349 1325.37 504.349 1277.1 543.481 1237.97 591.752 1237.97 640.024 1237.97 679.155 1277.1 679.155 1325.37Z"/></g></svg>`;
+        link.href = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="128px" height="128px" viewBox="-192 -192 2304.00 2304.00" stroke="white"><g stroke-width="0"><rect x="-192" y="-192" width="2304.00" height="2304.00" rx="0" fill="${options.custom_cards_3[match.groups.id].color.replace("#", "%23")}" strokewidth="0"/></g><g stroke-linecap="round" stroke-linejoin="round"/><g> <path d="M958.568 277.97C1100.42 277.97 1216.48 171.94 1233.67 34.3881 1146.27 12.8955 1054.57 0 958.568 0 864.001 0 770.867 12.8955 683.464 34.3881 700.658 171.94 816.718 277.97 958.568 277.97ZM35.8207 682.031C173.373 699.225 279.403 815.285 279.403 957.136 279.403 1098.99 173.373 1215.05 35.8207 1232.24 12.8953 1144.84 1.43262 1051.7 1.43262 957.136 1.43262 862.569 12.8953 769.434 35.8207 682.031ZM528.713 957.142C528.713 1005.41 489.581 1044.55 441.31 1044.55 393.038 1044.55 353.907 1005.41 353.907 957.142 353.907 908.871 393.038 869.74 441.31 869.74 489.581 869.74 528.713 908.871 528.713 957.142ZM1642.03 957.136C1642.03 1098.99 1748.06 1215.05 1885.61 1232.24 1908.54 1144.84 1920 1051.7 1920 957.136 1920 862.569 1908.54 769.434 1885.61 682.031 1748.06 699.225 1642.03 815.285 1642.03 957.136ZM1567.51 957.142C1567.51 1005.41 1528.38 1044.55 1480.11 1044.55 1431.84 1044.55 1392.71 1005.41 1392.71 957.142 1392.71 908.871 1431.84 869.74 1480.11 869.74 1528.38 869.74 1567.51 908.871 1567.51 957.142ZM958.568 1640.6C816.718 1640.6 700.658 1746.63 683.464 1884.18 770.867 1907.11 864.001 1918.57 958.568 1918.57 1053.14 1918.57 1146.27 1907.11 1233.67 1884.18 1216.48 1746.63 1100.42 1640.6 958.568 1640.6ZM1045.98 1480.11C1045.98 1528.38 1006.85 1567.51 958.575 1567.51 910.304 1567.51 871.172 1528.38 871.172 1480.11 871.172 1431.84 910.304 1392.71 958.575 1392.71 1006.85 1392.71 1045.98 1431.84 1045.98 1480.11ZM1045.98 439.877C1045.98 488.148 1006.85 527.28 958.575 527.28 910.304 527.28 871.172 488.148 871.172 439.877 871.172 391.606 910.304 352.474 958.575 352.474 1006.85 352.474 1045.98 391.606 1045.98 439.877ZM1441.44 1439.99C1341.15 1540.29 1333.98 1697.91 1418.52 1806.8 1579 1712.23 1713.68 1577.55 1806.82 1418.5 1699.35 1332.53 1541.74 1339.7 1441.44 1439.99ZM1414.21 1325.37C1414.21 1373.64 1375.08 1412.77 1326.8 1412.77 1278.53 1412.77 1239.4 1373.64 1239.4 1325.37 1239.4 1277.1 1278.53 1237.97 1326.8 1237.97 1375.08 1237.97 1414.21 1277.1 1414.21 1325.37ZM478.577 477.145C578.875 376.846 586.039 219.234 501.502 110.339 341.024 204.906 206.338 339.592 113.203 498.637 220.666 584.607 378.278 576.01 478.577 477.145ZM679.155 590.32C679.155 638.591 640.024 677.723 591.752 677.723 543.481 677.723 504.349 638.591 504.349 590.32 504.349 542.048 543.481 502.917 591.752 502.917 640.024 502.917 679.155 542.048 679.155 590.32ZM1440 475.712C1540.3 576.01 1697.91 583.174 1806.8 498.637 1712.24 338.159 1577.55 203.473 1418.51 110.339 1332.54 217.801 1341.13 375.413 1440 475.712ZM1414.21 590.32C1414.21 638.591 1375.08 677.723 1326.8 677.723 1278.53 677.723 1239.4 638.591 1239.4 590.32 1239.4 542.048 1278.53 502.917 1326.8 502.917 1375.08 502.917 1414.21 542.048 1414.21 590.32ZM477.145 1438.58C376.846 1338.28 219.234 1331.12 110.339 1415.65 204.906 1576.13 339.593 1710.82 498.637 1805.39 584.607 1696.49 577.443 1538.88 477.145 1438.58ZM679.155 1325.37C679.155 1373.64 640.024 1412.77 591.752 1412.77 543.481 1412.77 504.349 1373.64 504.349 1325.37 504.349 1277.1 543.481 1237.97 591.752 1237.97 640.024 1237.97 679.155 1277.1 679.155 1325.37Z"/></g></svg>`;
     }
 }
 

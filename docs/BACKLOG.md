@@ -170,3 +170,36 @@ real runner over extending it.
 
 Mutation-checking every test is documented as a required step in the README's
 contributing notes.
+
+## The vm test harness must be replaced, not kept
+
+Phase 2 adopting Vitest is a **correction for two realised failures**, not a
+preference. Both were in `test/`'s hand-rolled `vm`-based harness, both
+presented as ordinary results, and neither was caught by anything failing:
+
+1. **A test that structurally could not fail.** The first round-trip test in
+   `test/theme-revert.test.js` had an `async` body, so its assertions resolved
+   after the harness had already recorded a pass. It passed against unfixed
+   code. Caught only by mutation-checking, which came back green when it should
+   have been red. The harness now rejects thenable-returning bodies.
+
+2. **Correct values comparing as wrong.** `lifecycleCounts()` builds its result
+   object inside the vm sandbox, so its prototype is that realm's
+   `Object.prototype`. `assert.deepStrictEqual` rejected it despite identical
+   contents, and it presented as "the counts are wrong" when the counts were
+   right. Caught by reading the actual values when the diff made no sense.
+   Comparisons now copy across the realm boundary.
+
+Cross-realm identity is a standing hazard for every `vm`-loaded test here, and
+it applies to more than plain objects: `instanceof`, `Array.isArray` on
+sandbox arrays, and `assert.throws` matching on sandbox error types are all
+affected.
+
+**When the Phase 2 suite lands, the `vm` tests are ported to it, not kept
+alongside it.** Vitest fails loudly on unawaited thenables in test bodies,
+which is failure 1, and runs tests in the same realm as the code under test,
+which is failure 2.
+
+Operating rule until then: treat a surprising test result as
+suspect-the-harness-first. If a failure mode does not make mechanical sense,
+check the harness before checking the code.
