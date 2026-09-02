@@ -1,3 +1,11 @@
+// Chrome runs this file as a service worker and ignores background.scripts;
+// Firefox uses background.scripts and has already loaded defaults.js by now.
+// importScripts exists only in the worker, so this covers both without
+// double-loading.
+if (typeof OCHRE_DEFAULTS === "undefined" && typeof importScripts === "function") {
+    importScripts("/js/defaults.js");
+}
+
 // ===========================================================================
 // Storage migration
 //
@@ -73,130 +81,9 @@ chrome.runtime.onInstalled.addListener(function () {
 
     migrateStorage().catch(e => console.warn("[Ochre] storage migration failed:", e));
 
-    let default_options = {
-        "local": {
-            "previous_colors": null,
-            "previous_theme": null,
-            "errors": [],
-            "saved_themes": {},
-            "liked_themes": [],
-        },
-        "sync": {
-            "dark_preset": {
-                "background-0": "#161616",
-                "background-1": "#1e1e1e",
-                "background-2": "#262626",
-                "borders": "#3c3c3c",
-                "text-0": "#f5f5f5",
-                "text-1": "#e2e2e2",
-                "text-2": "#ababab",
-                "links": "#56Caf0",
-                "sidebar": "#1e1e1e",
-                "sidebar-text": "#f5f5f5"
-            },
-            "new_install": true,
-            "assignments_due": true,
-            "gpa_calc": true,
-            "dark_mode": true,
-            "gradent_cards": false,
-            "disable_color_overlay": false,
-            "auto_dark": false,
-            "auto_dark_start": { "hour": "20", "minute": "00" },
-            "auto_dark_end": { "hour": "08", "minute": "00" },
-            "num_assignments": 4,
-            "custom_domain": [""],
-            "assignments_done": [],
-            "dashboard_grades": true,
-            "assignment_date_format": false,
-            "dashboard_notes": false,
-            "dashboard_notes_text": "",
-            "dashboard_notes_mode": "edit",
-            "better_todo": true,
-            "todo_hr24": false,
-			"todo_separate_scrollbar": false,
-            "better_sidebar": false,
-            "condensed_cards": false,
-            "custom_cards": {},
-            "custom_cards_2": {},
-            "custom_cards_3": {},
-            "custom_assignments": [],
-            "custom_assignments_overflow": ["custom_assignments"],
-            "grade_hover": false,
-            "card_letter": false,
-            // "hide_completed": false,
-            "num_todo_items": 10,
-            "custom_font": { "link": "", "family": "" },
-            "hover_preview": true,
-            "full_width": null,
-            "remlogo": null,
-            "gpa_calc_bounds": {
-                "A+": { "cutoff": 97, "gpa": 4.0 },
-                "A": { "cutoff": 93, "gpa": 4 },
-                "A-": { "cutoff": 90, "gpa": 3.7 },
-                "B+": { "cutoff": 87, "gpa": 3.3 },
-                "B": { "cutoff": 83, "gpa": 3 },
-                "B-": { "cutoff": 80, "gpa": 2.7 },
-                "C+": { "cutoff": 77, "gpa": 2.3 },
-                "C": { "cutoff": 73, "gpa": 2 },
-                "C-": { "cutoff": 70, "gpa": 1.7 },
-                "D+": { "cutoff": 67, "gpa": 1.3 },
-                "D": { "cutoff": 63, "gpa": 1 },
-                "D-": { "cutoff": 60, "gpa": .7 },
-                "F": { "cutoff": 0, "gpa": 0 }
-            },
-            // "todo_overdues": false,
-            "card_overdues": false,
-            "relative_dues": false,
-            "equal_height_cards": false,
-            "hide_new_canvas": true,
-            "hide_sequence_footer": false,
-            "quiz_safe_mode": false,
-            "dark_mode_fix": [],
-            "assignment_states": {},
-            "tab_icons": false,
-            "todo_hide_feedback": false,
-            "todo_full_height": true,
-            "todo_progress_rings": "rings",
-            "todo_confetti": true,
-            "device_dark": false,
-            "cumulative_gpa": { "name": "Cumulative GPA", "hidden": false, "weight": "dnc", "credits": 999, "gr": 3.21 },
-            // "show_updates": false,
-            "card_method_date": false,
-            "card_method_dashboard": true,
-            "card_limit": 25,
-            "remind": false,
-            "reminders": [],
-            "reminder_count": 1,
-            "multi_remind": false,
-            "id": "",
-            "new_browser": null,
-            "gpa_calc_cumulative": false,
-            "gpa_calc_weighted": true,
-            "browser_show_likes": false,
-            "custom_styles": "",
-            "imageSize": 100,
-            "cardRoundness": 5,
-            "imageRoundness": 0,
-            'cardSpacing': 0,
-            "cardWidth": 262,
-            "cardHeight": 146,
-            "customCardStyles": false,
-            "customBackgroundLink": "",
-            "customBackgroundScale": 100,
-            "customBackgroundDaily": false,
-            "customBackgroundNasaDaily": false,
-            "nasaInfoOverlay": false,
-            "fitImageToScreen": false,
-            "bg_opacity": 65,
-            "sidebar_opacity": 100,
-            "bg_blur": 8,
-            "sidebar_blur": 0,
-            "global_search": false,
-            "grade_analytics": false,
-            "grade_analytics_zones": false,
-        }
-    };
-
+    // Defaults live in js/defaults.js, the single source of truth shared with
+    // the popup and the content script.
+    let default_options = OCHRE_DEFAULTS;
     const updateMsg = "Ochre for Canvas is installed.\nOpen the extension popup on your Canvas dashboard to get started.";
 
     chrome.storage.local.get(null, local => {
@@ -215,6 +102,19 @@ chrome.runtime.onInstalled.addListener(function () {
             // migrate old setting name
             if (sync["nasaFitToScreen"] !== undefined && sync["fitImageToScreen"] === undefined) {
                 newSyncOptions["fitImageToScreen"] = sync["nasaFitToScreen"];
+            }
+
+            // "gradent_cards" was a typo that only ever existed in the two
+            // defaults blocks. Every reader -- syncedSwitches, the
+            // applyOptionsChanges case, changeGradientCards, and every bundled
+            // theme's exports -- uses "gradient_cards", so the default was
+            // orphaned and the real key had none. Carry across any value a user
+            // somehow has under the misspelling, then delete it.
+            if (sync["gradent_cards"] !== undefined) {
+                if (sync["gradient_cards"] === undefined) {
+                    newSyncOptions["gradient_cards"] = sync["gradent_cards"];
+                }
+                chrome.storage.sync.remove("gradent_cards");
             }
 
             // Normalise custom_domain to bare lowercase hostnames. The popup

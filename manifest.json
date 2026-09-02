@@ -19,6 +19,7 @@
   },
   "background": {
     "scripts": [
+      "js/defaults.js",
       "js/background.js"
     ],
     "service_worker": "js/background.js"
@@ -33,6 +34,7 @@
         "css/darkmodecss.js",
         "js/backgrounds.js",
         "js/markdown.js",
+        "js/defaults.js",
         "js/storage.js",
         "js/content.js"
       ],
