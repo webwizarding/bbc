@@ -1,4 +1,77 @@
+// ===========================================================================
+// Storage migration
+//
+// Ten keys that grow with usage lived in chrome.storage.sync, which allows
+// 8,192 bytes per item and 102,400 in total. This moves them to local, where
+// there is no per-item limit. Duplicated from content.js rather than imported
+// because the service worker and the content script share no module system
+// until the Phase 2 build lands; the test asserts the two lists match.
+const OCHRE_LOCAL_KEYS = [
+    "custom_cards", "custom_cards_2", "custom_cards_3",
+    "assignments_done", "assignment_states", "custom_assignments",
+    "custom_task_links", "reminders", "dark_mode_fix",
+    "custom_styles", "dashboard_notes_text",
+    "previous_colors", "previous_theme", "errors",
+    "saved_themes", "liked_themes",
+];
+const OCHRE_STORAGE_VERSION = 1;
+
+/**
+ * Move bulk keys from sync to local, once.
+ *
+ * Ordering matters and is the whole difficulty: write to local first, verify
+ * it landed, and only then remove from sync. The reverse order loses data if
+ * the local write fails. The version marker is written last, so an interrupted
+ * migration is retried on the next start rather than skipped.
+ *
+ * A key already present in local wins: it is the newer copy, since nothing
+ * writes to sync for these keys after the migration runs.
+ */
+async function migrateStorage() {
+    const local = await chrome.storage.local.get(["ochre_storage_version"]);
+    if ((local.ochre_storage_version || 0) >= OCHRE_STORAGE_VERSION) return { migrated: [], skipped: true };
+
+    const sync = await chrome.storage.sync.get(OCHRE_LOCAL_KEYS);
+    const existingLocal = await chrome.storage.local.get(OCHRE_LOCAL_KEYS);
+
+    const toMove = {};
+    const staleInSync = [];
+    for (const key of OCHRE_LOCAL_KEYS) {
+        if (sync[key] === undefined) continue;
+        if (existingLocal[key] !== undefined) {
+            // Present in both. Local is authoritative, so this sync copy is a
+            // leftover from a run that copied but did not get to the removal.
+            // It still has to be cleared, or a partial failure leaves the data
+            // occupying the sync quota permanently -- the retry would otherwise
+            // skip the key and then write the version marker, stranding it.
+            staleInSync.push(key);
+            continue;
+        }
+        toMove[key] = sync[key];
+    }
+
+    const moved = Object.keys(toMove);
+    if (moved.length) {
+        await chrome.storage.local.set(toMove);
+        // Verify before deleting the only other copy.
+        const check = await chrome.storage.local.get(moved);
+        const failed = moved.filter(k => check[k] === undefined);
+        if (failed.length) {
+            console.warn("[Ochre] storage migration incomplete, leaving sync copies:", failed);
+            return { migrated: moved.filter(k => !failed.includes(k)), failed };
+        }
+    }
+    const toRemove = moved.concat(staleInSync);
+    if (toRemove.length) await chrome.storage.sync.remove(toRemove);
+
+    await chrome.storage.local.set({ ochre_storage_version: OCHRE_STORAGE_VERSION });
+    console.log("[Ochre] storage migration complete:", moved);
+    return { migrated: moved };
+}
+
 chrome.runtime.onInstalled.addListener(function () {
+
+    migrateStorage().catch(e => console.warn("[Ochre] storage migration failed:", e));
 
     let default_options = {
         "local": {
