@@ -5401,28 +5401,48 @@ function customizeCards(c = null) {
                 }
             } else if (cardOptions.img !== "") {
                 let topColor = card.querySelector(".ic-DashboardCard__header_hero");
-                let container = card.querySelector(".ic-DashboardCard__header_image") || makeElement("div", card, { "className": "ic-DashboardCard__header_image" });
+                const existing = card.querySelector(".ic-DashboardCard__header_image");
+                const container = existing || makeElement("div", card, { "className": "ic-DashboardCard__header_image" });
+                // Record enough to put the card back exactly as Canvas had it.
+                // Two distinct starting states, and clearing them is not the same
+                // operation: when Canvas already had a header image we overwrite
+                // its background and must restore that value, and when it had
+                // none we created the element and must remove it. Clearing the
+                // background in the second case leaves an empty container behind,
+                // which is what showed a placeholder instead of the course image.
+                // Saved on first mutation rather than reconstructed later, the
+                // same way changeFavicon saves the original icon href.
+                if (container.dataset.ochreCardImage == null) {
+                    container.dataset.ochreCardImage = existing ? "reused" : "created";
+                    if (existing) container.dataset.ochreOriginalBg = container.style.backgroundImage || "";
+                }
                 card.querySelector(".ic-DashboardCard__header").prepend(container);
                 container.appendChild(topColor);
                 container.style.backgroundImage = "url(\"" + cardOptions.img + "\")";
-                // Mark the injection so the clearing branch below can tell our
-                // image apart from one Canvas set itself. This branch reuses
-                // Canvas' own .ic-DashboardCard__header_image when it exists, so
-                // an unconditional clear would wipe legitimate course images.
-                container.dataset.ochreCardImage = "1";
                 topColor.style.opacity = .5;
             } else {
-                // img === "": clear an image we previously injected. Without this
-                // branch storage reverts correctly but the picture stays on screen
-                // until a full page load, because nothing ever undoes the inline
-                // backgroundImage set above.
+                // img === "": undo whatever we did, according to what we recorded.
+                // Without this the picture stays on screen until a full page load,
+                // because nothing undoes the inline backgroundImage set above.
                 const currentImg = card.querySelector(".ic-DashboardCard__header_image");
-                if (currentImg && currentImg.dataset.ochreCardImage === "1") {
-                    currentImg.style.backgroundImage = "";
+                const mark = currentImg && currentImg.dataset.ochreCardImage;
+                const topColor = card.querySelector(".ic-DashboardCard__header_hero");
+                if (mark === "reused") {
+                    // Restoring "" is correct when Canvas styled the element from a
+                    // stylesheet rather than inline: removing our inline value lets
+                    // the stylesheet apply again.
+                    currentImg.style.backgroundImage = currentImg.dataset.ochreOriginalBg || "";
+                    delete currentImg.dataset.ochreOriginalBg;
                     delete currentImg.dataset.ochreCardImage;
-                    const topColor = card.querySelector(".ic-DashboardCard__header_hero");
-                    if (topColor) topColor.style.opacity = 1;
+                } else if (mark === "created") {
+                    // The hero was moved inside this container on injection; move it
+                    // back out first or the colour overlay is removed along with it.
+                    if (topColor && currentImg.contains(topColor)) {
+                        currentImg.parentNode.insertBefore(topColor, currentImg);
+                    }
+                    currentImg.remove();
                 }
+                if (mark && topColor) topColor.style.opacity = 1;
             }
 
             // card name

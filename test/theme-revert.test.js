@@ -45,7 +45,16 @@ class El {
         this.children = []; this.parent = null;
         this.style = {}; this.dataset = {};
     }
+    get parentNode() { return this.parent; }
     appendChild(c) { if (c.parent) c.parent.remove_(c); c.parent = this; this.children.push(c); return c; }
+    insertBefore(node, ref) {
+        if (node.parent) node.parent.remove_(node);
+        node.parent = this;
+        const i = this.children.indexOf(ref);
+        if (i < 0) this.children.push(node); else this.children.splice(i, 0, node);
+        return node;
+    }
+    contains(n) { while (n) { if (n === this) return true; n = n.parent; } return false; }
     prepend(c) { if (c.parent) c.parent.remove_(c); c.parent = this; this.children.unshift(c); return c; }
     remove_(c) { const i = this.children.indexOf(c); if (i >= 0) this.children.splice(i, 1); }
     remove() { if (this.parent) this.parent.remove_(this); }
@@ -86,6 +95,7 @@ function makeCard(id, { nativeImage = false } = {}) {
         const native = header.appendChild(new El("ic-DashboardCard__header_image"));
         native.style.backgroundImage = 'url("https://canvas.example.edu/native.png")';
     }
+    card.__header = header;
     return card;
 }
 
@@ -192,7 +202,8 @@ test("customizeCards clears an image it injected once storage says empty", () =>
     const injected = card.querySelector(".ic-DashboardCard__header_image");
     assert.ok(injected, "image should have been injected");
     assert.match(injected.style.backgroundImage, /a\.gif/);
-    assert.strictEqual(injected.dataset.ochreCardImage, "1", "injection should be marked");
+    assert.ok(["created", "reused"].includes(injected.dataset.ochreCardImage),
+        `injection should record how it started, got ${JSON.stringify(injected.dataset.ochreCardImage)}`);
 
     // revert: storage now says no image
     ctx.options.custom_cards[101].img = "";
@@ -202,6 +213,45 @@ test("customizeCards clears an image it injected once storage says empty", () =>
         "injected background image should be cleared");
     assert.strictEqual(card.querySelector(".ic-DashboardCard__header_hero").style.opacity, 1,
         "hero opacity should be restored");
+});
+
+test("revert restores Canvas' own course image, not a placeholder", () => {
+    // The reported bug: after reverting a theme the card showed a stock image
+    // until a manual refresh. Storage was correct; the DOM restore was not.
+    const card = makeCard(303, { nativeImage: true });
+    const original = card.querySelector(".ic-DashboardCard__header_image").style.backgroundImage;
+    assert.match(original, /native\.png/, "fixture should start with Canvas' image");
+
+    // Theme applies its own image over Canvas'.
+    ctx.options = { custom_cards: { 303: { img: "https://theme/pusheen.gif", hidden: false, name: "" } }, custom_cards_2: {} };
+    ctx.customizeCards([card]);
+    assert.match(card.querySelector(".ic-DashboardCard__header_image").style.backgroundImage,
+        /pusheen\.gif/, "theme image should have been applied");
+
+    // Revert.
+    ctx.options.custom_cards[303].img = "";
+    ctx.customizeCards([card]);
+    const after = card.querySelector(".ic-DashboardCard__header_image");
+    assert.ok(after, "Canvas' own header image element must not be removed");
+    assert.strictEqual(after.style.backgroundImage, original,
+        "Canvas' original course image must be restored, not cleared to a placeholder");
+});
+
+test("revert removes a container we created, rather than leaving it empty", () => {
+    // When Canvas had no header image we create the element. Clearing its
+    // background leaves an empty container, which is what rendered as a
+    // placeholder; it has to be removed instead.
+    const card = makeCard(404);   // no native image
+    ctx.options = { custom_cards: { 404: { img: "https://theme/x.gif", hidden: false, name: "" } }, custom_cards_2: {} };
+    ctx.customizeCards([card]);
+    assert.ok(card.querySelector(".ic-DashboardCard__header_image"), "should have created a container");
+
+    ctx.options.custom_cards[404].img = "";
+    ctx.customizeCards([card]);
+    assert.strictEqual(card.querySelector(".ic-DashboardCard__header_image"), null,
+        "a container we created must be removed on revert, not left empty");
+    assert.ok(card.querySelector(".ic-DashboardCard__header_hero"),
+        "the colour overlay was moved inside the container and must survive its removal");
 });
 
 test("customizeCards leaves a Canvas-native image alone", () => {
