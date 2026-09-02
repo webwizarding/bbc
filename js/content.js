@@ -636,7 +636,7 @@ function watchNewCanvasButton() {
 }
 
 async function getActiveCustomBackground() {
-    const syncOpts = await chrome.storage.sync.get([
+    const syncOpts = await ochreStorage.get([
         "customBackgroundDaily",
         "customBackgroundNasaDaily",
         "customBackgroundLink",
@@ -671,12 +671,12 @@ async function getDailyBackgroundPreset() {
     const today = new Date();
     const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
     const cacheKey = `picsum_daily_${dateStr}`;
-    const cached = await chrome.storage.local.get(cacheKey);
+    const cached = await ochreStorage.get(cacheKey);
     if (cached[cacheKey]) return cached[cacheKey];
 
     const url = `https://picsum.photos/seed/${dateStr}/1920/1080`;
     const result = { url, scale: 100 };
-    await chrome.storage.local.set({ [cacheKey]: result });
+    await ochreStorage.set({ [cacheKey]: result });
     return result;
 }
 
@@ -739,13 +739,13 @@ function createNasaInfoOverlay() {
         for (let i = 0; i < 7; i++) {
             const dateStr = date.toISOString().slice(0, 10);
             const cacheKey = `nasa_apod_${dateStr}`;
-            const cached = await chrome.storage.local.get(cacheKey);
+            const cached = await ochreStorage.get(cacheKey);
             if (!cached[cacheKey]) {
                 date.setDate(date.getDate() - 1);
                 continue;
             }
             const metadataKey = `nasa_apod_meta_${dateStr}`;
-            const metadata = await chrome.storage.local.get(metadataKey);
+            const metadata = await ochreStorage.get(metadataKey);
             const meta = metadata[metadataKey];
             if (!meta) return false;
             document.getElementById("nasa-info-title").textContent = meta.title || "";
@@ -805,12 +805,12 @@ function getSidebarStateKey(mode = getSidebarLayoutMode()) {
 
 async function getSidebarExpandedState(mode = getSidebarLayoutMode()) {
     const key = getSidebarStateKey(mode);
-    const result = await chrome.storage.local.get(key);
+    const result = await ochreStorage.get(key);
     return result[key] ?? false;
 }
 
 function setSidebarExpandedState(mode, expanded) {
-    chrome.storage.local.set({ [getSidebarStateKey(mode)]: expanded });
+    ochreStorage.set({ [getSidebarStateKey(mode)]: expanded });
 }
 
 let assignments = null;
@@ -849,7 +849,7 @@ const canvas_svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="#ff4545" width
 
 async function insertReminders(reminders) {
     const toAdd = [];
-    const storage = await chrome.storage.sync.get("reminders");
+    const storage = await ochreStorage.get("reminders");
     // overrides = if theres a item that needs to update, but already exists
     let overrides = false;
     for (const insert of reminders) {
@@ -865,16 +865,16 @@ async function insertReminders(reminders) {
         }
         if (found === false) toAdd.push(insert);
     }
-    if (toAdd.length > 0 || overrides === true) chrome.storage.sync.set({ "reminders": [...storage["reminders"], ...toAdd] });
+    if (toAdd.length > 0 || overrides === true) ochreStorage.set({ "reminders": [...storage["reminders"], ...toAdd] });
 }
 
 async function hideReminder(href) {
-    const storage = await chrome.storage.sync.get("reminders");
+    const storage = await ochreStorage.get("reminders");
 
     for (let i = 0; i < storage["reminders"].length; i++) {
         if (storage["reminders"][i]["h"] === href) {
             storage["reminders"][i]["c"]++;
-            chrome.storage.sync.set({ "reminders": storage["reminders"] });
+            ochreStorage.set({ "reminders": storage["reminders"] });
             break;
         }
     }
@@ -897,7 +897,7 @@ function createReminder(reminder, location) {
 }
 
 async function reminderWatch() {
-    const sync = await chrome.storage.sync.get("remind");
+    const sync = await ochreStorage.get("remind");
     if (sync["remind"] !== true) {
         if (document.getElementById("ochre-reminders")) document.getElementById("ochre-reminders").style.display = "none";
         return;
@@ -907,7 +907,7 @@ async function reminderWatch() {
     container.textContent = "";
     const alertPeriod = 1000 * 60 * 60 * 6; // 6 hours
     const alertPeriod2 = 1000 * 60 * 60 * 2; // 2 hours
-    const storage = await chrome.storage.sync.get(["reminders", "reminder_count"]);
+    const storage = await ochreStorage.get(["reminders", "reminder_count"]);
     const now = (new Date()).getTime();
     storage["reminders"].forEach((reminder, index) => {
         if (reminder.d < now) {
@@ -916,7 +916,7 @@ async function reminderWatch() {
             createReminder(reminder, container);
         }
     });
-    chrome.storage.sync.set({ "reminders": storage["reminders"] });
+    ochreStorage.set({ "reminders": storage["reminders"] });
 }
 
 function updateReminders() {
@@ -992,7 +992,7 @@ function isBuiltInCanvasHost(host) {
 }
 
 function isDomainCanvasPage() {
-    chrome.storage.sync.get(['custom_domain', 'dark_mode', 'dark_preset', 'device_dark', 'remind'], result => {
+    ochreStorage.get(['custom_domain', 'dark_mode', 'dark_preset', 'device_dark', 'remind']).then(result => {
         options = result;
         const host = (window.location.hostname || "").toLowerCase();
         const configured = Array.isArray(result.custom_domain)
@@ -1074,12 +1074,12 @@ function startExtension() {
     // Include bg_opacity/bg_blur so setupBetterSidebar (called below) tints the
     // course-content panel with the user's slider values on first load, instead
     // of falling back to the defaults until a slider is touched.
-    chrome.storage.sync.get(["better_sidebar", "sidebar_scale", "bg_opacity", "bg_blur"], result => {
+    ochreStorage.get(["better_sidebar", "sidebar_scale", "bg_opacity", "bg_blur"]).then(result => {
         options = { ...options, ...result };
         ensureBetterSidebar();
     });
 
-    chrome.storage.sync.get(null, result => {
+    ochreStorage.getAll().then(result => {
         options = { ...options, ...result };
         applyTodoAlternateColors();
         toggleAutoDarkMode();
@@ -1984,7 +1984,7 @@ function getCardsFromDashboard() {
     console.log("getting cards from dashboard")
     const dashboard_cards = document.querySelectorAll(".ic-DashboardCard");
     return new Promise(resolve => {
-    chrome.storage.sync.get(["custom_cards", "custom_cards_2", "custom_cards_3"], storage => {
+    ochreStorage.get(["custom_cards", "custom_cards_2", "custom_cards_3"]).then(storage => {
         let cards = storage["custom_cards"] || {};
         let cards_2 = storage["custom_cards_2"] || {};
         let cards_3 = storage["custom_cards_3"] || {};
@@ -2049,7 +2049,7 @@ function getCardsFromDashboard() {
         } finally {
             if(newCards !== true) { resolve(); return; }
             console.log(newCards ? "new cards found" : "");
-            chrome.storage.sync.set({ "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 }, () => resolve());
+            ochreStorage.set({ "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 }).then(() => resolve());
         }
     });
     });
@@ -2058,7 +2058,7 @@ function getCardsFromDashboard() {
 async function getCards(api = null) {
     let dashboard_cards = api ? api : await canvasApi.getAll(`${domain}/api/v1/courses?${/*enrollment_state=active&*/""}per_page=100`);
     await new Promise(resolve => {
-    chrome.storage.sync.get(["custom_cards", "custom_cards_2", "custom_cards_3"], storage => {
+    ochreStorage.get(["custom_cards", "custom_cards_2", "custom_cards_3"]).then(storage => {
         let cards = storage["custom_cards"] || {};
         let cards_2 = storage["custom_cards_2"] || {};
         let cards_3 = storage["custom_cards_3"] || {};
@@ -2128,7 +2128,7 @@ async function getCards(api = null) {
         } catch (e) {
             console.log(e);
         } finally {
-            chrome.storage.sync.set(newCards ? { "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 } : {}, () => resolve());
+            ochreStorage.set(newCards ? { "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 } : {}).then(() => resolve());
         }
     });
     });
@@ -2971,7 +2971,7 @@ function saveCustomTaskLink(noteId, link) {
         delete links[key];
     }
     options = { ...options, custom_task_links: links };
-    chrome.storage.sync.set({ custom_task_links: links });
+    ochreStorage.set({ custom_task_links: links });
 }
 
 function deleteCustomTaskLink(noteId) {
@@ -2979,7 +2979,7 @@ function deleteCustomTaskLink(noteId) {
     const links = { ...getCustomTaskLinks() };
     delete links[String(noteId)];
     options = { ...options, custom_task_links: links };
-    chrome.storage.sync.set({ custom_task_links: links });
+    ochreStorage.set({ custom_task_links: links });
 }
 
 async function updateCanvasPlannerNote(id, payload) {
@@ -4605,7 +4605,7 @@ async function loadBetterTodo() {
         let announcementsToInsert = [];
 
         withApiData(assignments, data => {
-            chrome.storage.sync.get(options.custom_assignments_overflow, storage => {
+            ochreStorage.get(options.custom_assignments_overflow).then(storage => {
                 //assignmentData = assignmentData === null ? data : assignmentData;
                 let items = combineAssignments(data);
                 items.forEach((item, index) => {
@@ -4752,13 +4752,13 @@ async function loadBetterTodo() {
                         setAssignmentState(item.plannable_id, { "rem": filter === "todo", "expire": dueAt });
                         if (item.planner_override && item.planner_override.custom && item.planner_override.custom === true) {
                             // set item as complete locally
-                            chrome.storage.sync.get("custom_assignments_overflow", overflow => {
-                                chrome.storage.sync.get(overflow["custom_assignments_overflow"], storage => {
+                            ochreStorage.get("custom_assignments_overflow").then(overflow => {
+                                ochreStorage.get(overflow["custom_assignments_overflow"]).then(storage => {
                                     overflow["custom_assignments_overflow"].forEach(overflow => {
                                         for (let i = 0; i < storage[overflow].length; i++) {
                                             if (storage[overflow][i].plannable_id === item.plannable_id) {
                                                 storage[overflow].splice(i, 1);
-                                                chrome.storage.sync.set({ [overflow]: storage[overflow] }).then(() => {
+                                                ochreStorage.set({ [overflow]: storage[overflow] }).then(() => {
                                                 });
                                                 break;
                                             }
@@ -4949,7 +4949,7 @@ async function changeColorPreset(colors) {
     }, delay);
 
     // set colors to revert back to
-    chrome.storage.local.get("previous_colors", local => {
+    ochreStorage.get("previous_colors").then(local => {
         const now = Date.now();
         const prev = local["previous_colors"];
         // Overwrite when missing or expired — and when an old list-mode run
@@ -4958,7 +4958,7 @@ async function changeColorPreset(colors) {
         // revert to). chrome.storage.local.get yields undefined (not null)
         // for an unset key, so the old `=== null` check never matched it.
         if (previous.length > 0 && (!prev || now >= prev.expire || !Array.isArray(prev.colors) || prev.colors.length === 0)) {
-            chrome.storage.local.set({ "previous_colors": { "colors": previous, "expire": now + 86400000 } });
+            ochreStorage.set({ "previous_colors": { "colors": previous, "expire": now + 86400000 } });
         }
     });
 }
@@ -5060,7 +5060,7 @@ function autoDarkModeCheck() {
         // computed state already matches dark_mode, so the 60s timer is a cheap no-op.
         if (status === options.dark_mode) return;
         options.dark_mode = status;
-        chrome.storage.sync.set({ "dark_mode": status }, toggleDarkMode);
+        ochreStorage.set({ "dark_mode": status }).then(toggleDarkMode);
     }
 }
 
@@ -5581,11 +5581,11 @@ function calculateGPA2() {
 
 function changeGPASettings(course_id, update) {
     calculateGPA2();
-    chrome.storage.sync.get(["custom_cards", "cumulative_gpa"], storage => {
+    ochreStorage.get(["custom_cards", "cumulative_gpa"]).then(storage => {
         if (course_id === "cumulative") {
-            chrome.storage.sync.set({ "cumulative_gpa": { ...storage["cumulative_gpa"], ...update } });
+            ochreStorage.set({ "cumulative_gpa": { ...storage["cumulative_gpa"], ...update } });
         } else {
-            chrome.storage.sync.set({ "custom_cards": { ...storage["custom_cards"], [course_id]: { ...storage["custom_cards"][course_id], ...update } } });
+            ochreStorage.set({ "custom_cards": { ...storage["custom_cards"], [course_id]: { ...storage["custom_cards"][course_id], ...update } } });
         }
     });
 }
@@ -5757,7 +5757,7 @@ let dashboardNotesTimer;
 function delayDashboardNotesStorage(text) {
     clearTimeout(dashboardNotesTimer);
     dashboardNotesTimer = setTimeout(() => {
-        chrome.storage.sync.set({ dashboard_notes_text: text });
+        ochreStorage.set({ dashboard_notes_text: text });
     }, 250);
 }
 
@@ -6206,9 +6206,9 @@ function setupQuizSafeModeBanner() {
     if (!isQuizPreTakePage()) return;
     if (document.getElementById("ochre-quiz-safe-banner")) return;
 
-    chrome.storage.local.get("quiz_safe_mode_reminder_dismissed", local => {
+    ochreStorage.get("quiz_safe_mode_reminder_dismissed").then(local => {
         if (local && local.quiz_safe_mode_reminder_dismissed === true) return;
-        chrome.storage.sync.get("quiz_safe_mode", sync => {
+        ochreStorage.get("quiz_safe_mode").then(sync => {
             const safeModeOn = sync && sync.quiz_safe_mode === true;
             injectQuizSafeModeBanner(safeModeOn);
         });
@@ -6247,7 +6247,7 @@ function injectQuizSafeModeBanner(safeModeOn) {
         const checkbox = makeElement("input", toggleWrap, { type: "checkbox" });
         checkbox.checked = !!safeModeOn;
         checkbox.addEventListener("change", () => {
-            chrome.storage.sync.set({ quiz_safe_mode: checkbox.checked });
+            ochreStorage.set({ quiz_safe_mode: checkbox.checked });
             // The storage.onChanged listener (applyOptionsChanges) reloads quiz pages.
         });
         makeElement("span", toggleWrap, {
@@ -6262,7 +6262,7 @@ function injectQuizSafeModeBanner(safeModeOn) {
             title: "Hides this reminder permanently. You can still toggle Quiz Safe Mode in the extension popup.",
         });
         dismissBtn.addEventListener("click", () => {
-            chrome.storage.local.set({ quiz_safe_mode_reminder_dismissed: true });
+            ochreStorage.set({ quiz_safe_mode_reminder_dismissed: true });
             banner.remove();
         });
 
@@ -6930,7 +6930,7 @@ function showUpdateMsg() {
 }
 
 function readUpdate() {
-    chrome.storage.sync.set({ "update_msg": "" });
+    ochreStorage.set({ "update_msg": "" });
 }
 
 /*
@@ -6950,8 +6950,8 @@ function combineAssignments(data) {
 }
 
 function cleanCustomAssignments() {
-    chrome.storage.sync.get("custom_assignments_overflow", overflows => {
-        chrome.storage.sync.get(overflows["custom_assignments_overflow"], storage => {
+    ochreStorage.get("custom_assignments_overflow").then(overflows => {
+        ochreStorage.get(overflows["custom_assignments_overflow"]).then(storage => {
             const now = new Date();
 
             overflows["custom_assignments_overflow"].forEach(overflow => {
@@ -6963,7 +6963,7 @@ function cleanCustomAssignments() {
                         changed = true;
                     }
                 }
-                if (changed) chrome.storage.sync.set({ [overflow]: storage[overflow] });
+                if (changed) ochreStorage.set({ [overflow]: storage[overflow] });
             });
 
         });
@@ -6983,7 +6983,7 @@ function getColors() {
             Object.keys(cards).forEach(key => {
                 cards[key] = { ...cards[key], "color": data["custom_colors"]["course_" + key] ? data["custom_colors"]["course_" + key] : null };
             });
-            chrome.storage.sync.set({ "custom_cards_3": cards });
+            ochreStorage.set({ "custom_cards_3": cards });
             return cards;
         });
     }
@@ -7100,23 +7100,23 @@ const GA_ZONE_COLORS = (() => {
 const GA_OPEN_KEY = "grade_analytics_open";
 
 async function getGradeAnalyticsOpenState() {
-    const result = await chrome.storage.local.get(GA_OPEN_KEY);
+    const result = await ochreStorage.get(GA_OPEN_KEY);
     return result[GA_OPEN_KEY] ?? true;
 }
 
 function setGradeAnalyticsOpenState(open) {
-    chrome.storage.local.set({ [GA_OPEN_KEY]: open });
+    ochreStorage.set({ [GA_OPEN_KEY]: open });
 }
 
 const GA_FIT_Y_KEY = "grade_analytics_fit_y";
 
 async function getGradeAnalyticsFitY() {
-    const result = await chrome.storage.local.get(GA_FIT_Y_KEY);
+    const result = await ochreStorage.get(GA_FIT_Y_KEY);
     return result[GA_FIT_Y_KEY] ?? false;
 }
 
 function setGradeAnalyticsFitY(fit) {
-    chrome.storage.local.set({ [GA_FIT_Y_KEY]: fit });
+    ochreStorage.set({ [GA_FIT_Y_KEY]: fit });
 }
 
 // Final-grade calculator settings, stored per course so each course's final
@@ -7133,7 +7133,7 @@ async function getGaCalcSettings(courseId) {
     const empty = { weight: null, target: null, show: false };
     if (courseId == null) return empty;
     const key = gaCalcStorageKey(courseId);
-    const result = await chrome.storage.local.get(key);
+    const result = await ochreStorage.get(key);
     const v = result[key];
     return v && typeof v === "object" ? v : empty;
 }
@@ -7141,7 +7141,7 @@ async function getGaCalcSettings(courseId) {
 function saveGaCalcSettings() {
     const courseId = getCurrentCourseId();
     if (courseId == null || !gaCalc) return;
-    chrome.storage.local.set({ [gaCalcStorageKey(courseId)]: gaCalc });
+    ochreStorage.set({ [gaCalcStorageKey(courseId)]: gaCalc });
 }
 
 let gaObserver = null;
@@ -8854,189 +8854,7 @@ function makeElement(element, location, options, prepend = false) {
 }
 
 
-// ===========================================================================
-// ochreStorage
-//
-// chrome.storage.sync allows 8,192 bytes per item and 102,400 bytes in total.
-// Ten keys grow without bound as the extension is used -- per-course card
-// state, per-assignment completion state, custom tasks, reminders, note text,
-// user CSS -- and every one of them lived in sync. Not one of the 68
-// storage.set() calls across the codebase had a rejection handler, so hitting
-// either quota lost data silently.
-//
-// The fix is not 68 catch blocks. Writes go through this module, which decides
-// the area from the key, reports quota failures once and visibly, and coerces
-// values on the way in and out. A list of unguarded writes is a list nobody
-// should be maintaining.
-// ===========================================================================
-
-// Keys that grow with usage, or that are large and not meaningfully portable
-// between profiles. These live in chrome.storage.local, which has no per-item
-// limit and a far larger total.
-//
-// Everything not named here goes to sync. That direction is deliberate: a new
-// preference is small and portable by default, and the failure mode of getting
-// it wrong is a wasted sync byte rather than silent data loss. A new key that
-// grows must be added here, which is the one enumeration this module keeps --
-// it cannot be derived, because whether a key grows is a fact about how the
-// feature uses it, not about the value.
-const OCHRE_LOCAL_KEYS = new Set([
-    "custom_cards", "custom_cards_2", "custom_cards_3",
-    "assignments_done", "assignment_states", "custom_assignments",
-    "custom_task_links", "reminders", "dark_mode_fix",
-    "custom_styles", "dashboard_notes_text",
-    "previous_colors", "previous_theme", "errors",
-    "saved_themes", "liked_themes",
-]);
-
-const OCHRE_STORAGE_VERSION = 1;
-
-function storageAreaFor(key) {
-    return OCHRE_LOCAL_KEYS.has(key) ? "local" : "sync";
-}
-
-/**
- * Split a { key: value } object into per-area batches.
- * Returns { sync: {...}, local: {...} }, omitting empty areas.
- */
-function splitByArea(items) {
-    const out = { sync: {}, local: {} };
-    for (const [k, v] of Object.entries(items)) out[storageAreaFor(k)][k] = v;
-    if (!Object.keys(out.sync).length) delete out.sync;
-    if (!Object.keys(out.local).length) delete out.local;
-    return out;
-}
-
-let quotaNoticeShown = false;
-
-function reportStorageFailure(area, keys, error) {
-    const message = String(error && error.message ? error.message : error || "");
-    const isQuota = /QUOTA|quota/.test(message);
-    console.warn(`[Ochre] storage.${area} write failed for [${keys.join(", ")}]:`, message);
-    if (!isQuota || quotaNoticeShown) return;
-    quotaNoticeShown = true;
-    // Shown once. Repeating it per failed write would bury the page in notices
-    // exactly when something is already wrong.
-    showApiError(
-        new CanvasApiError("http", message),
-        { feature: "Settings could not be saved (browser storage is full)" });
-}
-
-/**
- * Write values, routing each key to its area. Always returns a promise, and
- * always reports a rejection rather than dropping it.
- */
-function storageSet(items) {
-    // Normalise on write as well as read, so a value that arrives from a theme
-    // import or an older profile is corrected once rather than re-coerced on
-    // every read for the life of the install.
-    const batches = splitByArea(coerceStoredValues(items));
-    return Promise.all(Object.entries(batches).map(([area, batch]) =>
-        Promise.resolve()
-            .then(() => chrome.storage[area].set(batch))
-            .then(() => {
-                // Firefox and Chrome disagree about whether a failed set
-                // rejects or sets runtime.lastError; check both.
-                if (chrome.runtime.lastError) throw new Error(chrome.runtime.lastError.message);
-            })
-            .catch(e => { reportStorageFailure(area, Object.keys(batch), e); throw e; })
-    )).then(() => undefined);
-}
-
-/** Read keys from whichever area each lives in. */
-function storageGet(keys) {
-    const list = Array.isArray(keys) ? keys : [keys];
-    const bySync = list.filter(k => storageAreaFor(k) === "sync");
-    const byLocal = list.filter(k => storageAreaFor(k) === "local");
-    const read = (area, ks) => ks.length
-        ? Promise.resolve().then(() => chrome.storage[area].get(ks))
-        : Promise.resolve({});
-    return Promise.all([read("sync", bySync), read("local", byLocal)])
-        .then(([a, b]) => coerceStoredValues({ ...a, ...b }));
-}
-
-/** Read everything from both areas, local winning on collision. */
-function storageGetAll() {
-    return Promise.all([
-        Promise.resolve().then(() => chrome.storage.sync.get(null)),
-        Promise.resolve().then(() => chrome.storage.local.get(null)),
-    ]).then(([sync, local]) => coerceStoredValues({ ...sync, ...local }));
-}
-
-function storageRemove(keys) {
-    const batches = splitByArea(Object.fromEntries((Array.isArray(keys) ? keys : [keys]).map(k => [k, null])));
-    return Promise.all(Object.entries(batches).map(([area, batch]) =>
-        Promise.resolve().then(() => chrome.storage[area].remove(Object.keys(batch)))
-    )).then(() => undefined);
-}
-
-// ---------------------------------------------------------------------------
-// Value coercion
-//
-// Stored values have drifted in type across versions. A theme export attached
-// to issue #12 carries cardRoundness and cardSpacing as strings ("15", "-15")
-// while cardWidth and cardHeight are numbers, and todo_progress_rings as the
-// boolean true where current code expects the mode string "rings".
-//
-// Numeric drift is not cosmetic: card sizing compares against defaults
-// (`options.cardWidth !== 262`), and "262" !== 262, so a string width silently
-// skips the rule. That is the mechanism behind the issue #12 report -- import a
-// theme, card sizing stops applying, cards become content-sized, and Firefox
-// scroll anchoring makes the dashboard unscrollable near the bottom.
-//
-// Coercion is by declared type, not by a list of known-bad keys: a list would
-// need updating every time a new key drifts, and the drift is silent.
-const OCHRE_NUMERIC_KEYS = new Set([
-    "imageSize", "cardRoundness", "cardSpacing", "cardWidth", "cardHeight",
-    "cardPadding", "imageRoundness", "customBackgroundScale", "bg_opacity",
-    "sidebar_opacity", "bg_blur", "sidebar_blur", "card_opacity", "card_blur",
-    "sidebar_scale", "num_assignments", "num_todo_items", "card_limit",
-    "reminder_count",
-]);
-
-// Keys whose value is one of a fixed set of mode strings. Anything else --
-// including the booleans older versions wrote -- falls back to the default.
-const OCHRE_ENUM_KEYS = {
-    todo_progress_rings: { values: ["rings", "rainbow", "lines", "oneline", "none"], fallback: "rings" },
-    todo_timeframe: { values: ["all", "week", "month"], fallback: "all" },
-    dashboard_notes_mode: { values: ["edit", "preview"], fallback: "edit" },
-};
-
-/** Coerce one stored value to the type the code expects. */
-function coerceStoredValue(key, value) {
-    if (value === undefined || value === null) return value;
-    if (OCHRE_NUMERIC_KEYS.has(key)) {
-        const n = typeof value === "number" ? value : parseFloat(value);
-        return Number.isFinite(n) ? n : undefined;
-    }
-    const spec = OCHRE_ENUM_KEYS[key];
-    if (spec) {
-        return spec.values.includes(value) ? value : spec.fallback;
-    }
-    return value;
-}
-
-/** Coerce every value in an object, dropping any that cannot be salvaged. */
-function coerceStoredValues(items) {
-    const out = {};
-    for (const [k, v] of Object.entries(items)) {
-        const c = coerceStoredValue(k, v);
-        if (c !== undefined) out[k] = c;
-    }
-    return out;
-}
-
-const ochreStorage = {
-    set: storageSet,
-    get: storageGet,
-    getAll: storageGetAll,
-    remove: storageRemove,
-    areaFor: storageAreaFor,
-    coerce: coerceStoredValue,
-    coerceAll: coerceStoredValues,
-    LOCAL_KEYS: OCHRE_LOCAL_KEYS,
-    VERSION: OCHRE_STORAGE_VERSION,
-};
+// Storage layer: see js/storage.js, loaded before this file.
 
 // ===========================================================================
 // canvasApi
@@ -9470,11 +9288,11 @@ function formatCardDue(date) {
 }
 
 function logError(e) {
-    chrome.storage.local.get("errors", storage => {
+    ochreStorage.get("errors").then(storage => {
         if (storage.errors.length > 20) {
             storage["errors"] = [];
         }
-        chrome.storage.local.set({ "errors": storage["errors"].concat(e.stack) });
+        ochreStorage.set({ "errors": storage["errors"].concat(e.stack) });
 
         console.log(e.stack);
         console.log(storage["errors"].concat(e.stack));

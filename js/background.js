@@ -241,6 +241,18 @@ chrome.runtime.onInstalled.addListener(function () {
                 if (changed) newSyncOptions["custom_domain"] = normalized;
             }
 
+            // Route seeded defaults by key, not by which block they were
+            // declared in. Ten keys in default_options.sync now belong in
+            // local; seeding them into sync would immediately recreate the
+            // condition the migration exists to undo, and burn sync quota on
+            // an empty object for every new install.
+            for (const key of OCHRE_LOCAL_KEYS) {
+                if (key in newSyncOptions) {
+                    newLocalOptions[key] = newSyncOptions[key];
+                    delete newSyncOptions[key];
+                }
+            }
+
             if (Object.keys(newLocalOptions).length > 0) {
                 chrome.storage.local.set(newLocalOptions);
             }

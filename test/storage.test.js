@@ -15,7 +15,9 @@ const vm = require("vm");
 const assert = require("assert");
 
 const ROOT = path.resolve(__dirname, "..");
-const CONTENT = fs.readFileSync(path.join(ROOT, "js/content.js"), "utf8").replace(/\r/g, "");
+// The storage layer lives in js/storage.js, shared by the content script and
+// the popup. The background worker keeps its own copy of the key list.
+const CONTENT = fs.readFileSync(path.join(ROOT, "js/storage.js"), "utf8").replace(/\r/g, "");
 const BG = fs.readFileSync(path.join(ROOT, "js/background.js"), "utf8").replace(/\r/g, "");
 const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 
@@ -71,6 +73,7 @@ function loadStorage(chrome) {
     for (const re of [
         /^const OCHRE_LOCAL_KEYS = new Set\(\[[\s\S]*?\]\);/m,
         /^const OCHRE_STORAGE_VERSION = \d+;/m,
+        /^const OCHRE_LOCAL_KEY_PREFIXES = \[[\s\S]*?\];/m,
         /^function storageAreaFor\([\s\S]*?\n\}/m,
         /^function splitByArea\([\s\S]*?\n\}/m,
         /^const OCHRE_NUMERIC_KEYS = new Set\(\[[\s\S]*?\]\);/m,
@@ -145,6 +148,35 @@ test("the content and background key lists agree", () => {
     const A = keys(a), B = keys(b);
     assert.deepStrictEqual([...A].sort(), [...B].sort(),
         "the migration would move a different set of keys than the runtime reads from");
+});
+
+test("no key that was in local before the refactor now routes to sync", () => {
+    // Routing by key means a key not named anywhere silently defaults to sync.
+    // Several keys were already in chrome.storage.local before this layer
+    // existed -- per-course grade-analytics state, cached daily images,
+    // per-mode sidebar state -- and moving those INTO sync would be the exact
+    // opposite of what 1.3 is for. Derived from the previous revision rather
+    // than hand-listed.
+    const ctx = loadStorage(fakeChrome());
+    const previouslyLocal = [
+        "previous_colors", "previous_theme", "errors",
+        "quiz_safe_mode_reminder_dismissed",
+        "grade_analytics_open", "grade_analytics_fit_y", "grade_analytics_final_12345",
+        "better_sidebar_expanded_dash", "better_sidebar_expanded_course",
+        "picsum_daily_2026-09-01", "nasa_apod_2026-09-01", "nasa_apod_meta_2026-09-01",
+        "ochre_global_search_index",
+    ];
+    const regressed = previouslyLocal.filter(k => ctx.storageAreaFor(k) !== "local");
+    assert.deepStrictEqual(regressed, [],
+        `these were in local and would now be written to sync: ${regressed.join(", ")}`);
+});
+
+test("prefix routing covers keys generated per course", () => {
+    const ctx = loadStorage(fakeChrome());
+    for (let id = 1; id <= 5; id++) {
+        assert.strictEqual(ctx.storageAreaFor(`grade_analytics_final_${id}`), "local",
+            "per-course keys grow with the number of courses and must not use sync");
+    }
 });
 
 /* ---------------- writes ---------------- */
@@ -225,6 +257,21 @@ testAsync("coercion applies on read, for values written before this landed", asy
     chrome.storage.sync.data.cardWidth = "262";       // written by an older version
     const got = await ctx.storageGet(["cardWidth"]);
     assert.strictEqual(got.cardWidth, 262);
+});
+
+test("no default is seeded into sync if its key belongs in local", () => {
+    // default_options.sync still declares the bulk keys, because that block is
+    // also the popup's fallback source. Seeding them into sync would recreate
+    // the exact condition the migration undoes, on every fresh install.
+    const b = strip(BG);
+    const local = new Set((/const OCHRE_LOCAL_KEYS = \[([\s\S]*?)\];/.exec(b)[1].match(/"([^"]+)"/g) || [])
+        .map(x => x.slice(1, -1)));
+    const seedBlock = /for \(const key of OCHRE_LOCAL_KEYS\) \{[\s\S]*?delete newSyncOptions\[key\];[\s\S]{0,40}?\}/.exec(b);
+    assert.ok(seedBlock, "seeding does not route by key; bulk defaults would land in sync");
+    assert.ok(/newLocalOptions\[key\] = newSyncOptions\[key\]/.test(seedBlock[0]) &&
+              /delete newSyncOptions\[key\]/.test(seedBlock[0]),
+        "a key moved to local must also be removed from the sync batch");
+    assert.ok(local.size >= 10, "sanity: the local key list should be non-trivial");
 });
 
 /* ---------------- migration, against a seeded profile ---------------- */

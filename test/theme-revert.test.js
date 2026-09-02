@@ -123,6 +123,18 @@ vm.runInContext(extractFunction("js/content.js", "customizeCards"), ctx);
 /** Run importTheme against a fake chrome.storage.sync and return what it wrote. */
 function runImport(theme, liveCards) {
     let written = null;
+    // importTheme writes through the shared storage layer now, so the harness
+    // stubs that rather than chrome.storage directly.
+    // A synchronously-resolving thenable, not a real Promise. importTheme now
+    // reads through ochreStorage.get(...).then(...), which defers to a
+    // microtask, and this harness is deliberately synchronous -- an async test
+    // body here could not fail (see the harness note above). Resolving inline
+    // keeps the assertions in the same tick while still driving the real code.
+    const inline = (v) => ({ then: (f) => inline(f(v)) });
+    ctx.ochreStorage = {
+        get: () => inline({ custom_cards: liveCards }),
+        set: (obj) => { written = obj; return inline(undefined); },
+    };
     ctx.chrome = {
         storage: {
             sync: {
