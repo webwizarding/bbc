@@ -2049,7 +2049,12 @@ function getCardsFromDashboard() {
         } finally {
             if(newCards !== true) { resolve(); return; }
             console.log(newCards ? "new cards found" : "");
-            ochreStorage.set({ "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 }).then(() => resolve());
+            // resolve() on both outcomes. It used to sit only in .then(), so a
+            // rejected write -- which is exactly what a quota failure is --
+            // left this promise pending forever and hung every caller. The
+            // write failure is already reported by the storage layer.
+            ochreStorage.set({ "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 })
+                .catch(() => {}).then(() => resolve());
         }
     });
     });
@@ -2128,7 +2133,9 @@ async function getCards(api = null) {
         } catch (e) {
             console.log(e);
         } finally {
-            ochreStorage.set(newCards ? { "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 } : {}).then(() => resolve());
+            // See the note in getCardsFromDashboard: resolve on both outcomes.
+            ochreStorage.set(newCards ? { "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 } : {})
+                .catch(() => {}).then(() => resolve());
         }
     });
     });
@@ -4924,7 +4931,16 @@ async function changeColorPreset(colors) {
                             'X-CSRF-Token': csrfToken,
                         },
                         body: JSON.stringify({ "hexcode": colors[cnum] })
-                    }).then(() => applyColor());
+                    }).then(() => applyColor())
+                      .catch(e => {
+                          // Repaint anyway: the user asked for this colour and
+                          // the local view should reflect it even if Canvas
+                          // rejected the write. Previously this had no catch,
+                          // so a failed PUT skipped applyColor() and left an
+                          // unhandled rejection.
+                          console.warn("[Ochre] could not save card colour to Canvas:", e);
+                          applyColor();
+                      });
             }
 
             colorChanges.push(changeCardColor);

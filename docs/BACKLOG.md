@@ -326,3 +326,38 @@ immediately and costs nothing at runtime. Worth doing when Phase 2 adds the
 debug mode.
 
 **Not built now.** Recorded so the decision is deliberate.
+
+## Investigated, not a defect: custom_cards_2 / _3 and theme revert
+
+Flagged during 1.2 as a gap — the theme snapshot (`allOptions` in popup.js)
+covers `custom_cards` but not `custom_cards_2` or `custom_cards_3`, so
+"revert theme changes" does not restore them.
+
+Checked, and there is nothing to restore. `importTheme`'s switch handles
+`dark_preset`, `card_colors`, and `custom_cards`, and touches neither of the
+others. `custom_cards_2` holds the user's own card links and `custom_cards_3`
+holds a per-course url and colour; applying a theme does not modify either, so
+reverting has no prior value to put back. Card colours revert through a
+separate mechanism (`previous_colors` plus a `setcolors` message).
+
+Adding them to the snapshot would be actively wrong: it would make "revert
+theme" clobber card links the user set themselves, which no theme ever
+touched.
+
+One real observation from the same reading, filed rather than fixed:
+`importTheme`'s `default` branch writes **any** key a theme names
+(`final[key] = theme[key]`). A theme file is untrusted input, so a crafted or
+corrupted one can write arbitrary storage keys, including `custom_cards_2`.
+That belongs with the theme-validation work in Phase 3.8, which already has to
+treat theme fields as untrusted because they feed the CSS sinks.
+
+## Chunking of custom_assignments is now unnecessary
+
+`custom_assignments` is split across `custom_assignments_2..` keys, with a
+`custom_assignments_overflow` index naming them — a workaround for the
+8,192-byte per-item limit in `chrome.storage.sync`. Now that the whole family
+routes to `chrome.storage.local`, which has no per-item limit, the chunking
+buys nothing and costs an extra indirection on every read.
+
+Removing it needs a migration that reassembles existing chunks, so it is not a
+tidy-up. Deferred; the mechanism works as-is.

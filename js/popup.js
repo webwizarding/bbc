@@ -2455,19 +2455,27 @@ function makeElement(element, location, options) {
 }
 
 async function sendFromPopup(message, options = {}) {
-
-    let response = new Promise((resolve, reject) => {
-        chrome.tabs.query({ currentWindow: true }).then(async tabs => {
-            for (let i = 0; i < tabs.length; i++) {
-                try {
-                    let res = await chrome.tabs.sendMessage(tabs[i].id, { "message": message, "options": options });
-                    if (res) resolve(res);
-                } catch (e) {
-                }
-            }
-            resolve(null);
-        });
-    })
-
-    return await response;
+    // No `new Promise` wrapper. The previous version wrapped
+    // chrome.tabs.query().then(...) in one, declared reject and never called
+    // it, and put no .catch() on the inner promise -- so if tabs.query
+    // rejected, the outer promise never settled and `await` here hung the
+    // popup forever. A hang produces no console output at all, which is why it
+    // was invisible.
+    let tabs;
+    try {
+        tabs = await chrome.tabs.query({ currentWindow: true });
+    } catch (e) {
+        console.warn("[Ochre] could not enumerate tabs:", e);
+        return null;
+    }
+    for (const tab of tabs) {
+        try {
+            const res = await chrome.tabs.sendMessage(tab.id, { "message": message, "options": options });
+            // A tab with no content script rejects; a tab that has one but
+            // does not handle this message resolves undefined. Neither is an
+            // error, so keep looking.
+            if (res) return res;
+        } catch (e) { /* not a Canvas tab */ }
+    }
+    return null;
 }
