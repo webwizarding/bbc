@@ -835,6 +835,7 @@ function createNasaInfoOverlay() {
     icon.addEventListener("mouseleave", hidePanel);
     panel.addEventListener("mouseenter", showPanel);
     panel.addEventListener("mouseleave", hidePanel);
+    makeActivatable(icon, { label: "Show background image details" });
     icon.addEventListener("click", togglePanel);
     
     contentMain.appendChild(nasaInfoOverlayEl);
@@ -3440,6 +3441,7 @@ async function createTodoSections(location) {
 		`;
 		setTimeout(() => updateIndicator(document.getElementById("better-todo-assignments")), 10);
 
+		makeActivatable(document.getElementById("better-todo-announcement"), { label: "Show announcements", role: "tab" });
 		document.getElementById("better-todo-announcement").addEventListener("click", (e) => {
 			betterTodoFilter = "announcements";
 			moreAnnouncementCount = 0;
@@ -3447,6 +3449,7 @@ async function createTodoSections(location) {
 			clearTodoList();
 			createTodoSections(location);
 		});
+		makeActivatable(document.getElementById("better-todo-assignments"), { label: "Show assignments", role: "tab" });
 		document.getElementById("better-todo-assignments").addEventListener("click", (e) => {
 			betterTodoFilter = "tasks";
 			moreAssignmentCount = 0;
@@ -3454,6 +3457,7 @@ async function createTodoSections(location) {
 			clearTodoList();
 			createTodoSections(location);
 		});
+		makeActivatable(document.getElementById("better-todo-completed"), { label: "Show completed", role: "tab" });
 		document.getElementById("better-todo-completed").addEventListener("click", (e) => {
 			betterTodoFilter = "completed";
 			moreCompletedCount = 0;
@@ -3908,6 +3912,8 @@ function populateAssignments(iscompleted = false) {
 			</div>
 		</div>
 		`;
+		makeActivatable(assignment.querySelector(".better-todo-assignment-checkmark"),
+			{ label: "Mark as complete" });
 		assignment.querySelector(".better-todo-assignment-checkmark").addEventListener("click", () => {
 			console.log("marking ", item.plannable.title, " as complete");
 			markAs(item, assignment.firstElementChild);
@@ -4392,6 +4398,7 @@ async function setupBetterSidebar(mode = getSidebarLayoutMode()) {
             watchSidebarBadges();
         });
 
+        makeActivatable(expander, { label: "Toggle sidebar" });
         expander.addEventListener("click", () => {
             expanded = !expanded;
             sidebarList.dataset.expanded = expanded ? "true" : "false";
@@ -5057,12 +5064,23 @@ const OCHRE_LIGHT_DEFAULTS = {
     "background-1": "#c7c7c7",
     "background-2": "#d9d9d9",
     "borders": "#808080",
-    "links": "#418df1",
+    // Was #418df1, which measured 3.33:1 on background-0, 2.36 on
+    // background-2 and 1.97 on background-1 -- below the 4.5:1 WCAG AA
+    // threshold for normal text on every surface it is used on. Same hue,
+    // darkened until the worst pairing clears AA (4.58 on background-1).
+    // Issue #11 is a light-mode contrast report and this is the measured part
+    // of it.
+    "links": "#26538e",
     "sidebar": "#e3e3e3",
     "sidebar-text": "#000000",
     "text-0": "#000000",
     "text-1": "#050505",
-    "text-2": "#4f4f4f"
+    "text-2": "#4f4f4f",
+    // --ochre-buttons is consumed by three rules in darkmodecss.js and was
+    // emitted by nobody, so those rules had never applied. It was lost when
+    // dark mode moved from a static darkcss.json blob to CSS generated from
+    // the preset keys; the blob emitted it at #262626.
+    "buttons": "#e8e8e8"
 };
 
 function generateDarkModeCSS() {
@@ -8940,6 +8958,41 @@ function getApiData() {
     }
 }
 
+
+/**
+ * Make a non-button element behave as one for keyboard and assistive tech.
+ *
+ * Several injected controls are <div> or <svg> with a click handler and
+ * cursor:pointer -- the to-do filter tabs, the completion checkmark, the
+ * expander. A click handler alone is mouse-only: the element is not in the tab
+ * order, does not respond to Enter or Space, and is announced as nothing.
+ *
+ * A helper rather than attributes added at each site, because the sites are a
+ * list that would need maintaining, and a control added later would silently
+ * be mouse-only again. Idempotent, since reconcilers may re-run over the same
+ * node.
+ */
+function makeActivatable(el, { label, role = "button", pressed } = {}) {
+    if (!el) return el;
+    if (label) el.setAttribute("aria-label", label);
+    if (pressed !== undefined) el.setAttribute("aria-pressed", String(pressed));
+    if (el.dataset.ochreActivatable === "1") return el;
+    el.dataset.ochreActivatable = "1";
+    const tag = (el.tagName || "").toLowerCase();
+    const native = tag === "button" || tag === "a" || tag === "input" || tag === "select" || tag === "textarea";
+    if (!native) {
+        if (!el.hasAttribute("role")) el.setAttribute("role", role);
+        if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+        el.addEventListener("keydown", (e) => {
+            // Space scrolls the page by default, and Enter does nothing on a
+            // div, so both need handling to match what a button does.
+            if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+            e.preventDefault();
+            el.click();
+        });
+    }
+    return el;
+}
 
 function makeElement(element, location, options, prepend = false) {
     let creation = document.createElement(element);

@@ -32,7 +32,8 @@ const OCHRE_DEFAULTS = {
             "text-2": "#ababab",
             "links": "#56Caf0",
             "sidebar": "#1e1e1e",
-            "sidebar-text": "#f5f5f5"
+            "sidebar-text": "#f5f5f5",
+            "buttons": "#262626"
         },
         "new_install": true,
         "assignments_due": true,

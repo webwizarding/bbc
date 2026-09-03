@@ -431,3 +431,18 @@
 }
 .ochre-api-error-retry:hover { filter: brightness(95%); }
 .ochre-api-error-retry:focus-visible { outline: 2px solid var(--ochre-links, #0374b5); outline-offset: 2px; }
+
+/* Visible focus for injected controls.
+   Several are <div> or <svg> made activatable at runtime; without an explicit
+   ring, a keyboard user tabbing through the to-do list gets no indication of
+   where they are. :focus-visible rather than :focus so it does not appear on
+   mouse clicks. currentColor keeps it legible in both themes without needing a
+   variable that a theme could set to the background colour. */
+[data-ochre-activatable="1"]:focus-visible,
+.ochre-custom-btn:focus-visible,
+.better-sidebar-btn:focus-visible,
+[id^="better-todo-"]:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+    border-radius: 3px;
+}
