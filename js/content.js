@@ -1454,7 +1454,12 @@ async function applyCustomBackground() {
     }
 
     const backgroundScale = Number(activeBackground.scale) || 100;
-    const backgroundUrl = JSON.stringify(activeBackground.url);
+    // Validated for scheme, then JSON.stringify'd so the quoted form cannot be
+    // terminated early. The background URL is user-supplied but is also part of
+    // a theme export, so a shared theme can set it.
+    const safeBackground = sanitizeHttpUrl(activeBackground.url);
+    if (!safeBackground) return;
+    const backgroundUrl = JSON.stringify(safeBackground);
     const fitToScreen = options.fitImageToScreen === true;
     // Opacity sliders (0-100). 100 = fully opaque surface, 0 = fully transparent
     // so the background image shows through. Only emitted while a background is
@@ -3839,18 +3844,23 @@ function populateAssignments(iscompleted = false) {
 			}
 		}
 
+		// Sanitized: this lands inside a style="" attribute in an
+		// innerHTML template, so an unvalidated value could close the
+		// attribute. custom_cards_3 colours come from the Canvas API
+		// and from theme imports.
 		const courseColor =
 			options.custom_cards_3?.[String(item.course_id)]?.color ??
 			options.custom_cards_3?.[item.course_id]?.color ??
 			options.custom_cards_3?.[item.plannable.course_id]?.color ??
 			"#cccccc";
+		const courseColorSafe = sanitizeCssColor(courseColor) || "#cccccc";
 
         // "Ignore card colors" (Better Todo List): when on, the class name is
         // rendered black in light mode or the theme text color in dark mode
         // instead of the course's card color.
         const classNameColor = options.todo_ignore_card_colors
             ? (options.dark_mode === true ? "var(--ochre-text-0)" : "#000000")
-            : courseColor;
+            : courseColorSafe;
         // "Remove icons" (Better Todo List): when on, the task-type icon is
         // omitted from the colored strip on the left of each task.
         const removeIcons = options.todo_remove_icons === true;
@@ -3876,7 +3886,7 @@ function populateAssignments(iscompleted = false) {
 		assignment.style.overflowX = "hidden";
 		assignment.innerHTML = `
 		<div style="display:flex;align-items:center;gap:5px;width:100%;height:60px;background:var(--ochre-background-2);border-radius:5px;transition:all .4s ease;overflow:hidden;">
-			<div style="width:40px;display:flex;align-items:center;justify-content:center;background-color:${courseColor};height:100%;border-radius:5px 0 0 5px;">
+			<div style="width:40px;display:flex;align-items:center;justify-content:center;background-color:${courseColorSafe};height:100%;border-radius:5px 0 0 5px;">
                 <div style="width:${iconSize}px;height:${iconSize}px;display:flex;margin-left:${iconLeftOffset}px;">
                     ${taskIcon}
 				</div>
@@ -3958,16 +3968,21 @@ function populateAnnouncements() {
 			});
 		}
 
+		// Sanitized: this lands inside a style="" attribute in an
+		// innerHTML template, so an unvalidated value could close the
+		// attribute. custom_cards_3 colours come from the Canvas API
+		// and from theme imports.
 		const courseColor =
 			options.custom_cards_3?.[String(item.course_id)]?.color ??
 			options.custom_cards_3?.[item.course_id]?.color ??
 			options.custom_cards_3?.[item.plannable.course_id]?.color ??
 			"#cccccc";
+		const courseColorSafe = sanitizeCssColor(courseColor) || "#cccccc";
 
 		// "Ignore card colors": black in light mode, theme text color in dark.
 		const classNameColor = options.todo_ignore_card_colors
 			? (options.dark_mode === true ? "var(--ochre-text-0)" : "#000000")
-			: courseColor;
+			: courseColorSafe;
 		// "Remove icons": drop the announcement icon from the colored strip.
 		const removeIcons = options.todo_remove_icons === true;
 
@@ -3978,7 +3993,7 @@ function populateAnnouncements() {
 
 		announcement.innerHTML = `
 		<div style="display:flex;align-items:center;gap:5px;width:100%;height:60px;background:var(--ochre-background-2);border-radius:5px;${filter}">
-			<div style="width:40px;display:flex;align-items:center;justify-content:center;background-color:${courseColor};height:100%;border-radius:5px 0 0 5px;">
+			<div style="width:40px;display:flex;align-items:center;justify-content:center;background-color:${courseColorSafe};height:100%;border-radius:5px 0 0 5px;">
 				<div style="width:23px;height:23px;display:flex;margin-left:0px;">
 					${removeIcons ? "" : `<svg fill="var(--cr-todo-icon)" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" style="transition:all .3s ease;">
 						<g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
@@ -4696,11 +4711,16 @@ async function loadBetterTodo() {
                     listItemContainer.querySelector('.ochre-todo-icon').innerHTML += svg;
 
                     let listItem = listItemContainer.querySelector(".ochre-todo-item");
-                    const courseColor =
+                    // Sanitized: this lands inside a style="" attribute in an
+		// innerHTML template, so an unvalidated value could close the
+		// attribute. custom_cards_3 colours come from the Canvas API
+		// and from theme imports.
+		const courseColor =
                         options.custom_cards_3?.[String(item.course_id)]?.color ??
                         options.custom_cards_3?.[item.course_id]?.color ??
                         options.custom_cards_3?.[item.plannable?.course_id]?.color ??
                         "#cccccc";
+		const courseColorSafe = sanitizeCssColor(courseColor) || "#cccccc";
                     if (itemState?.["lbl"] && itemState["lbl"] !== "") {
                         makeElement("span", listItem.querySelector(".ochre-todo-item-header"), { "className": "ochre-todo-label", "textContent": itemState["lbl"] });
                     }
@@ -4708,9 +4728,9 @@ async function loadBetterTodo() {
                         listItemContainer.querySelector(".ochre-todo-item").style.textDecoration = "line-through";
                     }
                     let title = makeElement("a", listItem.querySelector(".ochre-todo-item-header"), { "className": "ochre-todoitem-title", "textContent": item.plannable.title });
-                    if (options.todo_hide_feedback === true) title.style = "color:" + courseColor + "!important;";
+                    if (options.todo_hide_feedback === true) title.style = "color:" + courseColorSafe + "!important;";
                     let course = makeElement("p", listItem, { "className": "ochre-todoitem-course", "textContent": item.context_name });
-                    course.style.color = courseColor;
+                    course.style.color = courseColorSafe;
                     let format = formatTodoDate(date, item.submissions, hr24);
                     let todoDate = makeElement("p", listItem, { "className": "ochre-todoitem-date", "textContent": format.date });
                     if (format.dueSoon) todoDate.classList.add("ochre-due-soon");
@@ -5059,7 +5079,12 @@ function generateDarkModeCSS() {
     let darkBlock = ":root{\n";
     if (options.dark_preset) {
         Object.keys(options.dark_preset).forEach((key) => {
-            darkBlock += "    --ochre-" + key + ": " + options.dark_preset[key] + ";\n";
+            // Theme-supplied. Most are colours, but "sidebar" legitimately
+            // carries a gradient plus a url(), so the general CSS validator is
+            // used rather than the colour one. An unusable value is skipped,
+            // leaving the light-mode default in place.
+            const safe = sanitizeCssValue(options.dark_preset[key]);
+            if (safe) darkBlock += "    --ochre-" + key + ": " + safe + ";\n";
         });
     }
     darkBlock += "}\n\n";
@@ -5482,7 +5507,10 @@ function customizeCards(c = null) {
                 }
                 card.querySelector(".ic-DashboardCard__header").prepend(container);
                 container.appendChild(topColor);
-                container.style.backgroundImage = "url(\"" + cardOptions.img + "\")";
+                // Theme-supplied, so validate the scheme before it becomes a
+                // url(). A non-http(s) value yields "" and no image is set.
+                const safeImg = sanitizeHttpUrl(cardOptions.img);
+                container.style.backgroundImage = safeImg ? `url("${safeImg}")` : "";
                 topColor.style.opacity = .5;
             } else {
                 // img === "": undo whatever we did, according to what we recorded.
@@ -6143,12 +6171,21 @@ function loadCustomFont() {
     let load = () => {
         if (options.custom_font.link !== "") {
             document.head.appendChild(style);
-            link.href = `https://fonts.googleapis.com/css2?family=${options.custom_font.link}&display=swap`;
+            // Encoded, so the value cannot add its own query parameters or
+            // escape the fonts.googleapis.com origin.
+            link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(options.custom_font.link)}&display=swap`;
             link.rel = "stylesheet";
             document.head.appendChild(link);
         }
 
-        style.textContent = options.custom_font.link === "" ? "" : `*, input, a, button, h1, h2, h3, h4, h5, h6, p, span {font-family: ${options.custom_font.family}!important}`;
+        // The family name is theme- or user-supplied and lands inside a rule in
+        // a <style> element, so an unvalidated "}" closes our rule and opens
+        // theirs. sanitizeFontFamily accepts only quoted strings and bare
+        // identifiers; anything else yields "" and no rule is emitted.
+        const family = sanitizeFontFamily(options.custom_font.family);
+        style.textContent = (options.custom_font.link === "" || !family)
+            ? ""
+            : `*, input, a, button, h1, h2, h3, h4, h5, h6, p, span {font-family: ${family}!important}`;
     }
 
     let createEls = () => {

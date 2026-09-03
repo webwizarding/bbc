@@ -114,6 +114,10 @@ const ctx = {
     },
     quizSafeModeActive: () => false,
     logError() {},
+    // customizeCards validates theme-supplied image URLs before writing them
+    // into a CSS url(); load the real implementation rather than a stub, so the
+    // test exercises what ships.
+    ...require("../js/sanitize.js"),
 };
 vm.createContext(ctx);
 vm.runInContext(extractFunction("js/popup.js", "getExport"), ctx);

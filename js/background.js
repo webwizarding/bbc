@@ -95,7 +95,7 @@ const OCHRE_DYNAMIC_SCRIPT_ID = "ochre-custom-domain";
 // Must stay in step with the static entry in manifest.json. A test asserts it.
 const OCHRE_CONTENT_FILES = {
     js: ["css/darkmodecss.js", "js/backgrounds.js", "js/markdown.js",
-         "js/defaults.js", "js/storage.js", "js/content.js"],
+         "js/defaults.js", "js/sanitize.js", "js/storage.js", "js/content.js"],
     css: ["css/content.css"],
 };
 

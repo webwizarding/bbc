@@ -35,6 +35,7 @@
         "js/backgrounds.js",
         "js/markdown.js",
         "js/defaults.js",
+        "js/sanitize.js",
         "js/storage.js",
         "js/content.js"
       ],
