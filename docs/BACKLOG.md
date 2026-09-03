@@ -381,3 +381,39 @@ pattern would not compile.
 
 Both go away with a real parser. Another entry for the Phase 2 tooling case,
 alongside the async-body and cross-realm failures.
+
+## Deferred: 27 innerHTML sinks inside the quarantined features
+
+Phase 1.7 audited and fixed the pre-existing sinks. The other 27 are inside
+global search and grade analytics, both of which land disabled and unmodified.
+
+| Feature | Sinks | Owning functions |
+|---|---|---|
+| Global search | 9 | `runGlobalSearch` (5), `openGlobalSearchModal` (2), the three `ensureGlobalSearch*Button` |
+| Grade analytics | 18 | `renderGaCalculator` (3), the `gaIf*` calculator row builders (8), `renderGaStats`, `gaShowTooltip`, `gaHeatmapShowTip`, `ensureGradeAnalyticsPanel`, and others |
+
+**Not audited, deliberately.** Both features are off by default and the gates
+were verified rather than assumed:
+
+- `setupGlobalSearch()` returns early unless `options.global_search === true`,
+  and it is the only thing that binds the Ctrl/Cmd+K handler, so the modal
+  cannot be opened while the feature is off.
+- `gradeAnalyticsActive()` requires `options.grade_analytics === true`, and the
+  render paths are reached only through it.
+
+Auditing them now would mean reading ~2,300 lines of code that cannot execute,
+and any fix would be unverifiable against a feature nobody can turn on without
+editing defaults.
+
+**These are real work, not dismissed.** Global search's sinks are the more
+concerning: `runGlobalSearch` renders course names, module titles and
+assignment titles from the Canvas API into `innerHTML`, and the feature already
+carries `escapeGlobalSearchHtml` and `escapeGlobalSearchAttr` helpers — so
+whether every one of those five sinks actually uses them is exactly the
+question to ask. Grade analytics mostly renders numbers it computed itself,
+which is lower risk.
+
+**Trigger:** whichever Phase 3 item enables the feature. Sanitizers now exist
+in `js/sanitize.js`, so the audit has something to apply rather than needing to
+invent it. Note that `escapeGlobalSearchHtml` duplicates what a shared helper
+should do; prefer consolidating over keeping a third escaping implementation.
