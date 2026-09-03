@@ -28,7 +28,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*/*"
+        "https://*.instructure.com/*"
       ],
       "js": [
         "css/darkmodecss.js",
@@ -45,7 +45,8 @@
     }
   ],
   "permissions": [
-    "storage"
+    "storage",
+    "scripting"
   ],
   "default_locale": "en",
   "browser_specific_settings": {
@@ -58,5 +59,8 @@
         ]
       }
     }
-  }
+  },
+  "optional_host_permissions": [
+    "https://*/*"
+  ]
 }

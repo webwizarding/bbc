@@ -77,9 +77,108 @@ async function migrateStorage() {
     return { migrated: moved };
 }
 
+// ===========================================================================
+// Dynamic content scripts for user-supplied Canvas domains
+//
+// The static content_scripts entry matches only https://*.instructure.com/*.
+// Self-hosted Canvas lives on institution domains that cannot be known ahead
+// of time, so those are granted one host at a time through
+// optional_host_permissions and registered at runtime.
+//
+// This replaces matching https://*/* and injecting four scripts at
+// document_start on every HTTPS page the user visited. That was a privacy
+// problem, a performance problem, and the thing store reviewers push back on.
+// ===========================================================================
+
+const OCHRE_DYNAMIC_SCRIPT_ID = "ochre-custom-domain";
+
+// Must stay in step with the static entry in manifest.json. A test asserts it.
+const OCHRE_CONTENT_FILES = {
+    js: ["css/darkmodecss.js", "js/backgrounds.js", "js/markdown.js",
+         "js/defaults.js", "js/storage.js", "js/content.js"],
+    css: ["css/content.css"],
+};
+
+/** "canvas.ucsc.edu" -> "https://canvas.ucsc.edu/*", or null if unusable. */
+function domainToMatchPattern(entry) {
+    if (typeof entry !== "string") return null;
+    const raw = entry.trim();
+    if (raw === "") return null;
+    let host;
+    try {
+        host = new URL(raw.includes("://") ? raw : "https://" + raw).hostname.toLowerCase();
+    } catch (e) {
+        return null;
+    }
+    // A host with no dot, or a wildcard, would widen the grant far beyond what
+    // the user typed. This is the input that decides where a script carrying
+    // the user's Canvas session runs, so it is validated where it is granted,
+    // not only where it is read.
+    if (!host.includes(".") || host.includes("*")) return null;
+    return `https://${host}/*`;
+}
+
+/**
+ * Register the content scripts for every custom domain we actually hold
+ * permission for. Domains the user has not granted are skipped rather than
+ * requested here -- a request needs a user gesture and belongs in the popup.
+ */
+async function syncDynamicContentScripts() {
+    if (!chrome.scripting || !chrome.scripting.registerContentScripts) return;
+    const { custom_domain = [] } = await chrome.storage.sync.get("custom_domain");
+    const patterns = [];
+    for (const entry of Array.isArray(custom_domain) ? custom_domain : []) {
+        const pattern = domainToMatchPattern(entry);
+        if (!pattern) continue;
+        // Skip anything already covered by the static entry, or we would
+        // register a second injection into the same page.
+        if (/^https:\/\/([^/]*\.)?instructure\.com\/\*$/.test(pattern)) continue;
+        let granted = false;
+        try {
+            granted = await chrome.permissions.contains({ origins: [pattern] });
+        } catch (e) { granted = false; }
+        if (granted) patterns.push(pattern);
+    }
+
+    const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [OCHRE_DYNAMIC_SCRIPT_ID] })
+        .catch(() => []);
+    if (!patterns.length) {
+        if (existing.length) {
+            await chrome.scripting.unregisterContentScripts({ ids: [OCHRE_DYNAMIC_SCRIPT_ID] }).catch(() => {});
+        }
+        return;
+    }
+    const spec = {
+        id: OCHRE_DYNAMIC_SCRIPT_ID,
+        matches: patterns,
+        js: OCHRE_CONTENT_FILES.js,
+        css: OCHRE_CONTENT_FILES.css,
+        runAt: "document_start",
+        persistAcrossSessions: true,
+    };
+    try {
+        if (existing.length) await chrome.scripting.updateContentScripts([spec]);
+        else await chrome.scripting.registerContentScripts([spec]);
+    } catch (e) {
+        console.warn("[Ochre] could not register content scripts for", patterns, e);
+    }
+}
+
+// Re-sync whenever the domain list or the granted permissions change, and on
+// startup, since registrations do not always survive an update.
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "sync" && changes.custom_domain) syncDynamicContentScripts();
+});
+if (chrome.permissions && chrome.permissions.onAdded) {
+    chrome.permissions.onAdded.addListener(() => syncDynamicContentScripts());
+    chrome.permissions.onRemoved.addListener(() => syncDynamicContentScripts());
+}
+if (chrome.runtime.onStartup) chrome.runtime.onStartup.addListener(() => syncDynamicContentScripts());
+
 chrome.runtime.onInstalled.addListener(function () {
 
     migrateStorage().catch(e => console.warn("[Ochre] storage migration failed:", e));
+    syncDynamicContentScripts();
 
     // Defaults live in js/defaults.js, the single source of truth shared with
     // the popup and the content script.

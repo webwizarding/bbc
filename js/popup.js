@@ -1133,6 +1133,14 @@ function setup() {
         ochreStorage.set({ custom_domain: domains });
     });
 
+    // Host access is requested when the user finishes typing, not on every
+    // keystroke: chrome.permissions.request needs a user gesture, and prompting
+    // per character would be unusable. "change" fires on blur or Enter, which
+    // is the natural "I have finished" moment and still counts as a gesture.
+    document.querySelector('#customDomain').addEventListener('change', function () {
+        requestCustomDomainAccess(this.value.split(","));
+    });
+
     // setup custom url
     ochreStorage.get(["custom_domain"]).then(storage => {
         document.querySelector("#customDomain").value = storage.custom_domain ? storage.custom_domain : "";
@@ -2337,6 +2345,65 @@ function makeElement(element, location, options) {
     });
     location.appendChild(creation);
     return creation
+}
+
+/** "canvas.ucsc.edu" -> "https://canvas.ucsc.edu/*", or null if unusable. */
+function domainToMatchPattern(entry) {
+    if (typeof entry !== "string") return null;
+    const raw = entry.trim();
+    if (raw === "") return null;
+    let host;
+    try {
+        host = new URL(raw.includes("://") ? raw : "https://" + raw).hostname.toLowerCase();
+    } catch (e) {
+        return null;
+    }
+    // A bare host with no dot, or one containing a wildcard, would grant far
+    // more than the user typed. This input decides where a script carrying the
+    // user's Canvas session runs, so it is validated at the point of granting.
+    if (!host.includes(".") || host.includes("*")) return null;
+    return `https://${host}/*`;
+}
+
+/**
+ * Ask for access to the domains the user entered.
+ *
+ * The extension ships matching only https://*.instructure.com/*. Self-hosted
+ * Canvas needs an explicit per-host grant, requested here at the moment the
+ * user names the domain rather than up front for every site they visit.
+ */
+async function requestCustomDomainAccess(entries) {
+    if (!chrome.permissions) return;
+    const patterns = [];
+    for (const entry of entries) {
+        const p = domainToMatchPattern(entry);
+        // Already covered by the static content script; no grant needed.
+        if (!p || /^https:\/\/([^/]*\.)?instructure\.com\/\*$/.test(p)) continue;
+        patterns.push(p);
+    }
+    if (!patterns.length) return;
+
+    let already = false;
+    try { already = await chrome.permissions.contains({ origins: patterns }); } catch (e) { /* ask anyway */ }
+    if (already) { clearAlert(); return; }
+
+    let granted = false;
+    try {
+        granted = await chrome.permissions.request({ origins: patterns });
+    } catch (e) {
+        displayAlert(true, "Couldn't ask for access to that site. Try pressing Enter in the box.");
+        return;
+    }
+    if (granted) {
+        clearAlert();
+        displayAlert(false, "Access granted. Reload your Canvas tab to see the changes.");
+    } else {
+        // Say what stops working, rather than failing silently.
+        displayAlert(true,
+            "Without access to that site, Ochre can't change anything on it \u2014 no dark mode, " +
+            "no to-do list, no card styling. Your settings are saved, so you can grant access " +
+            "later by entering the address again.");
+    }
 }
 
 async function sendFromPopup(message, options = {}) {

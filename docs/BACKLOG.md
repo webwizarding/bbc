@@ -361,3 +361,23 @@ buys nothing and costs an extra indirection on every read.
 
 Removing it needs a migration that reassembles existing chunks, so it is not a
 tidy-up. Deferred; the mechanism works as-is.
+
+## Test harness: strip() breaks on "/*" inside a string
+
+The source-assertion tests strip comments with
+`t.replace(/\/\*[\s\S]*?\*\//g, "")`. That regex has no idea about string or
+template literals, so a `/*` inside one — for example the match pattern built
+as `` `https://${host}/*` `` — is treated as a comment opener and everything
+through the next `*/` is deleted. Braces in the deleted span disappear with
+it, which made a function unextractable and reported as "not found".
+
+Worked around in test/permissions.test.js by extracting function bodies from
+raw source and using the stripped copy only for text presence checks. The
+hazard remains for any future test that strips before parsing.
+
+Another instance of the same family: a `*/` appearing inside a block comment
+closes it early. A test file's own header comment containing an example match
+pattern would not compile.
+
+Both go away with a real parser. Another entry for the Phase 2 tooling case,
+alongside the async-body and cross-realm failures.
