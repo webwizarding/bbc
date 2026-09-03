@@ -99,6 +99,110 @@ function stopRouteScoped() {
     for (const [name, e] of [...lifecycle.listeners]) if (e.scope === "route") stopListener(name);
 }
 
+// ---------------------------------------------------------------------------
+// Coordinated DOM watcher
+//
+// Five features each ran their own MutationObserver on document.documentElement
+// with subtree:true -- the footer remover, the new-Canvas button, the sequence
+// footer, the submission-page button, and the profile logout button. That is
+// the most expensive observer shape there is, and Canvas mutates constantly, so
+// every mutation woke five callbacks. Several also carried retry ladders of
+// guessed delays (300, 800, 1600, 3000, 5000 ms) to cover the cases the
+// observer missed.
+//
+// They are all the same shape underneath: "make sure my node is in the right
+// state for this page". So they become reconcilers on one observer, run
+// together on a single rAF-throttled pass. A reconciler must be idempotent and
+// cheap; it is called on every settled mutation burst.
+// ---------------------------------------------------------------------------
+const domReconcilers = new Map();
+let domWatcherScheduled = false;
+
+function runReconcilers() {
+    for (const [name, fn] of domReconcilers) {
+        try {
+            fn();
+        } catch (e) {
+            // One broken reconciler must not stop the others.
+            console.warn(`[Ochre] reconciler "${name}" failed:`, e);
+        }
+    }
+}
+
+function ensureDomWatcher() {
+    if (lifecycle.observers.has("domWatcher")) return;
+    registerObserver("domWatcher", new MutationObserver(() => {
+        if (domWatcherScheduled) return;
+        domWatcherScheduled = true;
+        requestAnimationFrame(() => {
+            domWatcherScheduled = false;
+            runReconcilers();
+            // Backstop for navigations that reach neither the patched history
+            // methods nor popstate.
+            checkRouteChange();
+        });
+    }), document.documentElement, { childList: true, subtree: true }, "document");
+}
+
+/** Register a reconciler and run it once immediately. */
+function registerReconciler(name, fn) {
+    domReconcilers.set(name, fn);
+    ensureDomWatcher();
+    try {
+        fn();
+    } catch (e) {
+        console.warn(`[Ochre] reconciler "${name}" failed:`, e);
+    }
+}
+
+function unregisterReconciler(name) {
+    domReconcilers.delete(name);
+}
+
+// ---------------------------------------------------------------------------
+// Settle signal
+//
+// Replaces delays guessed from a cold page load. runDarkModeFixer walks every
+// element's computed style looking for colours dark mode missed, so it wants
+// "the DOM has stopped changing", not "800ms have passed" -- and on a soft
+// navigation there is no load event to measure 800ms from at all.
+//
+// Quiescence is the honest signal: run once the document is complete AND no
+// mutations have landed for quietMs, with a hard cap so a page that never
+// settles (a live-updating dashboard) still gets one pass.
+// ---------------------------------------------------------------------------
+function whenSettled(fn, { quietMs = 600, capMs = 6000 } = {}) {
+    let done = false;
+    let quietTimer = null;
+    let observer = null;
+    const finish = () => {
+        if (done) return;
+        done = true;
+        if (quietTimer) clearTimeout(quietTimer);
+        if (observer) observer.disconnect();
+        clearTimeout(capTimer);
+        try {
+            fn();
+        } catch (e) {
+            console.warn("[Ochre] settled callback failed:", e);
+        }
+    };
+    const capTimer = setTimeout(finish, capMs);
+    const arm = () => {
+        if (quietTimer) clearTimeout(quietTimer);
+        quietTimer = setTimeout(finish, quietMs);
+    };
+    const start = () => {
+        if (done) return;
+        observer = new MutationObserver(arm);
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        arm();
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => finish();
+}
+
 /** Counts for the duplicate-node acceptance test and the debug mode in Phase 2. */
 function lifecycleCounts() {
     return {
@@ -169,7 +273,6 @@ function resetRouteState() {
 
     domContainers = {};
     betterSidebarLoading = false;
-    sidebarBadgeWatchRetries = 0;
     moreAssignmentCount = 0;
     moreAnnouncementCount = 0;
 
@@ -431,27 +534,17 @@ function ensureProfileLogoutPageButton() {
 }
 
 function watchProfileLogoutPageButton() {
-    if (!isProfilePage()) {
-        document.getElementById("ochre-profile-logout")?.remove();
-        return;
-    }
-    if (ensureProfileLogoutPageButton()) return;
-    if (profileLogoutButtonObserver) return;
-
-    profileLogoutButtonObserver = new MutationObserver(() => {
-        if (ensureProfileLogoutPageButton() && profileLogoutButtonObserver) {
-            profileLogoutButtonObserver.disconnect();
-            profileLogoutButtonObserver = null;
+    // Reconciler, not its own observer. Handles both directions: adds the
+    // button on a profile page, removes it anywhere else. Previously the
+    // removal only happened on the call that noticed we had left, so the
+    // button could outlive the page it belonged to.
+    registerReconciler("profileLogoutButton", () => {
+        if (!isProfilePage()) {
+            document.getElementById("ochre-profile-logout")?.remove();
+            return;
         }
+        ensureProfileLogoutPageButton();
     });
-
-    profileLogoutButtonObserver.observe(document.documentElement, { childList: true, subtree: true });
-    setTimeout(() => {
-        if (profileLogoutButtonObserver) {
-            profileLogoutButtonObserver.disconnect();
-            profileLogoutButtonObserver = null;
-        }
-    }, 10000);
 }
 
 // Reconcile the button against the current page on a rAF-throttled schedule.
@@ -547,33 +640,19 @@ function applyHideSequenceFooter() {
 function watchSequenceFooter() {
     applyHideSequenceFooter();
     if (options.hide_sequence_footer !== true) {
-        if (sequenceFooterObserver) {
-            sequenceFooterObserver.disconnect();
-            sequenceFooterObserver = null;
-        }
+        unregisterReconciler("sequenceFooter");
         return;
     }
-    if (!isAssignmentPage()) return;
-    if (removeSequenceFooter()) return;
-    if (sequenceFooterObserver) return;
-
-    // The observer strips the footer from the DOM (no leftover gap), and
-    // disconnects once removed — after that (or after the 10s timeout below)
-    // the CSS rule above is what keeps it hidden across Canvas re-renders.
-    sequenceFooterObserver = new MutationObserver(() => {
-        if (removeSequenceFooter() && sequenceFooterObserver) {
-            sequenceFooterObserver.disconnect();
-            sequenceFooterObserver = null;
-        }
+    // Removes the footer from the DOM rather than only hiding it, so no gap is
+    // left behind; the CSS rule applied above is what keeps it hidden if
+    // Canvas re-adds it later. Stays registered rather than self-disconnecting
+    // after the first success plus a 10s timeout, because Canvas rebuilds the
+    // content area on client-side navigation and the old version had no way to
+    // come back once it had given up.
+    registerReconciler("sequenceFooter", () => {
+        if (options.hide_sequence_footer !== true || !isAssignmentPage()) return;
+        removeSequenceFooter();
     });
-
-    sequenceFooterObserver.observe(document.documentElement, { childList: true, subtree: true });
-    setTimeout(() => {
-        if (sequenceFooterObserver) {
-            sequenceFooterObserver.disconnect();
-            sequenceFooterObserver = null;
-        }
-    }, 10000);
 }
 
 // One persistent, rAF-throttled observer that keeps both assignment-page
@@ -589,14 +668,12 @@ function maintainAssignmentNavButtons() {
 }
 
 function watchSubmissionPageButton() {
-    if (lifecycle.observers.has("submissionPageButton")) return;
-    maintainAssignmentNavButtons();
-    submissionPageButtonObserver = registerObserver("submissionPageButton",
-        new MutationObserver(maintainAssignmentNavButtons),
-        document.documentElement, { childList: true, subtree: true }, "route");
-    for (const ms of [300, 800, 1600, 3000, 5000]) {
-        setTimeout(maintainAssignmentNavButtons, ms);
-    }
+    // The retry ladder this used to carry -- 300, 800, 1600, 3000, 5000 ms --
+    // existed because a single observer registration could miss the window
+    // where Canvas rebuilds the content area. The shared watcher runs this on
+    // every settled mutation burst instead, which covers the same cases
+    // without guessing when they happen.
+    registerReconciler("submissionPageButton", maintainAssignmentNavButtons);
 }
 
 function removeNewCanvasButton() {
@@ -604,35 +681,10 @@ function removeNewCanvasButton() {
 }
 
 function watchNewCanvasButton() {
-    if (newCanvasButtonObserver) {
-        newCanvasButtonObserver.disconnect();
-        newCanvasButtonObserver = null;
-    }
-    if (options.hide_new_canvas !== true) return;
-    removeNewCanvasButton();
-    let newCanvasButtonScheduled = false;
-    newCanvasButtonObserver = new MutationObserver((mutationList) => {
-        if (options.hide_new_canvas !== true) {
-            if (newCanvasButtonObserver) {
-                newCanvasButtonObserver.disconnect();
-                newCanvasButtonObserver = null;
-            }
-            return;
-        }
-        // Only scan when nodes were actually added, and coalesce to one pass per frame.
-        let added = false;
-        for (const mutation of mutationList) {
-            if (mutation.addedNodes && mutation.addedNodes.length) { added = true; break; }
-        }
-        if (!added || newCanvasButtonScheduled) return;
-        newCanvasButtonScheduled = true;
-        requestAnimationFrame(() => {
-            newCanvasButtonScheduled = false;
-            if (options.hide_new_canvas !== true) return;
-            removeNewCanvasButton();
-        });
+    registerReconciler("newCanvasButton", () => {
+        if (options.hide_new_canvas !== true) return;
+        removeNewCanvasButton();
     });
-    newCanvasButtonObserver.observe(document.documentElement, { childList: true, subtree: true });
 }
 
 async function getActiveCustomBackground() {
@@ -834,7 +886,6 @@ let sidebarReadyTimer = null;
 let lastDashboardCardSignature = null;
 let sidebarBadgeObserver = null;
 let sidebarBadgeSyncTimer = null;
-let sidebarBadgeWatchRetries = 0;
 
 /*
 Start
@@ -1036,28 +1087,11 @@ function startExtension() {
         const footer = document.querySelector('footer#footer.ic-app-footer, footer#footer');
         if (footer) footer.remove();
     };
-    removeFooter();
-    let footerScheduled = false;
-    // Was a const local, so nothing could ever disconnect it. Document-scoped:
-    // the footer sits outside the subtree Canvas swaps, so this runs for the
-    // life of the document rather than per route.
-    registerObserver("footer", new MutationObserver(() => {
-        // Canvas mutates the DOM constantly; only check for the footer at most once
-        // per animation frame instead of running a querySelector on every mutation.
-        if (footerScheduled) return;
-        footerScheduled = true;
-        requestAnimationFrame(() => {
-            footerScheduled = false;
-            removeFooter();
-            // Backstop for navigations that reach neither the patched history
-            // methods nor popstate. Piggybacked here rather than given its own
-            // observer: this one is already document-scoped and already
-            // rAF-throttled, and a second documentElement/subtree observer is
-            // the most expensive shape available. Phase 1.5 folds the several
-            // independent observers into one coordinated lifecycle.
-            checkRouteChange();
-        });
-    }), document.documentElement, { childList: true, subtree: true }, "document");
+    // The footer is one more thing to keep in the right state on every settled
+    // mutation burst, so it joins the shared watcher rather than running the
+    // sixth documentElement/subtree observer. The route-change backstop that
+    // used to be bolted onto this observer now lives in the watcher itself.
+    registerReconciler("footer", removeFooter);
 
     setupNavigation();
 
@@ -1102,8 +1136,13 @@ function startExtension() {
         setupGlobalSearch();
 
         
-        setTimeout(() => runDarkModeFixer(false), 800);
-        setTimeout(() => runDarkModeFixer(false), 4500);
+        // Was two guesses -- 800ms and 4500ms after startExtension. Both were
+        // measured from a cold load, so on a client-side navigation they fired
+        // against whatever happened to be on screen, or against the previous
+        // page. runDarkModeFixer walks every element's computed style looking
+        // for colours dark mode missed, so what it actually needs is "the DOM
+        // has stopped changing", which is what whenSettled waits for.
+        whenSettled(() => runDarkModeFixer(false));
     });
 
     chrome.runtime.onMessage.addListener(recieveMessage);
@@ -1390,7 +1429,6 @@ function resetBetterSidebarLayout() {
     clearBetterSidebarLayoutFix();
     if (sidebarBadgeObserver) { sidebarBadgeObserver.disconnect(); sidebarBadgeObserver = null; }
     if (sidebarBadgeSyncTimer) { clearTimeout(sidebarBadgeSyncTimer); sidebarBadgeSyncTimer = null; }
-    sidebarBadgeWatchRetries = 0;
 }
 
 function ensureBetterSidebar() {
@@ -4405,14 +4443,24 @@ function scheduleSidebarBadgeSync() {
 // Watch the global nav for badge changes (late load, new mail, read/unread)
 // and keep the better-sidebar dots in sync.
 function watchSidebarBadges() {
-    const navMenu = document.getElementById("menu");
-    if (!navMenu) {
-        if (sidebarBadgeWatchRetries++ < 20) setTimeout(watchSidebarBadges, 500);
-        return;
-    }
-    sidebarBadgeWatchRetries = 0;
+    // #menu is Canvas' global nav list. It used to be polled for, every 500ms
+    // up to 20 times, which both gave up after 10 seconds and did nothing when
+    // Canvas rebuilt the nav afterwards. The shared watcher already runs on
+    // every settled mutation burst, so registering there covers appearance,
+    // disappearance and rebuild without a poll or a retry budget.
+    registerReconciler("sidebarBadges", () => {
+        const menu = document.getElementById("menu");
+        if (!menu) return;
+        // Re-observe only if the node we were watching is gone.
+        if (sidebarBadgeObserver && sidebarBadgeObserver.__ochreTarget === menu) return;
+        attachSidebarBadgeObserver(menu);
+    });
+}
+
+function attachSidebarBadgeObserver(navMenu) {
     if (sidebarBadgeObserver) sidebarBadgeObserver.disconnect();
     sidebarBadgeObserver = new MutationObserver(scheduleSidebarBadgeSync);
+    sidebarBadgeObserver.__ochreTarget = navMenu;
     sidebarBadgeObserver.observe(navMenu, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style"] });
     scheduleSidebarBadgeSync();
 }

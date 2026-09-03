@@ -130,14 +130,48 @@ test("no setInterval result is discarded", () => {
         `${bad.length} setInterval call(s) whose id is discarded and can never be cleared`);
 });
 
-test("the four previously-uncontrollable entries are registered", () => {
+test("the four previously-uncontrollable entries are controllable", () => {
     const c = code();
+    // Asserts the property, not the mechanism. Phase 1.5 folded five
+    // documentElement/subtree observers into one shared watcher, so the footer
+    // and the page-chrome buttons are reconcilers on "domWatcher" rather than
+    // observers of their own. They are still stoppable -- via
+    // unregisterReconciler, or by stopping the watcher itself -- which is what
+    // this is really about.
+    const controllable = (name) =>
+        new RegExp(`registerObserver\\("${name}"`).test(c) ||
+        new RegExp(`registerReconciler\\("${name}"`).test(c);
     for (const name of ["footer", "dashboardReady", "submissionPageButton"]) {
-        assert.ok(new RegExp(`registerObserver\\("${name}"`).test(c),
-            `observer "${name}" is not registered`);
+        assert.ok(controllable(name), `"${name}" is neither a registered observer nor a reconciler`);
     }
+    assert.ok(/registerObserver\("domWatcher"/.test(c),
+        "the shared watcher must itself be on the registry, or nothing can stop it");
     assert.ok(/registerInterval\("reminderWatch"/.test(c),
         "the reminder poller interval is not registered");
+});
+
+test("reconcilers run on one shared observer, not one each", () => {
+    const c = code();
+    const reconcilers = new Set((c.match(/registerReconciler\("([^"]+)"/g) || []));
+    assert.ok(reconcilers.size >= 5,
+        `expected the page-chrome watchers to be reconcilers, found ${reconcilers.size}`);
+    // The five that each ran their own documentElement/subtree observer.
+    for (const name of ["footer", "newCanvasButton", "sequenceFooter",
+                        "submissionPageButton", "profileLogoutButton"]) {
+        assert.ok(new RegExp(`registerReconciler\\("${name}"`).test(c),
+            `"${name}" should be a reconciler on the shared watcher`);
+    }
+});
+
+test("no feature polls for an element with a retry ladder", () => {
+    const c = code();
+    // Two of these existed: a 300/800/1600/3000/5000 ladder for the submission
+    // button, and a 20x500ms poll for the nav menu. Both gave up after a fixed
+    // budget and did nothing if Canvas rebuilt the node afterwards.
+    assert.ok(!/for \(const ms of \[\s*\d+\s*,/.test(c),
+        "a retry ladder of guessed delays is back");
+    assert.ok(!/Retries\+\+ < \d+\) setTimeout/.test(c),
+        "a bounded poll for an element is back; register a reconciler instead");
 });
 
 test("dark mode is not route-scoped and cannot join the route cycle", () => {
