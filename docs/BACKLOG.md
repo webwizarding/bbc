@@ -127,7 +127,7 @@ them — which is why the quarantine holds, but it is the same defect.
 ### --orca-buttons is never emitted (root cause established)
 
 `css/darkmodecss.js` uses `var(--orca-buttons)` in three rules with no
-fallback. Nothing emits it: not `OCHRE_LIGHT_DEFAULTS`, not the
+fallback. Nothing emits it: not `ORCA_LIGHT_DEFAULTS`, not the
 `dark_preset` defaults, and no bundled theme supplies a `buttons` key.
 Those three rules have never applied in the current architecture.
 
@@ -140,7 +140,7 @@ declaration that did emit it, at `#262626`. When dark mode moved to
 carried background-0/1/2, borders, links, sidebar, sidebar-text, and
 text-0/1/2.
 
-Fix for Phase 1.7: emit `buttons` from both `OCHRE_LIGHT_DEFAULTS` and
+Fix for Phase 1.7: emit `buttons` from both `ORCA_LIGHT_DEFAULTS` and
 the `dark_preset` defaults. The historical dark value is `#262626`; a
 light value needs choosing. Decide separately whether to expose it as
 an editable swatch in the dark-mode editor, which would mean adding it
