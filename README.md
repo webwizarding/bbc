@@ -54,8 +54,21 @@ Inherited from Canvas Refined:
 - Browser-wide assignment reminders
 - Themes
 
-Changes made in this fork so far are listed in the commit history; this
-section will be updated as the roadmap below lands.
+Added in this fork:
+
+- Client-side navigation support, so features survive moving between pages
+  without a reload
+- A NASA background that works: bring your own free api.nasa.gov key instead of
+  sharing a demo key with every other user of every extension that ships it
+- Honest failure: when Canvas data cannot be loaded, the affected panel says so
+  and offers a retry, rather than rendering blank
+
+Removed in this fork:
+
+- The credentialed probe that fetched `/api/v1/courses` from every HTTPS site
+  you visited in order to guess your Canvas domain
+- Access to every HTTPS site. The extension now ships matching Instructure-hosted
+  Canvas only and asks for your institution's domain one host at a time
 
 ## Roadmap
 
@@ -63,11 +76,13 @@ Work is sequenced in three phases. Detail lives in
 [docs/CONTENT_JS_MAP.md](docs/CONTENT_JS_MAP.md) and
 [docs/BACKLOG.md](docs/BACKLOG.md).
 
-1. **Correctness.** Client-side navigation handling, a real API layer with
-   pagination and error typing, storage quota routing, narrowed host
-   permissions, observer lifecycle, and accessibility fixes.
-2. **Architecture.** Splitting `js/content.js` into modules, a build step,
-   tests, lint, and CI.
+1. **Correctness — done.** Client-side navigation with teardown and reapply, a
+   real API layer with pagination and typed errors, storage routed by key with
+   a sync-to-local migration, host permissions narrowed to Canvas with per-domain
+   opt-in, one coordinated DOM watcher in place of five, CSS and URL sanitizers,
+   WCAG AA on both colour presets, and keyboard-reachable controls.
+2. **Architecture — next.** Splitting `js/content.js` into modules, a build
+   step, tests, lint, and CI.
 3. **Features.** A full-page planner view, recurring tasks and subtasks,
    calendar export, what-if grades, grade history, per-course notes,
    flashcards with spaced repetition, and theme browsing.
