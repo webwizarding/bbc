@@ -177,6 +177,7 @@ const OCHRE_DEFAULTS = {
         "customBackgroundScale": 100,
         "customBackgroundDaily": false,
         "customBackgroundNasaDaily": false,
+        "nasa_api_key": "",
         "nasaInfoOverlay": false,
         "fitImageToScreen": false,
         "bg_opacity": 65,

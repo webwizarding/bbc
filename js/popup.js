@@ -12,6 +12,7 @@ const syncedSubOptions = [
 	"equal_height_cards",
 	// "todo_overdues",
 	"gpa_calc_prepend",
+	"nasa_api_key",
 	"gpa_calc_cumulative",
 	"gpa_calc_weighted",
 	"auto_dark",
@@ -922,6 +923,10 @@ function setup() {
 				setup: (initial) => setupCustomStyle(initial),
 			},
 			{
+				identifier: "nasa_api_key",
+				setup: (initial) => setupNasaApiKey(initial),
+			},
+			{
 				identifier: "imageSize",
 				setup: (initial) => setupImageSizeInput(initial),
 			},
@@ -1478,6 +1483,17 @@ function setup() {
 function applyGPAPreset(bounds) {
     ochreStorage.set({ "gpa_calc_bounds": bounds }).then(() => {
         displayGPABounds();
+    });
+}
+
+function setupNasaApiKey(initial) {
+    const el = document.getElementById("nasa_api_key");
+    if (!el) return;
+    el.value = initial || "";
+    el.addEventListener("change", (e) => {
+        // Trimmed, so a stray space does not become part of the key and
+        // produce a 403 that looks like a rejected key.
+        ochreStorage.set({ "nasa_api_key": e.target.value.trim() });
     });
 }
 

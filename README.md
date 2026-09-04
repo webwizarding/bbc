@@ -72,6 +72,14 @@ Work is sequenced in three phases. Detail lives in
    calendar export, what-if grades, grade history, per-course notes,
    flashcards with spaced repetition, and theme browsing.
 
+## Versioning
+
+`manifest.json` is the single source of truth for the version, and it follows
+semantic versioning. Upstream carried `6.4.0` in the manifest while tagging
+releases `0.3.1` and `0.4.0` in commit messages; the two never agreed, and the
+store listing disagreed with both. This fork reset to `0.1.0` at the rebrand
+and has one number.
+
 ## Install from source
 
 - Clone this repository.

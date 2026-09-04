@@ -1081,6 +1081,17 @@
                 <input type="checkbox" id="customBackgroundNasaDaily" name="customBackgroundNasaDaily">
                 <label for="customBackgroundNasaDaily" class="sub-text">NASA Astronomy Picture of the Day</label>
             </div>
+            <div class="sub-option" style="margin-top:6px;flex-direction:column;align-items:stretch;">
+                <label for="nasa_api_key" class="sub-text" style="margin-bottom:4px;">NASA API key (optional)</label>
+                <input type="text" id="nasa_api_key" name="nasa_api_key"
+                       placeholder="Leave blank to use NASA's shared demo key"
+                       autocomplete="off" spellcheck="false">
+                <p class="sub-text" style="opacity:.75;font-size:11px;margin-top:4px;">
+                    The shared demo key allows 30 requests an hour across everyone using it, so
+                    backgrounds often fail to load. A free key from api.nasa.gov fixes that. It is
+                    stored on your device and sent only to NASA.
+                </p>
+            </div>
             <div class="sub-option" style="margin-top:8px;">
                 <input type="checkbox" id="fitImageToScreen" name="fitImageToScreen">
                 <label for="fitImageToScreen" class="sub-text">Fit image to screen</label>

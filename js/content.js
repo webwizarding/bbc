@@ -733,12 +733,30 @@ async function getDailyBackgroundPreset() {
 }
 
 async function getNasaDailyBackground() {
+    let result;
     try {
-        return await chrome.runtime.sendMessage({ type: "getNasaBackground" });
+        result = await chrome.runtime.sendMessage({ type: "getNasaBackground" });
     } catch (error) {
         console.error("[Ochre] Failed to fetch NASA APOD:", error);
         return null;
     }
+    // An honest message beats silently showing no background. NASA's shared
+    // DEMO_KEY allows 30 requests an hour across everyone using it, so being
+    // over quota is the common case rather than an edge case.
+    if (result && result.error === "ratelimited") {
+        showApiError(new CanvasApiError("ratelimit", "NASA rate limit"), {
+            feature: "The NASA daily background is rate limited. Add your own free " +
+                     "api.nasa.gov key in the extension settings to avoid this",
+        });
+        return null;
+    }
+    if (result && result.error === "badkey") {
+        showApiError(new CanvasApiError("auth", "NASA rejected the key"), {
+            feature: "NASA rejected the API key in your settings",
+        });
+        return null;
+    }
+    return result;
 }
 
 let nasaInfoOverlayEl = null;

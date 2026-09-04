@@ -175,10 +175,76 @@ if (chrome.permissions && chrome.permissions.onAdded) {
 }
 if (chrome.runtime.onStartup) chrome.runtime.onStartup.addListener(() => syncDynamicContentScripts());
 
+// ===========================================================================
+// Pre-paint dark base
+//
+// toggleDarkMode() in the content script cannot run until an async
+// chrome.storage read resolves, and the page paints in that gap -- a white
+// flash on every load with dark mode on. A registered CSS-only content script
+// is applied by the browser at document_start instead, before first paint.
+//
+// Registered when dark mode is on and unregistered when it is off, so light
+// mode is untouched.
+// ===========================================================================
+
+const OCHRE_DARK_BASE_ID = "ochre-dark-base";
+
+async function syncDarkBaseStyle() {
+    if (!chrome.scripting || !chrome.scripting.registerContentScripts) return;
+    const { dark_mode, device_dark } = await chrome.storage.sync.get(["dark_mode", "device_dark"]);
+    const wanted = dark_mode === true || device_dark === true;
+
+    const existing = await chrome.scripting
+        .getRegisteredContentScripts({ ids: [OCHRE_DARK_BASE_ID] })
+        .catch(() => []);
+
+    if (!wanted) {
+        if (existing.length) {
+            await chrome.scripting.unregisterContentScripts({ ids: [OCHRE_DARK_BASE_ID] }).catch(() => {});
+        }
+        return;
+    }
+
+    // Same match set as the main content script, so the base never applies
+    // anywhere the extension itself would not run.
+    const matches = ["https://*.instructure.com/*"];
+    const { custom_domain = [] } = await chrome.storage.sync.get("custom_domain");
+    for (const entry of Array.isArray(custom_domain) ? custom_domain : []) {
+        const pattern = domainToMatchPattern(entry);
+        if (!pattern || matches.includes(pattern)) continue;
+        let granted = false;
+        try {
+            granted = await chrome.permissions.contains({ origins: [pattern] });
+        } catch (e) { granted = false; }
+        if (granted) matches.push(pattern);
+    }
+
+    const spec = {
+        id: OCHRE_DARK_BASE_ID,
+        matches,
+        css: ["css/darkbase.css"],
+        runAt: "document_start",
+        persistAcrossSessions: true,
+    };
+    try {
+        if (existing.length) await chrome.scripting.updateContentScripts([spec]);
+        else await chrome.scripting.registerContentScripts([spec]);
+    } catch (e) {
+        console.warn("[Ochre] could not register the dark base style:", e);
+    }
+}
+
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== "sync") return;
+    if (changes.dark_mode || changes.device_dark || changes.custom_domain) syncDarkBaseStyle();
+});
+if (chrome.runtime.onStartup) chrome.runtime.onStartup.addListener(() => syncDarkBaseStyle());
+
 chrome.runtime.onInstalled.addListener(function () {
 
     migrateStorage().catch(e => console.warn("[Ochre] storage migration failed:", e));
     syncDynamicContentScripts();
+    syncDarkBaseStyle();
 
     // Defaults live in js/defaults.js, the single source of truth shared with
     // the popup and the content script.
@@ -304,7 +370,11 @@ async function getNasaBackground() {
             }
 
             const data = await callNasaApi(dateStr);
-            if (data === "ratelimited" || data === null) return null;
+            // Surfaced to the content script so it can say what happened,
+            // rather than silently showing no background.
+            if (data === "ratelimited") return { error: "ratelimited" };
+            if (data === "badkey") return { error: "badkey" };
+            if (data === null) return null;
             if (data === "missing") {
                 await chrome.storage.local.set({ [missingKey]: true });
                 date.setDate(date.getDate() - 1);
@@ -325,13 +395,26 @@ async function getNasaBackground() {
 }
 
 async function callNasaApi(dateStr) {
+    // DEMO_KEY is NASA's shared demo credential: 30 requests per hour and 50
+    // per day, counted per IP but shared across every user of every project
+    // that ships it, so it is rate limited most of the time in practice. A user
+    // who wants reliable daily backgrounds can paste their own free key from
+    // api.nasa.gov, which is stored locally and sent only to NASA.
+    const { nasa_api_key } = await chrome.storage.sync.get("nasa_api_key");
+    const key = (typeof nasa_api_key === "string" && nasa_api_key.trim()) || "DEMO_KEY";
+
     let response;
     try {
-        response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&thumbs=true&date=${dateStr}`);
+        response = await fetch("https://api.nasa.gov/planetary/apod?api_key=" +
+            encodeURIComponent(key) + "&thumbs=true&date=" + encodeURIComponent(dateStr));
     } catch (error) {
         console.error("[Ochre] Failed to fetch NASA APOD:", error);
         return null;
     }
+
+    // 403 means the key itself was rejected, which is a different problem from
+    // being over quota and needs a different message.
+    if (response.status === 403) return key === "DEMO_KEY" ? "ratelimited" : "badkey";
 
     if (response.status === 429) return "ratelimited";
     if (!response.ok) {

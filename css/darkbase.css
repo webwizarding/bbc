@@ -1,0 +1,31 @@
+/*
+Pre-paint dark base.
+
+Registered by the background worker as a CSS-only content script when dark mode
+is on, and unregistered when it is off. Because it is a registered content
+script rather than a style element created by js/content.js, the browser
+applies it at document_start, before the page paints.
+
+That is the whole point. toggleDarkMode() cannot run until an async
+chrome.storage read resolves, and the page paints in the gap -- a white flash
+on every load, and the most noticeable thing the extension does wrong.
+
+Deliberately minimal: just enough surface and text colour that the first paint
+is dark. The real themed CSS, with the user's own preset, lands microseconds
+later and overrides all of it. Values are the shipped dark preset's
+background-0 and text-0; a user with a custom preset gets one frame of these
+before their own colours apply, which is invisible next to a full white flash.
+*/
+html {
+    background-color: #161616 !important;
+}
+
+/* Canvas paints these before its own stylesheet loads. */
+html body,
+html #application,
+html #wrapper,
+html #main,
+html #content {
+    background-color: #161616;
+    color: #f5f5f5;
+}
