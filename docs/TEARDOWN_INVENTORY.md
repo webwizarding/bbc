@@ -49,30 +49,30 @@ clears them for us.
 |---|---|---|
 | `darkcss` | dark mode | `documentElement` |
 | `gradientcss` | gradient cards | `documentElement` |
-| `ochre-aesthetics` | aesthetics | `documentElement` |
-| `ochre-background` | custom background | `documentElement` |
-| `ochre-sidebar-layout-fix` | better sidebar | `documentElement` |
+| `orca-aesthetics` | aesthetics | `documentElement` |
+| `orca-background` | custom background | `documentElement` |
+| `orca-sidebar-layout-fix` | better sidebar | `documentElement` |
 | `crtodoaltcss` | todo alt colours | `documentElement` |
-| `ochre-hide-right-sidebar-scrollbar` | better todo | `head` |
-| `ochre-hide-sequence-footer` | page chrome | `head` |
+| `orca-hide-right-sidebar-scrollbar` | better todo | `head` |
+| `orca-hide-sequence-footer` | page chrome | `head` |
 | `custom_font`, `custom_font_link` | fonts | `head` |
-| `ochre-reminders` | reminders | `body` |
-| `ochre-todo-preview` | todo hover preview | `body` |
-| `ochre-global-search-modal` | global search *(disabled)* | `body` |
+| `orca-reminders` | reminders | `body` |
+| `orca-todo-preview` | todo hover preview | `body` |
+| `orca-global-search-modal` | global search *(disabled)* | `body` |
 
 All twelve are created with a `getElementById(...) || makeElement(...)`
 idempotence guard, so **they do not duplicate**. The risk is not duplication
 but staleness: a `<style>` scoped to the dashboard keeps applying after
-navigating to a quiz page. `ochre-reminders` and `ochre-todo-preview` are
+navigating to a quiz page. `orca-reminders` and `orca-todo-preview` are
 detached UI that outlives the route that created it.
 
 ### A2. Attached inside the swapped subtree — Canvas clears these
 
-`ochre-todo-list`, `better-todo-main` and its ~30 descendants,
-`ochre-cumulative-gpa`, `ochre-nasa-info-overlay`, `ochre-update-msg`,
-`ochre-grade-analytics` *(disabled)*, `ochre-gs-nav-item`,
-`ochre-gs-sidebar-btn`, `ochre-global-search-header-btn` *(disabled)*,
-`ochre-assignment-return`, `ochre-card-*` (per-card).
+`orca-todo-list`, `better-todo-main` and its ~30 descendants,
+`orca-cumulative-gpa`, `orca-nasa-info-overlay`, `orca-update-msg`,
+`orca-grade-analytics` *(disabled)*, `orca-gs-nav-item`,
+`orca-gs-sidebar-btn`, `orca-global-search-header-btn` *(disabled)*,
+`orca-assignment-return`, `orca-card-*` (per-card).
 
 These need reapply, not teardown — but every insertion point needs an
 idempotence guard, or a reapply on a route Canvas *didn't* clear duplicates
@@ -179,7 +179,7 @@ subtree Canvas did *not* replace:
 | `link[rel=icon].href` (tab icons) | 6729 | **no** |
 | `card.style.display` (hide card) | 5170 | no — but derivable |
 | `header_hero.style.opacity` / `backgroundColor` | 4663, 5175 | no — but derivable |
-| `header_image.style.backgroundImage` | 5182 | marked `data-ochre-card-image` |
+| `header_image.style.backgroundImage` | 5182 | marked `data-orca-card-image` |
 
 Only the first two are genuinely lossy. The favicon one is the worse of the
 two: navigating from a course to the dashboard leaves the course's colour in
@@ -244,9 +244,9 @@ one was unsound.
 | `setupCardAssignments` | container count early-return | yes |
 | `createTodoSections`, `setupBetterTodo`, `setupBetterSidebar` | `querySelector` check | yes |
 | `ensureProfileLogoutPageButton`, `addSubmissionPageButton` | `querySelector` check | yes |
-| `setupGPACalc` | dataset marker (`ochreGpaRendered`) | yes |
+| `setupGPACalc` | dataset marker (`orcaGpaRendered`) | yes |
 | `populateSidebarFromNav` | dataset marker | yes |
-| `changeFavicon` | dataset marker (`ochreOriginalHref`) | yes |
+| `changeFavicon` | dataset marker (`orcaOriginalHref`) | yes |
 | `createCardAssignment`, `loadDashboardNotes`, `ensureTodoTaskMenu` | marker class | weak — see below |
 
 ### The unsound shape

@@ -23,7 +23,7 @@ we stop discovering it one user-visible bug at a time.
 
 | Commit | Date | What it actually changed | Risk |
 |---|---|---|---|
-| `933a5a5` | 08-26 | +103 lines of global-search CSS (modal, nav button, header trigger) | **Low** — all `.ochre-gs-*` scoped, and the feature is disabled |
+| `933a5a5` | 08-26 | +103 lines of global-search CSS (modal, nav button, header trigger) | **Low** — all `.orca-gs-*` scoped, and the feature is disabled |
 | `6fdf813` | 08-27 | Reworked 16 of those global-search lines | **Low** — same scoping, disabled |
 | `462186b` | 08-29 | +1 line each in `content.css` / `popup.css` | **Low** |
 | `9ab7d16` | 08-29 | **The grades table override.** Fixed on `main` at `db52492` | **Was high** — resolved |

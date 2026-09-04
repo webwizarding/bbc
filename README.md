@@ -1,4 +1,4 @@
-# Ochre for Canvas
+# Orca for Canvas
 
 A browser extension that improves the [Instructure Canvas](https://www.instructure.com/canvas)
 interface: dark mode, themes, dashboard card customization, an improved to-do
@@ -120,7 +120,10 @@ Dependency-free for now; a real runner arrives with Phase 2.
 python3 tools/make-icons.py
 ```
 
-Uses only the Python standard library.
+Reads `icon/source.png` and writes every size in `icon/`. Uses only the Python
+standard library — it decodes and re-encodes PNG with `zlib` and `struct`, so
+there is no Pillow or ImageMagick dependency. Replace `icon/source.png` and
+re-run to change the artwork.
 
 ## Contributing
 
@@ -263,6 +266,11 @@ Read values from the module-level `options` object, which mirrors
 ## License
 
 MIT. See [LICENSE-MIT](LICENSE-MIT).
+
+The Orca artwork in `icon/` is not inherited from any upstream project; it was
+supplied for this fork. The MIT licence above covers the code. Neither the name
+nor the artwork is connected to the GNOME Orca screen reader, which shares only
+the word.
 
 Copyright (c) 2024 ksucpea
 Copyright (c) 2026 Guy Sandler

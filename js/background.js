@@ -65,7 +65,7 @@ async function migrateStorage() {
         const check = await chrome.storage.local.get(moved);
         const failed = moved.filter(k => check[k] === undefined);
         if (failed.length) {
-            console.warn("[Ochre] storage migration incomplete, leaving sync copies:", failed);
+            console.warn("[Orca] storage migration incomplete, leaving sync copies:", failed);
             return { migrated: moved.filter(k => !failed.includes(k)), failed };
         }
     }
@@ -73,7 +73,7 @@ async function migrateStorage() {
     if (toRemove.length) await chrome.storage.sync.remove(toRemove);
 
     await chrome.storage.local.set({ orca_storage_version: ORCA_STORAGE_VERSION });
-    console.log("[Ochre] storage migration complete:", moved);
+    console.log("[Orca] storage migration complete:", moved);
     return { migrated: moved };
 }
 
@@ -160,7 +160,7 @@ async function syncDynamicContentScripts() {
         if (existing.length) await chrome.scripting.updateContentScripts([spec]);
         else await chrome.scripting.registerContentScripts([spec]);
     } catch (e) {
-        console.warn("[Ochre] could not register content scripts for", patterns, e);
+        console.warn("[Orca] could not register content scripts for", patterns, e);
     }
 }
 
@@ -230,7 +230,7 @@ async function syncDarkBaseStyle() {
         if (existing.length) await chrome.scripting.updateContentScripts([spec]);
         else await chrome.scripting.registerContentScripts([spec]);
     } catch (e) {
-        console.warn("[Ochre] could not register the dark base style:", e);
+        console.warn("[Orca] could not register the dark base style:", e);
     }
 }
 
@@ -242,14 +242,14 @@ if (chrome.runtime.onStartup) chrome.runtime.onStartup.addListener(() => syncDar
 
 chrome.runtime.onInstalled.addListener(function () {
 
-    migrateStorage().catch(e => console.warn("[Ochre] storage migration failed:", e));
+    migrateStorage().catch(e => console.warn("[Orca] storage migration failed:", e));
     syncDynamicContentScripts();
     syncDarkBaseStyle();
 
     // Defaults live in js/defaults.js, the single source of truth shared with
     // the popup and the content script.
     let default_options = ORCA_DEFAULTS;
-    const updateMsg = "Ochre for Canvas is installed.\nOpen the extension popup on your Canvas dashboard to get started.";
+    const updateMsg = "Orca for Canvas is installed.\nOpen the extension popup on your Canvas dashboard to get started.";
 
     chrome.storage.local.get(null, local => {
         chrome.storage.sync.get(null, async sync => {
@@ -408,7 +408,7 @@ async function callNasaApi(dateStr) {
         response = await fetch("https://api.nasa.gov/planetary/apod?api_key=" +
             encodeURIComponent(key) + "&thumbs=true&date=" + encodeURIComponent(dateStr));
     } catch (error) {
-        console.error("[Ochre] Failed to fetch NASA APOD:", error);
+        console.error("[Orca] Failed to fetch NASA APOD:", error);
         return null;
     }
 

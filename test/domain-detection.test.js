@@ -1,5 +1,5 @@
 /*
-Security regression test: how Ochre decides a page is Canvas.
+Security regression test: how Orca decides a page is Canvas.
 
 The rule is that Canvas is identified only two ways -- a built-in pattern for
 Instructure-hosted instances, and domains the user typed into the popup. It is

@@ -124,9 +124,9 @@ from 3 to 4. `grade_analytics` and `global_search` are absent from
 popup's `defaultOptions` entirely, so the reset button cannot re-enable
 them — which is why the quarantine holds, but it is the same defect.
 
-### --ochre-buttons is never emitted (root cause established)
+### --orca-buttons is never emitted (root cause established)
 
-`css/darkmodecss.js` uses `var(--ochre-buttons)` in three rules with no
+`css/darkmodecss.js` uses `var(--orca-buttons)` in three rules with no
 fallback. Nothing emits it: not `OCHRE_LIGHT_DEFAULTS`, not the
 `dark_preset` defaults, and no bundled theme supplies a `buttons` key.
 Those three rules have never applied in the current architecture.
@@ -148,8 +148,8 @@ to every bundled theme's export or defaulting it when absent — prefer
 defaulting when absent, since themes are untrusted input anyway.
 
 A full audit of emitted-versus-consumed variables found this is the
-**only** genuine orphan. `--ochre-stop` also died in that migration but
-has no remaining consumers. The four `--ochre-sidebar-{icon-size,
+**only** genuine orphan. `--orca-stop` also died in that migration but
+has no remaining consumers. The four `--orca-sidebar-{icon-size,
 label-size,btn-height,btn-gap}` variables look orphaned to a static
 scan but are set at runtime via `setProperty()` in
 `applySidebarScaleStyles`.

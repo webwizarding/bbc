@@ -1,5 +1,5 @@
 /*
-Ochre for Canvas - shared storage layer.
+Orca for Canvas - shared storage layer.
 
 Loaded before content.js as a content script, and by popup.html before
 popup.js, so both use one implementation rather than a copy each. The
@@ -89,7 +89,7 @@ let quotaNoticeShown = false;
 function reportStorageFailure(area, keys, error) {
     const message = String(error && error.message ? error.message : error || "");
     const isQuota = /QUOTA|quota/.test(message);
-    console.warn(`[Ochre] storage.${area} write failed for [${keys.join(", ")}]:`, message);
+    console.warn(`[Orca] storage.${area} write failed for [${keys.join(", ")}]:`, message);
     if (!isQuota || quotaNoticeShown) return;
     quotaNoticeShown = true;
     // Shown once. Repeating it per failed write would bury the page in notices
@@ -104,7 +104,7 @@ function reportStorageFailure(area, keys, error) {
             new CanvasApiError("http", message),
             { feature: "Settings could not be saved (browser storage is full)" });
     } else {
-        console.warn("[Ochre] browser storage is full; settings could not be saved.");
+        console.warn("[Orca] browser storage is full; settings could not be saved.");
     }
 }
 

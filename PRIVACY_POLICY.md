@@ -1,11 +1,11 @@
 # Privacy Policy
 
-**Extension:** Ochre for Canvas
+**Extension:** Orca for Canvas
 **Last updated:** September 1, 2026
 
 ## Summary
 
-Ochre for Canvas has no backend. There are no servers, no accounts, no
+Orca for Canvas has no backend. There are no servers, no accounts, no
 analytics, and no telemetry. Everything the extension stores stays in your
 browser's own extension storage on your device.
 

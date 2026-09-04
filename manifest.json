@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Ochre for Canvas",
+  "name": "Orca for Canvas",
   "description": "Dark mode, themes, an improved to-do list, and GPA tools for Canvas LMS. Everything stays on your device.",
   "version": "0.1.0",
   "icons": {
@@ -15,7 +15,7 @@
       "38": "icon/icon-38.png"
     },
     "default_popup": "html/popup.html",
-    "default_title": "Ochre for Canvas"
+    "default_title": "Orca for Canvas"
   },
   "background": {
     "scripts": [
@@ -52,7 +52,7 @@
   "default_locale": "en",
   "browser_specific_settings": {
     "gecko": {
-      "id": "ochre@example.invalid",
+      "id": "orca@example.invalid",
       "strict_min_version": "109.0",
       "data_collection_permissions": {
         "required": [

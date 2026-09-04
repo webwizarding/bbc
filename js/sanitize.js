@@ -1,5 +1,5 @@
 /*
-Ochre for Canvas - sanitizers for values that reach CSS and URL sinks.
+Orca for Canvas - sanitizers for values that reach CSS and URL sinks.
 
 Theme fields, the custom font, the custom background and per-course colours are
 all user- or theme-supplied, and several are written straight into a <style>

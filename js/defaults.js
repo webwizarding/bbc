@@ -1,5 +1,5 @@
 /*
-Ochre for Canvas - default option values.
+Orca for Canvas - default option values.
 
 The single source of truth. There were previously two: default_options in
 background.js, which seeds storage on install, and defaultOptions in popup.js,

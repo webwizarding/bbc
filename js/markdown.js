@@ -1,5 +1,5 @@
 /*
-Ochre - lightweight Markdown renderer for dashboard notes.
+Orca - lightweight Markdown renderer for dashboard notes.
 
 Renders a small, notes-friendly subset of Markdown to HTML:
   headings, bold, italic, strikethrough, inline code, fenced code blocks,

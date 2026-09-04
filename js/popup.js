@@ -2416,7 +2416,7 @@ async function requestCustomDomainAccess(entries) {
     } else {
         // Say what stops working, rather than failing silently.
         displayAlert(true,
-            "Without access to that site, Ochre can't change anything on it \u2014 no dark mode, " +
+            "Without access to that site, Orca can't change anything on it \u2014 no dark mode, " +
             "no to-do list, no card styling. Your settings are saved, so you can grant access " +
             "later by entering the address again.");
     }
@@ -2433,7 +2433,7 @@ async function sendFromPopup(message, options = {}) {
     try {
         tabs = await chrome.tabs.query({ currentWindow: true });
     } catch (e) {
-        console.warn("[Ochre] could not enumerate tabs:", e);
+        console.warn("[Orca] could not enumerate tabs:", e);
         return null;
     }
     for (const tab of tabs) {

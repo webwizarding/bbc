@@ -1,6 +1,6 @@
 {
 	"app_name": {
-		"message": "Ochre for Canvas"
+		"message": "Orca for Canvas"
 	},
 	"search_features": {
 		"message": "Search features..."
@@ -60,7 +60,7 @@
 		"message": "Quiz Safe Mode"
 	},
 	"quiz_safe_mode_desc": {
-		"message": "Turns off most Ochre features on quiz pages so you get the default Canvas quiz experience"
+		"message": "Turns off most Orca features on quiz pages so you get the default Canvas quiz experience"
 	},
 	"opacity_options": {
 		"message": "Opacity & Blur"

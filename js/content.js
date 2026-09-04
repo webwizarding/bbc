@@ -124,7 +124,7 @@ function runReconcilers() {
             fn();
         } catch (e) {
             // One broken reconciler must not stop the others.
-            console.warn(`[Ochre] reconciler "${name}" failed:`, e);
+            console.warn(`[Orca] reconciler "${name}" failed:`, e);
         }
     }
 }
@@ -151,7 +151,7 @@ function registerReconciler(name, fn) {
     try {
         fn();
     } catch (e) {
-        console.warn(`[Ochre] reconciler "${name}" failed:`, e);
+        console.warn(`[Orca] reconciler "${name}" failed:`, e);
     }
 }
 
@@ -184,7 +184,7 @@ function whenSettled(fn, { quietMs = 600, capMs = 6000 } = {}) {
         try {
             fn();
         } catch (e) {
-            console.warn("[Ochre] settled callback failed:", e);
+            console.warn("[Orca] settled callback failed:", e);
         }
     };
     const capTimer = setTimeout(finish, capMs);
@@ -737,7 +737,7 @@ async function getNasaDailyBackground() {
     try {
         result = await chrome.runtime.sendMessage({ type: "getNasaBackground" });
     } catch (error) {
-        console.error("[Ochre] Failed to fetch NASA APOD:", error);
+        console.error("[Orca] Failed to fetch NASA APOD:", error);
         return null;
     }
     // An honest message beats silently showing no background. NASA's shared
@@ -1168,7 +1168,7 @@ function startExtension() {
 
     chrome.storage.onChanged.addListener(applyOptionsChanges);
 
-    console.log("Ochre - running");
+    console.log("Orca - running");
 }
 
 function applyOptionsChanges(changes) {
@@ -5031,7 +5031,7 @@ async function changeColorPreset(colors) {
                           // rejected the write. Previously this had no catch,
                           // so a failed PUT skipped applyColor() and left an
                           // unhandled rejection.
-                          console.warn("[Ochre] could not save card colour to Canvas:", e);
+                          console.warn("[Orca] could not save card colour to Canvas:", e);
                           applyColor();
                       });
             }
@@ -6371,12 +6371,12 @@ function injectQuizSafeModeBanner(safeModeOn) {
 
         makeElement("div", banner, {
             className: "orca-quiz-safe-title",
-            textContent: "Ochre — Quiz Safe Mode",
+            textContent: "Orca — Quiz Safe Mode",
         });
 
         makeElement("p", banner, {
             className: "orca-quiz-safe-info",
-            textContent: "This extension hasn't been 100% approved by all teachers. Quiz Safe Mode turns off most Ochre features that could interfere with this quiz page, giving you the default Canvas quiz experience.",
+            textContent: "This extension hasn't been 100% approved by all teachers. Quiz Safe Mode turns off most Orca features that could interfere with this quiz page, giving you the default Canvas quiz experience.",
         });
 
         const toggleRow = makeElement("div", banner, { className: "orca-quiz-safe-row" });
@@ -6755,7 +6755,7 @@ async function buildGlobalSearchIndex() {
         // source so we never index (or waste requests on) past-term courses.
         courses = await canvasApi.getAll(`${domain}/api/v1/courses?enrollment_state=active&per_page=100`);
     } catch (e) {
-        console.warn("[Ochre] global search: failed to load courses", e);
+        console.warn("[Orca] global search: failed to load courses", e);
         return [];
     }
     if (!Array.isArray(courses) || !courses.length) return [];
@@ -9109,7 +9109,7 @@ function getNextPageUrl(linkHeader, expectedOrigin = domain) {
         return null;
     }
     if (parsed.origin !== expectedOrigin) {
-        console.warn("[Ochre] refusing cross-origin pagination link:", parsed.origin);
+        console.warn("[Orca] refusing cross-origin pagination link:", parsed.origin);
         return null;
     }
     return parsed.href;
@@ -9250,7 +9250,7 @@ async function canvasGetAll(url, { force = false, maxPages = CANVAS_API_MAX_PAGE
             items.push(...chunk);
             next = getNextPageUrl(response.headers.get("Link"));
             if (next && page === maxPages - 1) {
-                console.warn(`[Ochre] pagination stopped at the ${maxPages}-page cap for ${url}`);
+                console.warn(`[Orca] pagination stopped at the ${maxPages}-page cap for ${url}`);
             }
         }
         return items;
@@ -9333,7 +9333,7 @@ function clearApiError(feature) {
 }
 
 function showApiError(error, { feature = "Canvas data", container = null } = {}) {
-    console.warn(`[Ochre] ${feature} failed to load:`, error);
+    console.warn(`[Orca] ${feature} failed to load:`, error);
 
     const detail = error instanceof CanvasApiError
         ? error.userMessage
