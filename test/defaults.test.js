@@ -33,7 +33,7 @@ function loadDefaults() {
     vm.createContext(ctx);
     // `const` at the top level of a vm script is script-scoped and never
     // appears on the context object, so read the binding back explicitly.
-    vm.runInContext(read("js/defaults.js") + "\n;globalThis.__d = OCHRE_DEFAULTS;", ctx);
+    vm.runInContext(read("js/defaults.js") + "\n;globalThis.__d = ORCA_DEFAULTS;", ctx);
     return ctx.__d;
 }
 
@@ -41,7 +41,7 @@ console.log("\ndefaults\n");
 
 test("there is exactly one defaults object", () => {
     const d = loadDefaults();
-    assert.ok(d && d.sync && d.local, "OCHRE_DEFAULTS must expose sync and local");
+    assert.ok(d && d.sync && d.local, "ORCA_DEFAULTS must expose sync and local");
     for (const [file, marker] of [["js/background.js", "let default_options = {"],
                                   ["js/popup.js", "const defaultOptions = {"]]) {
         assert.ok(!strip(read(file)).includes(marker),
@@ -50,8 +50,8 @@ test("there is exactly one defaults object", () => {
 });
 
 test("both consumers reference the shared object", () => {
-    assert.ok(/let default_options = OCHRE_DEFAULTS;/.test(strip(read("js/background.js"))));
-    assert.ok(/const defaultOptions = OCHRE_DEFAULTS;/.test(strip(read("js/popup.js"))));
+    assert.ok(/let default_options = ORCA_DEFAULTS;/.test(strip(read("js/background.js"))));
+    assert.ok(/const defaultOptions = ORCA_DEFAULTS;/.test(strip(read("js/popup.js"))));
 });
 
 test("reset and fresh install now produce the same profile", () => {

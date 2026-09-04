@@ -224,7 +224,7 @@ test("navigation is detected by more than one signal", () => {
 test("history patching is idempotent", () => {
     const c = code();
     const m = /function setupNavigation\(\)\s*\{[\s\S]*?\n\}/.exec(c);
-    assert.ok(/__ochrePatched/.test(m[0]),
+    assert.ok(/__orcaPatched/.test(m[0]),
         "history methods must not be wrapped twice if setupNavigation runs again");
 });
 

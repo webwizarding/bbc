@@ -1,85 +1,122 @@
 #!/usr/bin/env python3
 """
-Generate the Ochre for Canvas icon set.
+Generate the Orca for Canvas icon set from icon/source.png.
 
-Dependency-free: writes PNGs with stdlib zlib/struct only, so the icons are
-reproducible from source without ImageMagick, cairo, or Pillow.
-
-Mark: a cream ring ("O" for Ochre) on a rounded square in ochre pigment tones.
-Rendered at 8x supersample and box-downsampled for anti-aliasing.
+Dependency-free: decodes and re-encodes PNG with stdlib zlib/struct only, so
+the icons are reproducible from source without Pillow, ImageMagick or cairo.
 
 Usage:  python3 tools/make-icons.py
 """
-import math
 import struct
 import zlib
 from pathlib import Path
 
-SS = 8  # supersample factor
-
-TOP = (209, 138, 58)     # #D18A3A  ochre, lit
-BOTTOM = (150, 82, 20)   # #965214  ochre, shadowed
-RING = (247, 240, 228)   # #F7F0E4  cream
-
-OUT = Path(__file__).resolve().parent.parent / "icon"
+ROOT = Path(__file__).resolve().parent.parent
+SOURCE = ROOT / "icon" / "source.png"
+OUT = ROOT / "icon"
 SIZES = [16, 19, 32, 38, 48, 128]
 
 
-def rounded_box_sdf(px, py, half, radius):
-    """Signed distance to a rounded square centred at the origin. <=0 is inside."""
-    qx = abs(px) - (half - radius)
-    qy = abs(py) - (half - radius)
-    outside = math.hypot(max(qx, 0.0), max(qy, 0.0))
-    inside = min(max(qx, qy), 0.0)
-    return outside + inside - radius
+def read_png(path):
+    """Decode a non-interlaced 8-bit PNG to (width, height, RGBA bytes)."""
+    data = path.read_bytes()
+    if data[:8] != b"\x89PNG\r\n\x1a\n":
+        raise ValueError("not a PNG")
+    pos, idat, pal, trns = 8, bytearray(), None, None
+    width = height = depth = color = None
+    while pos < len(data):
+        (length,) = struct.unpack(">I", data[pos:pos + 4])
+        tag = data[pos + 4:pos + 8]
+        body = data[pos + 8:pos + 8 + length]
+        pos += 12 + length
+        if tag == b"IHDR":
+            width, height, depth, color, _, _, interlace = struct.unpack(">IIBBBBB", body)
+            if depth != 8:
+                raise ValueError(f"unsupported bit depth {depth}")
+            if interlace:
+                raise ValueError("interlaced PNG not supported")
+        elif tag == b"PLTE":
+            pal = body
+        elif tag == b"tRNS":
+            trns = body
+        elif tag == b"IDAT":
+            idat += body
+        elif tag == b"IEND":
+            break
+
+    channels = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}[color]
+    raw = zlib.decompress(bytes(idat))
+    stride = width * channels
+    out = bytearray(stride * height)
+
+    # Undo the per-scanline filters.
+    prev = bytearray(stride)
+    p = 0
+    for y in range(height):
+        ftype = raw[p]; p += 1
+        line = bytearray(raw[p:p + stride]); p += stride
+        if ftype == 1:      # Sub
+            for i in range(channels, stride):
+                line[i] = (line[i] + line[i - channels]) & 0xFF
+        elif ftype == 2:    # Up
+            for i in range(stride):
+                line[i] = (line[i] + prev[i]) & 0xFF
+        elif ftype == 3:    # Average
+            for i in range(stride):
+                a = line[i - channels] if i >= channels else 0
+                line[i] = (line[i] + ((a + prev[i]) >> 1)) & 0xFF
+        elif ftype == 4:    # Paeth
+            for i in range(stride):
+                a = line[i - channels] if i >= channels else 0
+                b = prev[i]
+                c = prev[i - channels] if i >= channels else 0
+                pa, pb, pc = abs(b - c), abs(a - c), abs(a + b - 2 * c)
+                pr = a if (pa <= pb and pa <= pc) else (b if pb <= pc else c)
+                line[i] = (line[i] + pr) & 0xFF
+        elif ftype != 0:
+            raise ValueError(f"bad filter type {ftype}")
+        out[y * stride:(y + 1) * stride] = line
+        prev = line
+
+    # Normalise to RGBA.
+    rgba = bytearray(width * height * 4)
+    for i in range(width * height):
+        if color == 2:
+            r, g, b = out[i * 3:i * 3 + 3]; a = 255
+        elif color == 6:
+            r, g, b, a = out[i * 4:i * 4 + 4]
+        elif color == 0:
+            r = g = b = out[i]; a = 255
+        elif color == 4:
+            r = g = b = out[i * 2]; a = out[i * 2 + 1]
+        else:  # palette
+            idx = out[i]
+            r, g, b = pal[idx * 3:idx * 3 + 3]
+            a = trns[idx] if trns and idx < len(trns) else 255
+        rgba[i * 4:i * 4 + 4] = bytes((r, g, b, a))
+    return width, height, rgba
 
 
-def render(size):
-    n = size * SS
-    half = n / 2.0
-    radius = n * 0.235          # corner radius
-    ring_r = n * 0.275          # ring centreline radius
-    # Heavier stroke at small sizes so the O stays legible at 16px.
-    ring_w = n * (0.155 if size <= 19 else 0.135)
-
-    rows = []
-    for y in range(n):
-        row = bytearray()
-        py = y + 0.5 - half
-        t = y / (n - 1)
-        base = tuple(round(TOP[i] + (BOTTOM[i] - TOP[i]) * t) for i in range(3))
-        for x in range(n):
-            px = x + 0.5 - half
-            if rounded_box_sdf(px, py, half, radius) > 0:
-                row += b"\x00\x00\x00\x00"
-                continue
-            d = abs(math.hypot(px, py) - ring_r)
-            if d <= ring_w / 2.0:
-                row += bytes(RING) + b"\xff"
-            else:
-                row += bytes(base) + b"\xff"
-        rows.append(bytes(row))
-
-    # Box-downsample SS x SS blocks, compositing over transparency correctly.
+def resize(src_w, src_h, rgba, size):
+    """Box-filter downsample, averaging in premultiplied alpha."""
     out = bytearray()
     for oy in range(size):
-        out.append(0)  # PNG filter type 0 (None)
+        out.append(0)  # PNG filter type None
+        y0, y1 = oy * src_h // size, max(oy * src_h // size + 1, (oy + 1) * src_h // size)
         for ox in range(size):
-            ra = ga = ba = aa = 0
-            for sy in range(SS):
-                r = rows[oy * SS + sy]
-                for sx in range(SS):
-                    i = (ox * SS + sx) * 4
-                    a = r[i + 3]
-                    ra += r[i] * a
-                    ga += r[i + 1] * a
-                    ba += r[i + 2] * a
-                    aa += a
-            if aa == 0:
+            x0, x1 = ox * src_w // size, max(ox * src_w // size + 1, (ox + 1) * src_w // size)
+            r = g = b = a = n = 0
+            for y in range(y0, y1):
+                row = y * src_w
+                for x in range(x0, x1):
+                    i = (row + x) * 4
+                    pa = rgba[i + 3]
+                    r += rgba[i] * pa; g += rgba[i + 1] * pa; b += rgba[i + 2] * pa
+                    a += pa; n += 1
+            if a == 0:
                 out += b"\x00\x00\x00\x00"
             else:
-                out += bytes((round(ra / aa), round(ga / aa), round(ba / aa),
-                              round(aa / (SS * SS))))
+                out += bytes((round(r / a), round(g / a), round(b / a), round(a / n)))
     return bytes(out)
 
 
@@ -97,9 +134,12 @@ def write_png(path, size, raw):
 
 
 def main():
-    OUT.mkdir(exist_ok=True)
+    if not SOURCE.exists():
+        raise SystemExit(f"missing source artwork: {SOURCE}")
+    w, h, rgba = read_png(SOURCE)
+    print(f"  source {SOURCE.name}: {w}x{h}")
     for s in SIZES:
-        n = write_png(OUT / f"icon-{s}.png", s, render(s))
+        n = write_png(OUT / f"icon-{s}.png", s, resize(w, h, rgba, s))
         print(f"  icon-{s}.png  {n:,} bytes")
 
     # Our own chevron, replacing a third-party SVG Repo asset.

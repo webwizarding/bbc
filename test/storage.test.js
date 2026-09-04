@@ -71,13 +71,13 @@ function loadStorage(chrome) {
     const c = strip(CONTENT);
     const pieces = [];
     for (const re of [
-        /^const OCHRE_LOCAL_KEYS = new Set\(\[[\s\S]*?\]\);/m,
-        /^const OCHRE_STORAGE_VERSION = \d+;/m,
-        /^const OCHRE_LOCAL_KEY_PREFIXES = \[[\s\S]*?\];/m,
+        /^const ORCA_LOCAL_KEYS = new Set\(\[[\s\S]*?\]\);/m,
+        /^const ORCA_STORAGE_VERSION = \d+;/m,
+        /^const ORCA_LOCAL_KEY_PREFIXES = \[[\s\S]*?\];/m,
         /^function storageAreaFor\([\s\S]*?\n\}/m,
         /^function splitByArea\([\s\S]*?\n\}/m,
-        /^const OCHRE_NUMERIC_KEYS = new Set\(\[[\s\S]*?\]\);/m,
-        /^const OCHRE_ENUM_KEYS = \{[\s\S]*?\n\};/m,
+        /^const ORCA_NUMERIC_KEYS = new Set\(\[[\s\S]*?\]\);/m,
+        /^const ORCA_ENUM_KEYS = \{[\s\S]*?\n\};/m,
         /^function coerceStoredValue\([\s\S]*?\n\}/m,
         /^function coerceStoredValues\([\s\S]*?\n\}/m,
         /^let quotaNoticeShown = false;/m,
@@ -86,7 +86,7 @@ function loadStorage(chrome) {
         /^function storageGet\([\s\S]*?\n\}/m,
         /^function storageGetAll\([\s\S]*?\n\}/m,
         /^function storageRemove\([\s\S]*?\n\}/m,
-        /^const ochreStorage = \{[\s\S]*?\n\};/m,
+        /^const orcaStorage = \{[\s\S]*?\n\};/m,
     ]) {
         const m = re.exec(c);
         assert.ok(m, "could not extract " + re);
@@ -107,8 +107,8 @@ function loadStorage(chrome) {
 function loadMigration(chrome) {
     const b = strip(BG);
     const pieces = [
-        /^const OCHRE_LOCAL_KEYS = \[[\s\S]*?\];/m.exec(b)[0],
-        /^const OCHRE_STORAGE_VERSION = \d+;/m.exec(b)[0],
+        /^const ORCA_LOCAL_KEYS = \[[\s\S]*?\];/m.exec(b)[0],
+        /^const ORCA_STORAGE_VERSION = \d+;/m.exec(b)[0],
         /^async function migrateStorage\(\)[\s\S]*?\n\}/m.exec(b)[0],
     ];
     const ctx = { chrome, console: { warn() {}, log() {} }, Promise, Object };
@@ -142,8 +142,8 @@ test("an unknown key defaults to sync", () => {
 });
 
 test("the content and background key lists agree", () => {
-    const a = /^const OCHRE_LOCAL_KEYS = new Set\(\[([\s\S]*?)\]\);/m.exec(strip(CONTENT))[1];
-    const b = /^const OCHRE_LOCAL_KEYS = \[([\s\S]*?)\];/m.exec(strip(BG))[1];
+    const a = /^const ORCA_LOCAL_KEYS = new Set\(\[([\s\S]*?)\]\);/m.exec(strip(CONTENT))[1];
+    const b = /^const ORCA_LOCAL_KEYS = \[([\s\S]*?)\];/m.exec(strip(BG))[1];
     const keys = (t) => new Set((t.match(/"([^"]+)"/g) || []).map(x => x.slice(1, -1)));
     const A = keys(a), B = keys(b);
     assert.deepStrictEqual([...A].sort(), [...B].sort(),
@@ -164,7 +164,7 @@ test("no key that was in local before the refactor now routes to sync", () => {
         "grade_analytics_open", "grade_analytics_fit_y", "grade_analytics_final_12345",
         "better_sidebar_expanded_dash", "better_sidebar_expanded_course",
         "picsum_daily_2026-09-01", "nasa_apod_2026-09-01", "nasa_apod_meta_2026-09-01",
-        "ochre_global_search_index",
+        "orca_global_search_index",
     ];
     const regressed = previouslyLocal.filter(k => ctx.storageAreaFor(k) !== "local");
     assert.deepStrictEqual(regressed, [],
@@ -264,9 +264,9 @@ test("no default is seeded into sync if its key belongs in local", () => {
     // also the popup's fallback source. Seeding them into sync would recreate
     // the exact condition the migration undoes, on every fresh install.
     const b = strip(BG);
-    const local = new Set((/const OCHRE_LOCAL_KEYS = \[([\s\S]*?)\];/.exec(b)[1].match(/"([^"]+)"/g) || [])
+    const local = new Set((/const ORCA_LOCAL_KEYS = \[([\s\S]*?)\];/.exec(b)[1].match(/"([^"]+)"/g) || [])
         .map(x => x.slice(1, -1)));
-    const seedBlock = /for \(const key of OCHRE_LOCAL_KEYS\) \{[\s\S]*?delete newSyncOptions\[key\];[\s\S]{0,40}?\}/.exec(b);
+    const seedBlock = /for \(const key of ORCA_LOCAL_KEYS\) \{[\s\S]*?delete newSyncOptions\[key\];[\s\S]{0,40}?\}/.exec(b);
     assert.ok(seedBlock, "seeding does not route by key; bulk defaults would land in sync");
     assert.ok(/newLocalOptions\[key\] = newSyncOptions\[key\]/.test(seedBlock[0]) &&
               /delete newSyncOptions\[key\]/.test(seedBlock[0]),
@@ -347,7 +347,7 @@ testAsync("the version marker is not written when the move fails", async () => {
     chrome.storage.sync.remove = async () => { throw new Error("interrupted"); };
     const ctx = loadMigration(chrome);
     await ctx.migrateStorage().catch(() => {});
-    assert.ok(!(chrome.storage.local.data.ochre_storage_version >= 1),
+    assert.ok(!(chrome.storage.local.data.orca_storage_version >= 1),
         "the version marker was written despite the move failing; every later " +
         "run will skip and the data is stranded in sync");
 });

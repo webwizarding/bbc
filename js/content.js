@@ -323,13 +323,13 @@ function setupNavigation() {
 
     for (const method of ["pushState", "replaceState"]) {
         const original = history[method];
-        if (typeof original !== "function" || original.__ochrePatched) continue;
+        if (typeof original !== "function" || original.__orcaPatched) continue;
         const patched = function (...args) {
             const result = original.apply(this, args);
             scheduleRouteCheck();
             return result;
         };
-        patched.__ochrePatched = true;
+        patched.__orcaPatched = true;
         history[method] = patched;
     }
 
@@ -467,15 +467,15 @@ function addSubmissionPageButton() {
     const row = document.querySelector(".submission-details-header__heading-and-grades")
         || document.querySelector(".submission-details-header")
         || document.querySelector(".submission_details");
-    if (!row || row.querySelector("#ochre-assignment-return")) return;
+    if (!row || row.querySelector("#orca-assignment-return")) return;
 
     // Insert between the h1 heading and the grade-summary div so it reads
     // [Heading] [Back to Assignment] [Grade]. Falls back to appending if the
     // grade-summary div isn't found for some reason.
     const gradeSummary = row.querySelector(".submission-details-header__grade-summary");
     const btn = makeElement("a", row, {
-        id: "ochre-assignment-return",
-        className: "ochre-custom-btn",
+        id: "orca-assignment-return",
+        className: "orca-custom-btn",
         href: assignmentLink,
         textContent: "Back to Assignment",
         style: "display:inline-flex;align-items:center;justify-content:center;align-self:center;margin-left:auto;margin-right:12px;padding:6px 12px;text-decoration:none;font-weight:700;color:inherit!important;",
@@ -496,14 +496,14 @@ function addAssignmentPageButton() {
     // right); the h1 still wraps its text when long.
     const titleContent = document.querySelector(".assignment-title .title-content")
         || document.querySelector(".title-content");
-    if (!titleContent || titleContent.querySelector("#ochre-assignment-grades")) return;
+    if (!titleContent || titleContent.querySelector("#orca-assignment-grades")) return;
 
     titleContent.style.display = "flex";
     titleContent.style.alignItems = "center";
     titleContent.style.gap = "12px";
     makeElement("a", titleContent, {
-        id: "ochre-assignment-grades",
-        className: "ochre-custom-btn",
+        id: "orca-assignment-grades",
+        className: "orca-custom-btn",
         href: link,
         textContent: "Go to Grades",
         style: "display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto;padding:6px 12px;text-decoration:none;font-weight:700;font-size:16px;color:inherit!important;white-space:nowrap;",
@@ -513,11 +513,11 @@ function addAssignmentPageButton() {
 function addProfileLogoutPageButton() {
     if (!isProfilePage()) return;
     const content = document.getElementById("content");
-    if (!content || content.querySelector("#ochre-profile-logout")) return;
+    if (!content || content.querySelector("#orca-profile-logout")) return;
 
     makeElement("a", content, {
-        id: "ochre-profile-logout",
-        className: "ochre-custom-btn",
+        id: "orca-profile-logout",
+        className: "orca-custom-btn",
         href: `${domain}/logout`,
         textContent: "Logout",
         style: "display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;margin:0 0 12px 0;padding:10px 14px;text-decoration:none;font-weight:700;",
@@ -528,9 +528,9 @@ function ensureProfileLogoutPageButton() {
     if (!isProfilePage()) return false;
     const content = document.getElementById("content");
     if (!content) return false;
-    if (content.querySelector("#ochre-profile-logout")) return true;
+    if (content.querySelector("#orca-profile-logout")) return true;
     addProfileLogoutPageButton();
-    return Boolean(content.querySelector("#ochre-profile-logout"));
+    return Boolean(content.querySelector("#orca-profile-logout"));
 }
 
 function watchProfileLogoutPageButton() {
@@ -540,7 +540,7 @@ function watchProfileLogoutPageButton() {
     // button could outlive the page it belonged to.
     registerReconciler("profileLogoutButton", () => {
         if (!isProfilePage()) {
-            document.getElementById("ochre-profile-logout")?.remove();
+            document.getElementById("orca-profile-logout")?.remove();
             return;
         }
         ensureProfileLogoutPageButton();
@@ -556,7 +556,7 @@ function maintainSubmissionPageButton() {
     requestAnimationFrame(() => {
         submissionButtonScheduled = false;
         const link = getSubmissionAssignmentLink();
-        const existing = document.getElementById("ochre-assignment-return");
+        const existing = document.getElementById("orca-assignment-return");
         if (!link) {
             existing?.remove();
             return;
@@ -579,7 +579,7 @@ function maintainAssignmentPageButton() {
     requestAnimationFrame(() => {
         assignmentButtonScheduled = false;
         const isAssignmentPage = /^\/courses\/\d+\/assignments\/\d+(?!\/submissions)(?:\/|$)/.test(getRoute());
-        const existing = document.getElementById("ochre-assignment-grades");
+        const existing = document.getElementById("orca-assignment-grades");
         if (!isAssignmentPage) {
             if (existing) {
                 const titleContent = existing.closest(".title-content");
@@ -624,11 +624,11 @@ function removeSequenceFooter() {
 // Canvas re-renders and full reloads, so the footer can never flash back after
 // the JS observer has removed it (or timed out) once.
 function applyHideSequenceFooter() {
-    let style = document.getElementById("ochre-hide-sequence-footer");
+    let style = document.getElementById("orca-hide-sequence-footer");
     if (options.hide_sequence_footer === true) {
         if (!style) {
             style = document.createElement("style");
-            style.id = "ochre-hide-sequence-footer";
+            style.id = "orca-hide-sequence-footer";
             style.textContent = "#sequence_footer{display:none!important}";
             (document.head || document.documentElement).appendChild(style);
         }
@@ -688,7 +688,7 @@ function watchNewCanvasButton() {
 }
 
 async function getActiveCustomBackground() {
-    const syncOpts = await ochreStorage.get([
+    const syncOpts = await orcaStorage.get([
         "customBackgroundDaily",
         "customBackgroundNasaDaily",
         "customBackgroundLink",
@@ -723,12 +723,12 @@ async function getDailyBackgroundPreset() {
     const today = new Date();
     const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
     const cacheKey = `picsum_daily_${dateStr}`;
-    const cached = await ochreStorage.get(cacheKey);
+    const cached = await orcaStorage.get(cacheKey);
     if (cached[cacheKey]) return cached[cacheKey];
 
     const url = `https://picsum.photos/seed/${dateStr}/1920/1080`;
     const result = { url, scale: 100 };
-    await ochreStorage.set({ [cacheKey]: result });
+    await orcaStorage.set({ [cacheKey]: result });
     return result;
 }
 
@@ -782,7 +782,7 @@ function createNasaInfoOverlay() {
     }
 
     nasaInfoOverlayEl = document.createElement("div");
-    nasaInfoOverlayEl.id = "ochre-nasa-info-overlay";
+    nasaInfoOverlayEl.id = "orca-nasa-info-overlay";
     nasaInfoOverlayEl.style.cssText = "position:absolute;right:24px;bottom:24px;z-index:9999;";
     nasaInfoOverlayEl.innerHTML = `
         <div id="nasa-info-icon" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:rgba(30,30,30,0.85);border:1px solid rgba(255,255,255,0.15);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
@@ -809,13 +809,13 @@ function createNasaInfoOverlay() {
         for (let i = 0; i < 7; i++) {
             const dateStr = date.toISOString().slice(0, 10);
             const cacheKey = `nasa_apod_${dateStr}`;
-            const cached = await ochreStorage.get(cacheKey);
+            const cached = await orcaStorage.get(cacheKey);
             if (!cached[cacheKey]) {
                 date.setDate(date.getDate() - 1);
                 continue;
             }
             const metadataKey = `nasa_apod_meta_${dateStr}`;
-            const metadata = await ochreStorage.get(metadataKey);
+            const metadata = await orcaStorage.get(metadataKey);
             const meta = metadata[metadataKey];
             if (!meta) return false;
             document.getElementById("nasa-info-title").textContent = meta.title || "";
@@ -876,12 +876,12 @@ function getSidebarStateKey(mode = getSidebarLayoutMode()) {
 
 async function getSidebarExpandedState(mode = getSidebarLayoutMode()) {
     const key = getSidebarStateKey(mode);
-    const result = await ochreStorage.get(key);
+    const result = await orcaStorage.get(key);
     return result[key] ?? false;
 }
 
 function setSidebarExpandedState(mode, expanded) {
-    ochreStorage.set({ [getSidebarStateKey(mode)]: expanded });
+    orcaStorage.set({ [getSidebarStateKey(mode)]: expanded });
 }
 
 let assignments = null;
@@ -919,7 +919,7 @@ const canvas_svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="#ff4545" width
 
 async function insertReminders(reminders) {
     const toAdd = [];
-    const storage = await ochreStorage.get("reminders");
+    const storage = await orcaStorage.get("reminders");
     // overrides = if theres a item that needs to update, but already exists
     let overrides = false;
     for (const insert of reminders) {
@@ -935,16 +935,16 @@ async function insertReminders(reminders) {
         }
         if (found === false) toAdd.push(insert);
     }
-    if (toAdd.length > 0 || overrides === true) ochreStorage.set({ "reminders": [...storage["reminders"], ...toAdd] });
+    if (toAdd.length > 0 || overrides === true) orcaStorage.set({ "reminders": [...storage["reminders"], ...toAdd] });
 }
 
 async function hideReminder(href) {
-    const storage = await ochreStorage.get("reminders");
+    const storage = await orcaStorage.get("reminders");
 
     for (let i = 0; i < storage["reminders"].length; i++) {
         if (storage["reminders"][i]["h"] === href) {
             storage["reminders"][i]["c"]++;
-            ochreStorage.set({ "reminders": storage["reminders"] });
+            orcaStorage.set({ "reminders": storage["reminders"] });
             break;
         }
     }
@@ -952,13 +952,13 @@ async function hideReminder(href) {
 
 function createReminder(reminder, location) {
     const remaining = getRelativeDate(new Date(reminder.d));
-    const wrapper = makeElement("div", location, { "className": "ochre-reminder-wrapper" });
-    const container = makeElement("div", wrapper, { "className": "ochre-reminder-container" });
+    const wrapper = makeElement("div", location, { "className": "orca-reminder-wrapper" });
+    const container = makeElement("div", wrapper, { "className": "orca-reminder-container" });
     const svg = makeElement("div", container, { "innerHTML": canvas_svg });
-    const content = makeElement("a", container, { "className": "ochre-reminder-content", "href": reminder.h, "target": "_blank" });
-    const title = makeElement("h2", content, { "className": "ochre-reminder-title", "textContent": reminder.t });
-    const due = makeElement("p", content, { "className": "ochre-reminder-due", "textContent": `Assignment due in ${remaining.time}` });
-    const hidebtn = makeElement("btn", wrapper, { "className": "ochre-reminder-hide", "textContent": "x" });
+    const content = makeElement("a", container, { "className": "orca-reminder-content", "href": reminder.h, "target": "_blank" });
+    const title = makeElement("h2", content, { "className": "orca-reminder-title", "textContent": reminder.t });
+    const due = makeElement("p", content, { "className": "orca-reminder-due", "textContent": `Assignment due in ${remaining.time}` });
+    const hidebtn = makeElement("btn", wrapper, { "className": "orca-reminder-hide", "textContent": "x" });
     hidebtn.addEventListener("click", () => {
         hideReminder(reminder.h);
         wrapper.remove();
@@ -967,17 +967,17 @@ function createReminder(reminder, location) {
 }
 
 async function reminderWatch() {
-    const sync = await ochreStorage.get("remind");
+    const sync = await orcaStorage.get("remind");
     if (sync["remind"] !== true) {
-        if (document.getElementById("ochre-reminders")) document.getElementById("ochre-reminders").style.display = "none";
+        if (document.getElementById("orca-reminders")) document.getElementById("orca-reminders").style.display = "none";
         return;
     }
-    const container = document.getElementById("ochre-reminders") || makeElement("div", document.body, { "id": "ochre-reminders" });
+    const container = document.getElementById("orca-reminders") || makeElement("div", document.body, { "id": "orca-reminders" });
     container.style.display = "flex";
     container.textContent = "";
     const alertPeriod = 1000 * 60 * 60 * 6; // 6 hours
     const alertPeriod2 = 1000 * 60 * 60 * 2; // 2 hours
-    const storage = await ochreStorage.get(["reminders", "reminder_count"]);
+    const storage = await orcaStorage.get(["reminders", "reminder_count"]);
     const now = (new Date()).getTime();
     storage["reminders"].forEach((reminder, index) => {
         if (reminder.d < now) {
@@ -986,7 +986,7 @@ async function reminderWatch() {
             createReminder(reminder, container);
         }
     });
-    ochreStorage.set({ "reminders": storage["reminders"] });
+    orcaStorage.set({ "reminders": storage["reminders"] });
 }
 
 function updateReminders() {
@@ -1009,14 +1009,14 @@ function updateReminders() {
 }
 
 function showExampleReminder() {
-    const location = document.getElementById("ochre-reminders") || makeElement("div", document.body, { "id": "ochre-reminders" });
+    const location = document.getElementById("orca-reminders") || makeElement("div", document.body, { "id": "orca-reminders" });
     if (options.remind !== true) {
         location.remove();
         return;
     }
     location.textContent = "";
     const example = createReminder({ "d": new Date(), "t": "This is an example reminder", }, location);
-    example.querySelector(".ochre-reminder-due").textContent = "This notification will pop up in other pages to remind you of incomplete assignments that are due in less than 6 hours." /*It will notify again at 2 hours if the 'Remind 2x' option is on."*/;
+    example.querySelector(".orca-reminder-due").textContent = "This notification will pop up in other pages to remind you of incomplete assignments that are due in less than 6 hours." /*It will notify again at 2 hours if the 'Remind 2x' option is on."*/;
 }
 
 
@@ -1062,7 +1062,7 @@ function isBuiltInCanvasHost(host) {
 }
 
 function isDomainCanvasPage() {
-    ochreStorage.get(['custom_domain', 'dark_mode', 'dark_preset', 'device_dark', 'remind']).then(result => {
+    orcaStorage.get(['custom_domain', 'dark_mode', 'dark_preset', 'device_dark', 'remind']).then(result => {
         options = result;
         const host = (window.location.hostname || "").toLowerCase();
         const configured = Array.isArray(result.custom_domain)
@@ -1127,12 +1127,12 @@ function startExtension() {
     // Include bg_opacity/bg_blur so setupBetterSidebar (called below) tints the
     // course-content panel with the user's slider values on first load, instead
     // of falling back to the defaults until a slider is touched.
-    ochreStorage.get(["better_sidebar", "sidebar_scale", "bg_opacity", "bg_blur"]).then(result => {
+    orcaStorage.get(["better_sidebar", "sidebar_scale", "bg_opacity", "bg_blur"]).then(result => {
         options = { ...options, ...result };
         ensureBetterSidebar();
     });
 
-    ochreStorage.getAll().then(result => {
+    orcaStorage.getAll().then(result => {
         options = { ...options, ...result };
         applyTodoAlternateColors();
         toggleAutoDarkMode();
@@ -1192,7 +1192,7 @@ function applyOptionsChanges(changes) {
 				// mode, so re-render the Better Todo list to keep it in sync.
 				if (options.todo_ignore_card_colors && options.better_todo && document.getElementById("better-todo-main")) {
 					clearTodoList();
-					createTodoSections(document.querySelector("#ochre-todo-list"));
+					createTodoSections(document.querySelector("#orca-todo-list"));
 				}
 				break;
 			case "todo_alternate_colors":
@@ -1221,7 +1221,7 @@ function applyOptionsChanges(changes) {
 			case "num_assignments":
 				if (!assignments) getAssignments();
 				if (
-					document.querySelectorAll(".ochre-card-assignment")
+					document.querySelectorAll(".orca-card-assignment")
 						.length === 0
 				)
 					setupCardAssignments();
@@ -1250,7 +1250,7 @@ function applyOptionsChanges(changes) {
 					moreAnnouncementCount = 0;
 					moreAssignmentCount = 0;
 					clearTodoList();
-					createTodoSections(document.querySelector("#ochre-todo-list"));
+					createTodoSections(document.querySelector("#orca-todo-list"));
 				}
 				break;
 			case "custom_cards_2":
@@ -1272,7 +1272,7 @@ function applyOptionsChanges(changes) {
 				moreAssignmentCount = 0;
 				// loadBetterTodo();
 				clearTodoList();
-				createTodoSections(document.querySelector("#ochre-todo-list"));
+				createTodoSections(document.querySelector("#orca-todo-list"));
 				break;
 			case "gpa_calc":
 			case "gpa_calc_prepend":
@@ -1463,8 +1463,8 @@ async function applyCustomBackground() {
     // Quiz safe mode: leave the quiz page background untouched.
     if (quizSafeModeActive()) return;
     // let style = document.querySelector("#DashboardCard_Container")
-    let style = document.querySelector("#ochre-background") || document.createElement('style');
-    style.id = "ochre-background";
+    let style = document.querySelector("#orca-background") || document.createElement('style');
+    style.id = "orca-background";
 
     const activeBackground = await getActiveCustomBackground();
     if (!activeBackground) {
@@ -1524,8 +1524,8 @@ async function applyCustomBackground() {
             margin-left: -35px !important;
             margin-right: -35px !important;
             box-sizing: border-box !important;
-            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
-            border: 1px solid color-mix(in srgb, var(--ochre-borders) 60%, transparent) !important;
+            background-color: color-mix(in srgb, var(--orca-background-0), transparent ${bgTransparent}%) !important;
+            border: 1px solid color-mix(in srgb, var(--orca-borders) 60%, transparent) !important;
             border-radius: 10px !important;
             position: sticky !important;
             top: 0 !important;
@@ -1542,11 +1542,11 @@ async function applyCustomBackground() {
            background peeks through between the day cards. */
         #dashboard-planner .planner-day,
         #dashboard-planner .planner-empty-days {
-            background: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
+            background: color-mix(in srgb, var(--orca-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 12px !important;
-            border: 1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent) !important;
+            border: 1px solid color-mix(in srgb, var(--orca-borders) 75%, transparent) !important;
             padding: 8px 12px !important;
             box-sizing: border-box !important;
         }
@@ -1563,20 +1563,20 @@ async function applyCustomBackground() {
             background: transparent !important;
         }
         #dashboard-planner .Grouping-styles__title {
-            background: var(--ochre-background-1) !important;
+            background: var(--orca-background-1) !important;
             border-radius: 6px !important;
         }
         /* Item-row hover: subtle tint on the glass instead of Canvas's flat
            gray, so rows feel alive on the translucent day cards. */
         #dashboard-planner .planner-item:hover,
         #dashboard-planner .Grouping-styles__heroHover:hover {
-            background: color-mix(in srgb, var(--ochre-text-0) 5%, transparent) !important;
+            background: color-mix(in srgb, var(--orca-text-0) 5%, transparent) !important;
             border-radius: 8px !important;
         }
         #right-side-wrapper {
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
-            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%);
+            background-color: color-mix(in srgb, var(--orca-background-0), transparent ${bgTransparent}%);
             border-radius: 5px;
         }
         /* Native left nav column: #left-side > #sticky-container.ic-sticky-frame
@@ -1589,7 +1589,7 @@ async function applyCustomBackground() {
         #left-side {
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
-            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--orca-background-0), transparent ${bgTransparent}%) !important;
         }
         /* Recent feedback lives in #right-side. The dark-mode CSS
            (darkmodecss.js) recolors its text, but those rules are dark-mode-
@@ -1605,45 +1605,45 @@ async function applyCustomBackground() {
         #right-side .event-details .event-details__context *,
         #right-side .recent_feedback .event-details p,
         #right-side .recent_feedback .event-details span {
-            color: var(--ochre-text-0) !important;
+            color: var(--orca-text-0) !important;
         }
         .event-details strong {
-            color: var(--ochre-text-0) !important;
+            color: var(--orca-text-0) !important;
         }
         /* Native global nav sidebar. color-mix only accepts a solid color, so
            gradient/image sidebars keep their existing look (rule is invalid and
-           ignored). At 100% opacity this is equivalent to var(--ochre-sidebar).
+           ignored). At 100% opacity this is equivalent to var(--orca-sidebar).
            Sidebar blur only shows when sidebar opacity < 100.
-           The icon/text colors are recolored to var(--ochre-sidebar-text) to match
+           The icon/text colors are recolored to var(--orca-sidebar-text) to match
            the background we just set — without this, light mode (where
-           --ochre-sidebar is the light default #e3e3e3) would leave institution-
+           --orca-sidebar is the light default #e3e3e3) would leave institution-
            themed light icons on a now-light background = white-on-white.
            Mirrors the dark-mode rules in css/darkmodecss.js. */
         .ic-app-header {
-            background: color-mix(in srgb, var(--ochre-sidebar), transparent ${sidebarTransparent}%) !important;
+            background: color-mix(in srgb, var(--orca-sidebar), transparent ${sidebarTransparent}%) !important;
             backdrop-filter: blur(${sidebarBlur}px) !important;
             -webkit-backdrop-filter: blur(${sidebarBlur}px) !important;
         }
         .ic-app-header__menu-list-link svg,
         .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active svg {
-            fill: var(--ochre-sidebar-text) !important;
+            fill: var(--orca-sidebar-text) !important;
         }
         .menu-item-icon-container,
         .ic-app-header__menu-list-link .menu-item__text,
         .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active .menu-item__text {
-            color: var(--ochre-sidebar-text) !important;
+            color: var(--orca-sidebar-text) !important;
         }
         .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active .ic-app-header__menu-list-link,
         .ic-app-header__menu-list-link:hover {
             background: #0000004f !important;
         }
-        /* Better sidebar. The inline background-color is var(--ochre-sidebar), so the
+        /* Better sidebar. The inline background-color is var(--orca-sidebar), so the
            !important here is required to override it. The same sidebar_opacity /
            sidebar_blur sliders drive both surfaces, so whichever sidebar is
            active (Better Sidebar when enabled, otherwise the native nav) picks
            up the value. */
         #better-sidebar-container {
-            background-color: color-mix(in srgb, var(--ochre-sidebar), transparent ${sidebarTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--orca-sidebar), transparent ${sidebarTransparent}%) !important;
             backdrop-filter: blur(${sidebarBlur}px) !important;
             -webkit-backdrop-filter: blur(${sidebarBlur}px) !important;
         }
@@ -1658,7 +1658,7 @@ async function applyCustomBackground() {
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 12px !important;
-            border: 1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent) !important;
+            border: 1px solid color-mix(in srgb, var(--orca-borders) 75%, transparent) !important;
             /* box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important; */
         }
         #context_modules_sortable_container {
@@ -1682,7 +1682,7 @@ async function applyCustomBackground() {
             border-radius: 0 !important;
         }
         #assignments.ui-tabs-panel {
-            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--orca-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 5px !important;
@@ -1697,7 +1697,7 @@ async function applyCustomBackground() {
         #content {
             margin: 36px 48px 48px !important;
             padding: 10px !important;
-            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--orca-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 5px !important;
@@ -1708,7 +1708,7 @@ async function applyCustomBackground() {
         #content {
             margin: 36px 48px 48px !important;
             padding: 10px !important;
-            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--orca-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 5px !important;
@@ -1726,7 +1726,7 @@ async function applyCustomBackground() {
         .ic-Layout-contentMain {
             margin: 26px 38px 38px !important;
             padding: 10px !important;
-            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--orca-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 10px !important;
@@ -1734,7 +1734,7 @@ async function applyCustomBackground() {
         ` : ""}
         ${isConversationsPage() ? `
         .css-1nh4pc4-view-flexItem {
-            background-color: color-mix(in srgb, var(--ochre-background-0), transparent ${bgTransparent}%) !important;
+            background-color: color-mix(in srgb, var(--orca-background-0), transparent ${bgTransparent}%) !important;
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
             border-radius: 5px !important;
@@ -1744,12 +1744,12 @@ async function applyCustomBackground() {
         .css-1nh4pc4-view-flexItem svg * {
             fill: currentColor !important;
             stroke: currentColor !important;
-            color: var(--ochre-text-0) !important;
+            color: var(--orca-text-0) !important;
         }
         ` : ""}
         .item-group-condensed .ig-row.ig-published.no-estimated-duration {
-            color: var(--ochre-text-1) !important;
-            border: 1px solid color-mix(in srgb, var(--ochre-borders) 60%, transparent) !important;
+            color: var(--orca-text-1) !important;
+            border: 1px solid color-mix(in srgb, var(--orca-borders) 60%, transparent) !important;
             border-radius: 0 !important;
             padding: 10px 12px !important;
         }
@@ -1769,7 +1769,7 @@ async function applyCustomBackground() {
         .item-group-container {
             background: transparent !important;
             border-radius: 12px !important;
-            border: 1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent) !important;
+            border: 1px solid color-mix(in srgb, var(--orca-borders) 75%, transparent) !important;
         }
         .ig-header {
             /* backdrop-filter: blur(10px) !important; */
@@ -1798,14 +1798,14 @@ async function applyCustomBackground() {
             backdrop-filter: blur(${bgBlur}px) !important;
             -webkit-backdrop-filter: blur(${bgBlur}px) !important;
         }
-        .ochre-gpa-card,
-        .ochre-gpa,
+        .orca-gpa-card,
+        .orca-gpa,
         .ic-DashboardCard {
             ${cardTransparency
-                ? `background: color-mix(in srgb, var(--ochre-background-0), transparent ${cardTransparent}%) !important;
+                ? `background: color-mix(in srgb, var(--orca-background-0), transparent ${cardTransparent}%) !important;
             backdrop-filter: blur(${cardBlur}px) saturate(120%) !important;
             -webkit-backdrop-filter: blur(${cardBlur}px) saturate(120%) !important;`
-                : `background: var(--ochre-background-0) !important;`}
+                : `background: var(--orca-background-0) !important;`}
         }
         /* Card header strip (the course-nickname bar under the hero). Canvas
            paints it a solid light color ($ic-color-light) and nothing overrides
@@ -1819,7 +1819,7 @@ async function applyCustomBackground() {
         .ic-DashboardCard__header_content {
             ${cardTransparency
                 ? `background: none !important;`
-                : `background: var(--ochre-background-0) !important;`}
+                : `background: var(--orca-background-0) !important;`}
         }
         tr.student_assignment.assignment_graded.editable > * {
             border:none!important
@@ -1830,8 +1830,8 @@ async function applyCustomBackground() {
 }
 
 function applyBetterSidebarLayoutFix() {
-    let style = document.querySelector("#ochre-sidebar-layout-fix") || document.createElement("style");
-    style.id = "ochre-sidebar-layout-fix";
+    let style = document.querySelector("#orca-sidebar-layout-fix") || document.createElement("style");
+    style.id = "orca-sidebar-layout-fix";
     style.textContent = `
         #wrapper,
         .ic-Layout-wrapper,
@@ -1843,7 +1843,7 @@ function applyBetterSidebarLayoutFix() {
 }
 
 function clearBetterSidebarLayoutFix() {
-	let style = document.querySelector("#ochre-sidebar-layout-fix");
+	let style = document.querySelector("#orca-sidebar-layout-fix");
 	if (style) style.remove();
 }
 
@@ -1895,7 +1895,7 @@ function checkDashboardReady() {
                     // Canvas often re-renders the dashboard on a hard reload and
                     // replaces the .ic-DashboardCard nodes with fresh ones that have
                     // the same courses/links (so the signature is unchanged) but no
-                    // longer carry our .ochre-card-assignment marker. The
+                    // longer carry our .orca-card-assignment marker. The
                     // signature guard alone would skip re-setup in that case, leaving
                     // card assignments empty until a popup toggle forces a reload.
                     // Re-run whenever any card is missing its marker too. This is safe
@@ -1903,7 +1903,7 @@ function checkDashboardReady() {
                     // card has the marker, so our own subsequent mutation bursts skip.
                     let missingMarker = false;
                     for (let i = 0; i < cards.length; i++) {
-                        if (!cards[i].querySelector(".ochre-card-assignment")) {
+                        if (!cards[i].querySelector(".orca-card-assignment")) {
                             missingMarker = true;
                             break;
                         }
@@ -1923,7 +1923,7 @@ function checkDashboardReady() {
                 }
 
                 const rightSide = document.querySelector("#right-side");
-                if (rightSide && !rightSide.querySelector(".ochre-todosidebar")) {
+                if (rightSide && !rightSide.querySelector(".orca-todosidebar")) {
                     setupBetterTodo();
                     setupBetterSidebar(getSidebarLayoutMode());
                 }
@@ -2046,7 +2046,7 @@ function getCardsFromDashboard() {
     console.log("getting cards from dashboard")
     const dashboard_cards = document.querySelectorAll(".ic-DashboardCard");
     return new Promise(resolve => {
-    ochreStorage.get(["custom_cards", "custom_cards_2", "custom_cards_3"]).then(storage => {
+    orcaStorage.get(["custom_cards", "custom_cards_2", "custom_cards_3"]).then(storage => {
         let cards = storage["custom_cards"] || {};
         let cards_2 = storage["custom_cards_2"] || {};
         let cards_3 = storage["custom_cards_3"] || {};
@@ -2115,7 +2115,7 @@ function getCardsFromDashboard() {
             // rejected write -- which is exactly what a quota failure is --
             // left this promise pending forever and hung every caller. The
             // write failure is already reported by the storage layer.
-            ochreStorage.set({ "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 })
+            orcaStorage.set({ "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 })
                 .catch(() => {}).then(() => resolve());
         }
     });
@@ -2125,7 +2125,7 @@ function getCardsFromDashboard() {
 async function getCards(api = null) {
     let dashboard_cards = api ? api : await canvasApi.getAll(`${domain}/api/v1/courses?${/*enrollment_state=active&*/""}per_page=100`);
     await new Promise(resolve => {
-    ochreStorage.get(["custom_cards", "custom_cards_2", "custom_cards_3"]).then(storage => {
+    orcaStorage.get(["custom_cards", "custom_cards_2", "custom_cards_3"]).then(storage => {
         let cards = storage["custom_cards"] || {};
         let cards_2 = storage["custom_cards_2"] || {};
         let cards_3 = storage["custom_cards_3"] || {};
@@ -2196,7 +2196,7 @@ async function getCards(api = null) {
             console.log(e);
         } finally {
             // See the note in getCardsFromDashboard: resolve on both outcomes.
-            ochreStorage.set(newCards ? { "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 } : {})
+            orcaStorage.set(newCards ? { "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 } : {})
                 .catch(() => {}).then(() => resolve());
         }
     });
@@ -2285,7 +2285,7 @@ function attachProgressFilterClick(el, courseId) {
     el.style.cursor = 'pointer';
     el.onclick = () => {
         betterTodoProgressFilter = (String(betterTodoProgressFilter) === String(courseId)) ? null : String(courseId);
-        const loc = document.querySelector("#ochre-todo-list");
+        const loc = document.querySelector("#orca-todo-list");
         if (loc) { clearTodoList(); createTodoSections(loc); }
     };
 }
@@ -2383,8 +2383,8 @@ function getDashboardCourseOrder() {
 // farthest text corner; the text fits when that is <= availableRadius.
 function fitProgressOverlayText(overlay, neededRadius, availableRadius) {
     const textWrap = overlay?.firstElementChild;
-    const pct = overlay?.querySelector('.ochre-progress-percent');
-    const cnt = overlay?.querySelector('.ochre-progress-count');
+    const pct = overlay?.querySelector('.orca-progress-percent');
+    const cnt = overlay?.querySelector('.orca-progress-count');
     if (!textWrap || !pct || !cnt || textWrap === pct || textWrap === cnt) return;
     // Undo any shrink applied by a previous render before measuring (these
     // are the default sizes the overlays are created with).
@@ -2425,10 +2425,10 @@ function renderProgressRingsMode(wrapper, shown, totalAll, completedAll, percent
     const padding = 2;
     const outerRadius = Math.floor((size / 2) - padding);
 
-    let svg = wrapper.querySelector('svg.ochre-progress-svg');
+    let svg = wrapper.querySelector('svg.orca-progress-svg');
     if (!svg) {
         svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('class', 'ochre-progress-svg');
+        svg.setAttribute('class', 'orca-progress-svg');
         svg.style.display = 'block';
         wrapper.appendChild(svg);
     }
@@ -2436,19 +2436,19 @@ function renderProgressRingsMode(wrapper, shown, totalAll, completedAll, percent
     svg.setAttribute('height', String(size));
     svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
 
-    let overlay = wrapper.querySelector('.ochre-progress-overlay');
+    let overlay = wrapper.querySelector('.orca-progress-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
-        overlay.className = 'ochre-progress-overlay';
+        overlay.className = 'orca-progress-overlay';
         overlay.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;';
         const textWrap = document.createElement('div');
-        textWrap.style.cssText = 'text-align:center;color:var(--ochre-text-0);';
-        textWrap.innerHTML = `<div class='ochre-progress-percent' style='font-weight:700;font-size:20px;line-height:1;'></div><div class='ochre-progress-count' style='font-size:12px;margin-top:4px;'></div>`;
+        textWrap.style.cssText = 'text-align:center;color:var(--orca-text-0);';
+        textWrap.innerHTML = `<div class='orca-progress-percent' style='font-weight:700;font-size:20px;line-height:1;'></div><div class='orca-progress-count' style='font-size:12px;margin-top:4px;'></div>`;
         overlay.appendChild(textWrap);
         wrapper.appendChild(overlay);
     }
-    overlay.querySelector('.ochre-progress-percent').textContent = `${percent}%`;
-    overlay.querySelector('.ochre-progress-count').textContent = `${completedAll}/${totalAll} done`;
+    overlay.querySelector('.orca-progress-percent').textContent = `${percent}%`;
+    overlay.querySelector('.orca-progress-count').textContent = `${completedAll}/${totalAll} done`;
 
     const stroke = 8;
     const gap = 4;
@@ -2479,7 +2479,7 @@ function renderProgressRingsMode(wrapper, shown, totalAll, completedAll, percent
             bg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             bg.setAttribute('data-idx', String(idx));
             bg.setAttribute('data-role', 'bg');
-            bg.classList.add('ochre-ring-bg');
+            bg.classList.add('orca-ring-bg');
             svg.appendChild(bg);
         }
         bg.setAttribute('cx', String(cx));
@@ -2500,7 +2500,7 @@ function renderProgressRingsMode(wrapper, shown, totalAll, completedAll, percent
             fg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             fg.setAttribute('data-idx', String(idx));
             fg.setAttribute('data-role', 'fg');
-            fg.classList.add('ochre-progress-ring');
+            fg.classList.add('orca-progress-ring');
             fg.setAttribute('stroke-linecap', 'round');
             fg.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
             fg.setAttribute('stroke-dasharray', dasharrayVal);
@@ -2572,10 +2572,10 @@ function renderProgressRainbow(wrapper, shown, totalAll, completedAll, percent) 
     const baseY = outerRadius + stroke / 2 + pad;
     const svgHeight = Math.ceil(baseY + stroke / 2 + 2);
 
-    let svg = wrapper.querySelector('svg.ochre-progress-svg');
+    let svg = wrapper.querySelector('svg.orca-progress-svg');
     if (!svg) {
         svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('class', 'ochre-progress-svg');
+        svg.setAttribute('class', 'orca-progress-svg');
         svg.style.display = 'block';
         wrapper.appendChild(svg);
     }
@@ -2685,23 +2685,23 @@ function renderProgressRainbow(wrapper, shown, totalAll, completedAll, percent) 
     const innerRadius = ringCount > 0 ? Math.max(1, outerRadius - (ringCount - 1) * step) : outerRadius;
     const holeCenterY = baseY - (4 * innerRadius) / (3 * Math.PI) + 6;
     const nudge = Math.round(holeCenterY - svgHeight / 2);
-    let overlay = wrapper.querySelector('.ochre-progress-overlay');
+    let overlay = wrapper.querySelector('.orca-progress-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
-        overlay.className = 'ochre-progress-overlay';
+        overlay.className = 'orca-progress-overlay';
         overlay.style.cssText = `position:absolute;left:0;top:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;transform:translateY(${nudge}px);`;
         // Same textWrap structure as rings mode so fitProgressOverlayText
         // measures the whole percent+count block, not just one line.
         const textWrap = document.createElement('div');
-        textWrap.style.cssText = 'text-align:center;color:var(--ochre-text-0);';
-        textWrap.innerHTML = `<div class='ochre-progress-percent' style='font-weight:700;font-size:20px;line-height:1;'></div><div class='ochre-progress-count' style='font-size:12px;margin-top:3px;'></div>`;
+        textWrap.style.cssText = 'text-align:center;color:var(--orca-text-0);';
+        textWrap.innerHTML = `<div class='orca-progress-percent' style='font-weight:700;font-size:20px;line-height:1;'></div><div class='orca-progress-count' style='font-size:12px;margin-top:3px;'></div>`;
         overlay.appendChild(textWrap);
         wrapper.appendChild(overlay);
     } else {
         overlay.style.transform = `translateY(${nudge}px)`;
     }
-    overlay.querySelector('.ochre-progress-percent').textContent = `${percent}%`;
-    overlay.querySelector('.ochre-progress-count').textContent = `${completedAll}/${totalAll} done`;
+    overlay.querySelector('.orca-progress-percent').textContent = `${percent}%`;
+    overlay.querySelector('.orca-progress-count').textContent = `${completedAll}/${totalAll} done`;
 
     // Shrink the % / count text if any corner would cross the innermost arc.
     // The text is centered at (cx, holeCenterY); the bowl is the semicircle
@@ -2719,10 +2719,10 @@ function renderProgressRainbow(wrapper, shown, totalAll, completedAll, percent) 
 
 // Mode "lines": one horizontal bar per course, each with its own %.
 function renderProgressLines(wrapper, shown) {
-    let list = wrapper.querySelector('.ochre-progress-lines');
+    let list = wrapper.querySelector('.orca-progress-lines');
     if (!list) {
         list = document.createElement('div');
-        list.className = 'ochre-progress-lines';
+        list.className = 'orca-progress-lines';
         list.style.cssText = 'display:flex;flex-direction:column;gap:8px;width:100%;box-sizing:border-box;';
         wrapper.appendChild(list);
     }
@@ -2736,9 +2736,9 @@ function renderProgressLines(wrapper, shown) {
         let row = list.children[idx];
         if (!row) {
             row = document.createElement('div');
-            row.className = 'ochre-progress-line';
+            row.className = 'orca-progress-line';
             row.style.cssText = 'display:flex;flex-direction:column;gap:3px;width:100%;';
-            row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11px;"><span class="cr-pl-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;"></span><span class="cr-pl-pct" style="flex-shrink:0;font-weight:600;color:var(--ochre-text-0);"></span></div><div style="position:relative;height:8px;border-radius:999px;overflow:hidden;"><div class="cr-pl-fill" style="height:100%;border-radius:999px;width:0%;transition:width .8s cubic-bezier(.2,.9,.2,1);"></div></div>`;
+            row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11px;"><span class="cr-pl-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;"></span><span class="cr-pl-pct" style="flex-shrink:0;font-weight:600;color:var(--orca-text-0);"></span></div><div style="position:relative;height:8px;border-radius:999px;overflow:hidden;"><div class="cr-pl-fill" style="height:100%;border-radius:999px;width:0%;transition:width .8s cubic-bezier(.2,.9,.2,1);"></div></div>`;
             list.appendChild(row);
         }
         const labelEl = row.querySelector('.cr-pl-label');
@@ -2767,10 +2767,10 @@ function renderProgressLines(wrapper, shown) {
 // to the left (full course color) and its UNCOMPLETED portion to the right
 // (faded course color), with no gaps between segments. Overall % shown above.
 function renderProgressOneLine(wrapper, shown, totalAll, completedAll, percent) {
-    let box = wrapper.querySelector('.ochre-progress-oneline');
+    let box = wrapper.querySelector('.orca-progress-oneline');
     if (!box) {
         box = document.createElement('div');
-        box.className = 'ochre-progress-oneline';
+        box.className = 'orca-progress-oneline';
         box.style.cssText = 'display:flex;flex-direction:column;gap:5px;width:100%;box-sizing:border-box;';
         wrapper.appendChild(box);
     }
@@ -2779,7 +2779,7 @@ function renderProgressOneLine(wrapper, shown, totalAll, completedAll, percent) 
     if (!head) {
         head = document.createElement('div');
         head.className = 'cr-ol-head';
-        head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ochre-text-0);';
+        head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--orca-text-0);';
         head.innerHTML = `<span>Overall</span><span class="cr-ol-pct" style="font-weight:700;"></span>`;
         box.appendChild(head);
     }
@@ -2790,7 +2790,7 @@ function renderProgressOneLine(wrapper, shown, totalAll, completedAll, percent) 
         head.onclick = () => {
             if (betterTodoProgressFilter == null) return;
             betterTodoProgressFilter = null;
-            const loc = document.querySelector("#ochre-todo-list");
+            const loc = document.querySelector("#orca-todo-list");
             if (loc) { clearTodoList(); createTodoSections(loc); }
         };
     } else {
@@ -2803,7 +2803,7 @@ function renderProgressOneLine(wrapper, shown, totalAll, completedAll, percent) 
         bar = document.createElement('div');
         bar.className = 'cr-ol-bar';
         // position:relative so absolutely-positioned segments anchor to it
-        bar.style.cssText = 'position:relative;width:100%;height:14px;border-radius:999px;overflow:hidden;background:var(--ochre-background-1);';
+        bar.style.cssText = 'position:relative;width:100%;height:14px;border-radius:999px;overflow:hidden;background:var(--orca-background-1);';
         box.appendChild(bar);
     }
 
@@ -2888,10 +2888,10 @@ function renderProgressRings(container, scopedData) {
     const percent = totalAll === 0 ? 0 : Math.round((completedAll / totalAll) * 100);
 
     // wrapper reused across renders; clear on mode switch so each mode rebuilds fresh DOM
-    let wrapper = container.querySelector('.ochre-progress-wrapper');
+    let wrapper = container.querySelector('.orca-progress-wrapper');
     if (!wrapper) {
         wrapper = document.createElement('div');
-        wrapper.className = 'ochre-progress-wrapper';
+        wrapper.className = 'orca-progress-wrapper';
         wrapper.style.cssText = 'display:flex;flex-direction:column;align-items:center;position:relative;width:100%;box-sizing:border-box;';
         container.appendChild(wrapper);
     }
@@ -3040,7 +3040,7 @@ function saveCustomTaskLink(noteId, link) {
         delete links[key];
     }
     options = { ...options, custom_task_links: links };
-    ochreStorage.set({ custom_task_links: links });
+    orcaStorage.set({ custom_task_links: links });
 }
 
 function deleteCustomTaskLink(noteId) {
@@ -3048,7 +3048,7 @@ function deleteCustomTaskLink(noteId) {
     const links = { ...getCustomTaskLinks() };
     delete links[String(noteId)];
     options = { ...options, custom_task_links: links };
-    ochreStorage.set({ custom_task_links: links });
+    orcaStorage.set({ custom_task_links: links });
 }
 
 async function updateCanvasPlannerNote(id, payload) {
@@ -3214,32 +3214,32 @@ function ensureTodoTaskMenu(location, feedbackElement) {
 
         const addTaskButton = makeElement("button", actionsRow, {
             id: "better-todo-add-task-btn",
-            className: "ochre-custom-btn",
+            className: "orca-custom-btn",
             textContent: "+ Add Task",
             style: "width:100%;padding:6px 8px;cursor:pointer;",
         });
 
         const menu = makeElement("div", actionsRow, {
             id: "better-todo-add-task-menu",
-            className: "ochre-add-assignment",
+            className: "orca-add-assignment",
         });
 
         menu.innerHTML = `
-            <div style="display:flex;flex-direction:column;gap:8px;padding:8px;border:1px solid #c7cdd1;border-radius:6px;background:var(--ochre-background-2);position:relative;">
-                <button id="better-todo-add-task-close" type="button" class="ochre-custom-btn" title="Close" style="position:absolute;top:4px;right:6px;padding:0 6px;cursor:pointer;line-height:18px;font-size:14px;color:var(--ochre-text-1);">\u00d7</button>
-                <input type="text" id="better-todo-new-task-title" class="ochre-custom-input" placeholder="Task title" maxlength="255">
-                <textarea id="better-todo-new-task-details" class="ochre-custom-input" placeholder="Details (optional)" style="min-height:70px;resize:vertical;padding-top:6px;padding-bottom:6px;"></textarea>
-                <select id="better-todo-new-task-course" class="ochre-custom-input"></select>
+            <div style="display:flex;flex-direction:column;gap:8px;padding:8px;border:1px solid #c7cdd1;border-radius:6px;background:var(--orca-background-2);position:relative;">
+                <button id="better-todo-add-task-close" type="button" class="orca-custom-btn" title="Close" style="position:absolute;top:4px;right:6px;padding:0 6px;cursor:pointer;line-height:18px;font-size:14px;color:var(--orca-text-1);">\u00d7</button>
+                <input type="text" id="better-todo-new-task-title" class="orca-custom-input" placeholder="Task title" maxlength="255">
+                <textarea id="better-todo-new-task-details" class="orca-custom-input" placeholder="Details (optional)" style="min-height:70px;resize:vertical;padding-top:6px;padding-bottom:6px;"></textarea>
+                <select id="better-todo-new-task-course" class="orca-custom-input"></select>
                 <div style="display:flex;gap:6px;">
-                    <input type="date" id="better-todo-new-task-date" class="ochre-custom-input">
-                    <input type="time" id="better-todo-new-task-time" class="ochre-custom-input">
+                    <input type="date" id="better-todo-new-task-date" class="orca-custom-input">
+                    <input type="time" id="better-todo-new-task-time" class="orca-custom-input">
                 </div>
-                <input type="text" id="better-todo-new-task-link" class="ochre-custom-input" placeholder="Link (optional)" maxlength="2048">
+                <input type="text" id="better-todo-new-task-link" class="orca-custom-input" placeholder="Link (optional)" maxlength="2048">
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                    <span id="better-todo-add-task-status" style="font-size:12px;color:var(--ochre-text-0);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                    <span id="better-todo-add-task-status" style="font-size:12px;color:var(--orca-text-0);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
                     <div style="display:flex;gap:6px;align-items:center;">
-                        <button id="better-todo-add-task-delete" class="ochre-custom-btn" style="padding:4px 10px;cursor:pointer;display:none;color:#db3754;" type="button" title="Delete this custom task">Delete</button>
-                        <button id="better-todo-add-task-submit" class="ochre-custom-btn" style="padding:4px 10px;cursor:pointer;" type="button">Create</button>
+                        <button id="better-todo-add-task-delete" class="orca-custom-btn" style="padding:4px 10px;cursor:pointer;display:none;color:#db3754;" type="button" title="Delete this custom task">Delete</button>
+                        <button id="better-todo-add-task-submit" class="orca-custom-btn" style="padding:4px 10px;cursor:pointer;" type="button">Create</button>
                     </div>
                 </div>
             </div>
@@ -3254,8 +3254,8 @@ function ensureTodoTaskMenu(location, feedbackElement) {
         courseSelect.addEventListener("change", () => updateTaskCourseSelectColor(courseSelect));
 
         addTaskButton.addEventListener("click", () => {
-            const willOpen = !menu.classList.contains("ochre-custom-open");
-            menu.classList.toggle("ochre-custom-open");
+            const willOpen = !menu.classList.contains("orca-custom-open");
+            menu.classList.toggle("orca-custom-open");
             if (willOpen) {
                 resetTaskFormToCreate(menu);
                 // Scroll the form up so the picker stays on screen.
@@ -3286,7 +3286,7 @@ function ensureTodoTaskMenu(location, feedbackElement) {
                 }
                 status.style.color = "#198754";
                 resetTaskFormToCreate(menu);
-                menu.classList.remove("ochre-custom-open");
+                menu.classList.remove("orca-custom-open");
 
                 getAssignments();
                 clearTodoList();
@@ -3305,7 +3305,7 @@ function ensureTodoTaskMenu(location, feedbackElement) {
         // Close (×) button: dismiss the form without creating/editing a task.
         menu.querySelector("#better-todo-add-task-close")?.addEventListener("click", () => {
             resetTaskFormToCreate(menu);
-            menu.classList.remove("ochre-custom-open");
+            menu.classList.remove("orca-custom-open");
         });
 
         // Reposition the field on focus so the picker opens on screen.
@@ -3328,7 +3328,7 @@ function ensureTodoTaskMenu(location, feedbackElement) {
                 await deleteCanvasPlannerNote(editingId);
                 deleteCustomTaskLink(editingId);
                 resetTaskFormToCreate(menu);
-                menu.classList.remove("ochre-custom-open");
+                menu.classList.remove("orca-custom-open");
                 getAssignments();
                 clearTodoList();
                 createTodoSections(location);
@@ -3376,7 +3376,7 @@ function resetTaskFormToCreate(menu) {
 
 // Open the shared form pre-filled with a custom task for editing or deletion.
 function openTaskForEdit(item) {
-    const location = document.getElementById("ochre-todo-list");
+    const location = document.getElementById("orca-todo-list");
     if (!location) return;
     const feedbackElement = location.querySelector(".recent_feedback");
     ensureTodoTaskMenu(location, feedbackElement);
@@ -3405,14 +3405,14 @@ function openTaskForEdit(item) {
     menu.querySelector("#better-todo-add-task-submit").textContent = "Save";
     const status = menu.querySelector("#better-todo-add-task-status");
     if (status) { status.textContent = ""; status.style.color = ""; }
-    menu.classList.add("ochre-custom-open");
+    menu.classList.add("orca-custom-open");
     scrollTodoIntoView(menu, true);
 }
 
 async function createTodoSections(location) {
 	if (!location.querySelector("#better-todo-header")) {
 		let header = makeElement("div", location, { id: "better-todo-header" });
-		header.style = "display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ochre-background-1);padding-bottom:-2px;";
+		header.style = "display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--orca-background-1);padding-bottom:-2px;";
 		let today = new Date();
 		today.setHours(0,0,0,0);
 		const todayString = today.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
@@ -3429,7 +3429,7 @@ async function createTodoSections(location) {
 		<div style="display:flex;justify-content:center;margin-top:20px;">
 			<div id="better-todo-filterbuttongroup" style="display:flex;gap:50px;justify-content:space-between;position:relative;padding-bottom:5px;width:70%;height:30px;">
 				<div id="better-todo-announcement" style="color:black !important;width:25px;cursor:pointer;">
-					<svg fill="var(--ochre-text-0)" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" style="transition:all .3s ease;">
+					<svg fill="var(--orca-text-0)" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" style="transition:all .3s ease;">
 						<g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
 						<g id="SVGRepo_iconCarrier">
 							<path d="M1587.162 31.278c11.52-23.491 37.27-35.689 63.473-29.816 25.525 6.099 43.483 28.8 43.483 55.002V570.46C1822.87 596.662 1920 710.733 1920 847.053c0 136.32-97.13 250.503-225.882 276.705v513.883c0 26.202-17.958 49.016-43.483 55.002a57.279 57.279 0 0 1-12.988 1.468c-21.12 0-40.772-11.745-50.485-31.171C1379.238 1247.203 964.18 1242.347 960 1242.347H564.706v564.706h87.755c-11.859-90.127-17.506-247.003 63.473-350.683 52.405-67.087 129.657-101.082 229.948-101.082v112.941c-64.49 0-110.57 18.861-140.837 57.487-68.781 87.868-45.064 263.83-30.269 324.254 4.18 16.828.34 34.673-10.277 48.34-10.73 13.665-27.219 21.684-44.499 21.684H508.235c-31.171 0-56.47-25.186-56.47-56.47v-621.177h-56.47c-155.747 0-282.354-126.607-282.354-282.353v-56.47h-56.47C25.299 903.523 0 878.336 0 847.052c0-31.172 25.299-56.471 56.47-56.471h56.471v-56.47c0-155.634 126.607-282.354 282.353-282.354h564.593c16.941-.112 420.48-7.002 627.275-420.48Zm-5.986 218.429c-194.71 242.371-452.216 298.164-564.705 311.04v572.724c112.489 12.876 369.995 68.556 564.705 311.04ZM903.53 564.7H395.294c-93.402 0-169.412 76.01-169.412 169.411v225.883c0 93.402 76.01 169.412 169.412 169.412H903.53V564.7Zm790.589 123.444v317.93c65.618-23.379 112.94-85.497 112.94-159.021 0-73.525-47.322-135.53-112.94-158.909Z" fill-rule="evenodd"></path>
@@ -3437,7 +3437,7 @@ async function createTodoSections(location) {
 					</svg>
 				</div>
 				<div id="better-todo-assignments" style="color:black !important;width:25px;cursor:pointer;">
-					<svg fill="var(--ochre-text-0)" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" style="transition:all .3s ease;">
+					<svg fill="var(--orca-text-0)" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" style="transition:all .3s ease;">
 						<g id="SVGRepo_bgCarrier" stroke-width="1"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
 						<g id="SVGRepo_iconCarrier">
 							<path d="M1468.214 0v551.145L840.27 1179.089c-31.623 31.623-49.693 74.54-49.693 119.715v395.289h395.288c45.176 0 88.093-18.07 119.716-49.694l162.633-162.633v438.206H0V0h1468.214Zm129.428 581.3c22.137-22.136 57.825-22.136 79.962 0l225.879 225.879c22.023 22.023 22.023 57.712 0 79.848l-677.638 677.637c-10.616 10.503-24.96 16.49-39.98 16.49H903.516v-282.35c0-15.02 5.986-29.364 16.49-39.867Zm-920.005 548.095H338.82v112.94h338.818v-112.94Zm225.88-225.879H338.818v112.94h564.697v-112.94Zm734.106-202.5-89.561 89.56 146.03 146.031 89.562-89.56-146.031-146.031Zm-508.228-362.197H338.82v338.818h790.576V338.82Z" fill-rule="evenodd"></path>
@@ -3449,11 +3449,11 @@ async function createTodoSections(location) {
 						<g id="SVGRepo_bgCarrier" stroke-width="0"></g>
 						<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
 						<g id="SVGRepo_iconCarrier"> <g id="Interface / Checkbox_Check">
-							<path id="Vector" d="M8 12L11 15L16 9M4 16.8002V7.2002C4 6.08009 4 5.51962 4.21799 5.0918C4.40973 4.71547 4.71547 4.40973 5.0918 4.21799C5.51962 4 6.08009 4 7.2002 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V16.8036C20 17.9215 20 18.4805 19.7822 18.9079C19.5905 19.2842 19.2837 19.5905 18.9074 19.7822C18.48 20 17.921 20 16.8031 20H7.19691C6.07899 20 5.5192 20 5.0918 19.7822C4.71547 19.5905 4.40973 19.2842 4.21799 18.9079C4 18.4801 4 17.9203 4 16.8002Z" stroke="var(--ochre-text-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+							<path id="Vector" d="M8 12L11 15L16 9M4 16.8002V7.2002C4 6.08009 4 5.51962 4.21799 5.0918C4.40973 4.71547 4.71547 4.40973 5.0918 4.21799C5.51962 4 6.08009 4 7.2002 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V16.8036C20 17.9215 20 18.4805 19.7822 18.9079C19.5905 19.2842 19.2837 19.5905 18.9074 19.7822C18.48 20 17.921 20 16.8031 20H7.19691C6.07899 20 5.5192 20 5.0918 19.7822C4.71547 19.5905 4.40973 19.2842 4.21799 18.9079C4 18.4801 4 17.9203 4 16.8002Z" stroke="var(--orca-text-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
 						</g></g>
 					</svg>
 				</div>
-				<div id="better-todo-indicator" style="position:absolute;bottom:4px;left:0;height:3px;background-color:var(--ochre-text-0);border-radius:3px 3px 0 0;transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+				<div id="better-todo-indicator" style="position:absolute;bottom:4px;left:0;height:3px;background-color:var(--orca-text-0);border-radius:3px 3px 0 0;transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></div>
 			</div>
 		</div>
 		`;
@@ -3553,7 +3553,7 @@ async function createTodoSections(location) {
             else label = "<strong>" + key + "</strong>";
             makeElement("div", wrapper, {
                 innerHTML: "<span>" + label + "</span>",
-                style: "display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--ochre-text-0);"
+                style: "display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--orca-text-0);"
             })
 
             let listContainer = makeElement("div", wrapper, { className: "todo-group-list" });
@@ -3626,8 +3626,8 @@ async function createTodoSections(location) {
 }
 
 function ensureRightSideWrapperScrollbarHidden() {
-    let style = document.getElementById("ochre-hide-right-sidebar-scrollbar") || document.createElement("style");
-    style.id = "ochre-hide-right-sidebar-scrollbar";
+    let style = document.getElementById("orca-hide-right-sidebar-scrollbar") || document.createElement("style");
+    style.id = "orca-hide-right-sidebar-scrollbar";
     style.textContent = `
         #right-side-wrapper {
             scrollbar-width: none !important;
@@ -3657,7 +3657,7 @@ function clearTodoList() {
 }
 
 // "Alternate colors" (Better Todo List, light mode only): recolors the main
-// todo-list icon fill to white instead of the default --ochre-text-0, so icons
+// todo-list icon fill to white instead of the default --orca-text-0, so icons
 // stay visible on lighter course-color strips. Implemented through a CSS
 // variable so toggling the option or dark mode recolors existing icons live
 // without a re-render.
@@ -3665,7 +3665,7 @@ const TODO_ALT_ICON_COLOR = "#ffffff";
 let todoAltStyleEl = null;
 function applyTodoAlternateColors() {
     const altOn = options.todo_alternate_colors === true && options.dark_mode !== true;
-    const color = altOn ? TODO_ALT_ICON_COLOR : "var(--ochre-text-0)";
+    const color = altOn ? TODO_ALT_ICON_COLOR : "var(--orca-text-0)";
     if (!todoAltStyleEl) {
         todoAltStyleEl = document.createElement("style");
         todoAltStyleEl.id = "crtodoaltcss";
@@ -3679,7 +3679,7 @@ function applyTodoAlternateColors() {
 // populateAnnouncements (the old loadBetterTodo renderer is no longer called).
 // A single shared, body-level tooltip is reused across items so it is never
 // clipped by the sidebar's scroll/overflow containers. It reuses the
-// .ochre-hover-preview class so existing light/dark styling applies.
+// .orca-hover-preview class so existing light/dark styling applies.
 let todoPreviewDelay = null;
 let todoPreviewToken = 0;
 const todoPreviewCache = new Map();
@@ -3690,12 +3690,12 @@ function stripHtmlPreview(html) {
 }
 
 function getTodoPreviewEl() {
-    let el = document.getElementById("ochre-todo-preview");
+    let el = document.getElementById("orca-todo-preview");
     if (el) return el;
     el = document.createElement("div");
-    el.id = "ochre-todo-preview";
-    el.className = "ochre-hover-preview";
-    el.innerHTML = '<p class="ochre-preview-title"></p><p class="ochre-preview-text"></p>';
+    el.id = "orca-todo-preview";
+    el.className = "orca-hover-preview";
+    el.innerHTML = '<p class="orca-preview-title"></p><p class="orca-preview-text"></p>';
     el.style.position = "fixed";
     el.style.zIndex = "100001";
     el.style.width = "300px";
@@ -3762,15 +3762,15 @@ async function getTodoPreviewText(item) {
 
 function hideTodoPreview() {
     todoPreviewToken++; // cancel any pending async text update
-    const el = document.getElementById("ochre-todo-preview");
+    const el = document.getElementById("orca-todo-preview");
     if (el) el.style.display = "none";
 }
 
 async function showTodoPreview(anchor, item) {
     const token = ++todoPreviewToken;
     const el = getTodoPreviewEl();
-    const title = el.querySelector(".ochre-preview-title");
-    const text = el.querySelector(".ochre-preview-text");
+    const title = el.querySelector(".orca-preview-title");
+    const text = el.querySelector(".orca-preview-text");
     title.textContent = item.plannable && item.plannable.title ? item.plannable.title : "";
     text.textContent = "Loading…";
     el.style.display = "block";
@@ -3881,7 +3881,7 @@ function populateAssignments(iscompleted = false) {
         // rendered black in light mode or the theme text color in dark mode
         // instead of the course's card color.
         const classNameColor = options.todo_ignore_card_colors
-            ? (options.dark_mode === true ? "var(--ochre-text-0)" : "#000000")
+            ? (options.dark_mode === true ? "var(--orca-text-0)" : "#000000")
             : courseColorSafe;
         // "Remove icons" (Better Todo List): when on, the task-type icon is
         // omitted from the colored strip on the left of each task.
@@ -3890,7 +3890,7 @@ function populateAssignments(iscompleted = false) {
         const isCustomTask = item.plannable_type == "planner_note" || item.planner_override?.custom === true;
         const taskHref = isCustomTask ? customTaskHref(item) : (domain + item.html_url);
         const editButtonSvg = isCustomTask
-            ? `<svg class="better-todo-assignment-edit" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:15px;height:15px;position:absolute;top:18px;right:5px;opacity:0.3;transition:all .3s ease;cursor:pointer;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.3'" title="Edit this custom task"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke="var(--ochre-text-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+            ? `<svg class="better-todo-assignment-edit" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:15px;height:15px;position:absolute;top:18px;right:5px;opacity:0.3;transition:all .3s ease;cursor:pointer;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.3'" title="Edit this custom task"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke="var(--orca-text-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
             : "";
         const iconSize = isCustomTask ? 26 : 20;
         const iconLeftOffset = isCustomTask ? 2 : 5;
@@ -3907,7 +3907,7 @@ function populateAssignments(iscompleted = false) {
 
 		assignment.style.overflowX = "hidden";
 		assignment.innerHTML = `
-		<div style="display:flex;align-items:center;gap:5px;width:100%;height:60px;background:var(--ochre-background-2);border-radius:5px;transition:all .4s ease;overflow:hidden;">
+		<div style="display:flex;align-items:center;gap:5px;width:100%;height:60px;background:var(--orca-background-2);border-radius:5px;transition:all .4s ease;overflow:hidden;">
 			<div style="width:40px;display:flex;align-items:center;justify-content:center;background-color:${courseColorSafe};height:100%;border-radius:5px 0 0 5px;">
                 <div style="width:${iconSize}px;height:${iconSize}px;display:flex;margin-left:${iconLeftOffset}px;">
                     ${taskIcon}
@@ -3917,14 +3917,14 @@ function populateAssignments(iscompleted = false) {
 				<div style="display:flex;flex-direction:column;gap:3px;">
 					<span style="color:${classNameColor};font-size:12px;margin-top:-2px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;box-sizing:border-box;padding-right:22px;">${item.context_name}</span>
 					<a href="${taskHref}" style="color:inherit;text-decoration:none;font-weight:bold;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;padding-right:28px;margin-top:-5px;">${item.plannable.title}</a>
-					<span style="color:var(--ochre-text-0);font-size:12px;margin-top:-5px;">${convertToDueDate(item.plannable_date)}</span>
+					<span style="color:var(--orca-text-0);font-size:12px;margin-top:-5px;">${convertToDueDate(item.plannable_date)}</span>
 				</div>
 				${editButtonSvg}
 				<svg class="better-todo-assignment-checkmark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:15px;height:15px;position:absolute;top:0px;right:5px;opacity:0.3;transition:all .3s ease;cursor:pointer;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.3'">
 					<g id="SVGRepo_bgCarrier" stroke-width="0"></g>
 					<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
 					<g id="SVGRepo_iconCarrier"> <g id="Interface / Checkbox_Check">
-						<path id="Vector" d="M8 12L11 15L16 9M4 16.8002V7.2002C4 6.08009 4 5.51962 4.21799 5.0918C4.40973 4.71547 4.71547 4.40973 5.0918 4.21799C5.51962 4 6.08009 4 7.2002 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V16.8036C20 17.9215 20 18.4805 19.7822 18.9079C19.5905 19.2842 19.2837 19.5905 18.9074 19.7822C18.48 20 17.921 20 16.8031 20H7.19691C6.07899 20 5.5192 20 5.0918 19.7822C4.71547 19.5905 4.40973 19.2842 4.21799 18.9079C4 18.4801 4 17.9203 4 16.8002Z" stroke="var(--ochre-text-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+						<path id="Vector" d="M8 12L11 15L16 9M4 16.8002V7.2002C4 6.08009 4 5.51962 4.21799 5.0918C4.40973 4.71547 4.71547 4.40973 5.0918 4.21799C5.51962 4 6.08009 4 7.2002 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V16.8036C20 17.9215 20 18.4805 19.7822 18.9079C19.5905 19.2842 19.2837 19.5905 18.9074 19.7822C18.48 20 17.921 20 16.8031 20H7.19691C6.07899 20 5.5192 20 5.0918 19.7822C4.71547 19.5905 4.40973 19.2842 4.21799 18.9079C4 18.4801 4 17.9203 4 16.8002Z" stroke="var(--orca-text-0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
 					</g></g>
 				</svg>
 			</div>
@@ -3956,7 +3956,7 @@ function populateAssignments(iscompleted = false) {
 
 		let seeMoreButton = makeElement("button", document.getElementById("better-todo-main"), {
 			textContent: `View More (${assignmentCount - maxElements})`,
-			className: "ochre-custom-btn",
+			className: "orca-custom-btn",
 			id: "better-todo-see-more",
 			style: "width:100%;margin-top:15px;cursor:pointer;"
 		})
@@ -4005,7 +4005,7 @@ function populateAnnouncements() {
 
 		// "Ignore card colors": black in light mode, theme text color in dark.
 		const classNameColor = options.todo_ignore_card_colors
-			? (options.dark_mode === true ? "var(--ochre-text-0)" : "#000000")
+			? (options.dark_mode === true ? "var(--orca-text-0)" : "#000000")
 			: courseColorSafe;
 		// "Remove icons": drop the announcement icon from the colored strip.
 		const removeIcons = options.todo_remove_icons === true;
@@ -4016,7 +4016,7 @@ function populateAnnouncements() {
 		}
 
 		announcement.innerHTML = `
-		<div style="display:flex;align-items:center;gap:5px;width:100%;height:60px;background:var(--ochre-background-2);border-radius:5px;${filter}">
+		<div style="display:flex;align-items:center;gap:5px;width:100%;height:60px;background:var(--orca-background-2);border-radius:5px;${filter}">
 			<div style="width:40px;display:flex;align-items:center;justify-content:center;background-color:${courseColorSafe};height:100%;border-radius:5px 0 0 5px;">
 				<div style="width:23px;height:23px;display:flex;margin-left:0px;">
 					${removeIcons ? "" : `<svg fill="var(--cr-todo-icon)" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" style="transition:all .3s ease;">
@@ -4031,7 +4031,7 @@ function populateAnnouncements() {
 				<div style="display:flex;flex-direction:column;gap:3px;">
 					<span style="color:${classNameColor};font-size:12px;margin-top:-2px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;box-sizing:border-box;padding-right:22px;">${item.context_name}</span>
 					<a href="${domain + item.html_url}" style="color:inherit;text-decoration:none;font-weight:bold;text-overflow:ellipsis;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:-5px;">${item.plannable.title}</a>
-					<span style="color:var(--ochre-text-0);font-size:12px;margin-top:-5px;">${convertToDueDate(item.plannable_date)}</span>
+					<span style="color:var(--orca-text-0);font-size:12px;margin-top:-5px;">${convertToDueDate(item.plannable_date)}</span>
 				</div>
 			</div>
 		</div>
@@ -4048,7 +4048,7 @@ function createConfettiBurst(targetElement, opts = {}) {
         const colors = opts.colors || ['#ff4d4f', '#ffc107', '#28a745', '#17a2b8', '#6f42c1', '#ff6b6b', '#ff8a65', '#ffd54f'];
         const rect = targetElement.getBoundingClientRect();
         const container = document.createElement('div');
-        container.className = 'ochre-confetti-container';
+        container.className = 'orca-confetti-container';
         container.style.position = 'fixed';
         container.style.left = '0';
         container.style.top = '0';
@@ -4063,7 +4063,7 @@ function createConfettiBurst(targetElement, opts = {}) {
 
         for (let i = 0; i < count; i++) {
             const el = document.createElement('div');
-            el.className = 'ochre-confetti';
+            el.className = 'orca-confetti';
             const w = 4 + Math.floor(Math.random() * 7); // smaller pieces
             const h = Math.max(3, Math.floor(w * (0.4 + Math.random() * 0.8)));
             el.style.position = 'absolute';
@@ -4199,7 +4199,7 @@ function markAs(item, element) {
 
     setTimeout(() => {
         clearTodoList();
-        createTodoSections(document.querySelector("#ochre-todo-list"));
+        createTodoSections(document.querySelector("#orca-todo-list"));
     }, 400);
 
     // --- Persistence (background, best-effort) ---
@@ -4235,8 +4235,8 @@ function markAs(item, element) {
 }
 
 function createTodoViewMore(location, type) {
-    let viewMoreButton = makeElement("button", location, { "className": "ochre-custom-btn ochre-viewmore-btn", "textContent": "View More" });
-    //viewMoreButton.classList.add("ochre-viewmore-btn");
+    let viewMoreButton = makeElement("button", location, { "className": "orca-custom-btn orca-viewmore-btn", "textContent": "View More" });
+    //viewMoreButton.classList.add("orca-viewmore-btn");
     const showMoreCount = 3;
     viewMoreButton.addEventListener("click", function (e) {
         if (type === "announcement") {
@@ -4253,16 +4253,16 @@ function setupBetterTodo() {
     // Better Todo list is removed from quizzes (it interferes with the quiz page).
     if (isQuizPage()) return;
     if (options.better_todo !== true || isGradesPage()) return;
-    if (document.querySelector('#ochre-todo-list')) return;
+    if (document.querySelector('#orca-todo-list')) return;
     let list = document.querySelector("#right-side");
     if (!list) return;
-    //if (!list || list.childElementCount === 0 || list.children[0].id === "ochre-todo-list") return;
+    //if (!list || list.childElementCount === 0 || list.children[0].id === "orca-todo-list") return;
     try {
         /* save the feedback to append it later */
         const feedback = list.querySelector(".events_list.recent_feedback");
 
         list.textContent = "";
-        list = makeElement("div", list, { "className": "ochre-todosidebar","id": "ochre-todo-list"});
+        list = makeElement("div", list, { "className": "orca-todosidebar","id": "orca-todo-list"});
         createTodoSections(list);
 
         if (feedback) list.append(feedback);
@@ -4280,10 +4280,10 @@ function getSidebarScale() {
 
 function applySidebarScaleStyles(sidebarList) {
     const scale = getSidebarScale();
-    sidebarList.style.setProperty("--ochre-sidebar-icon-size", `${Math.round(20 * scale)}px`);
-    sidebarList.style.setProperty("--ochre-sidebar-btn-height", `${Math.round(30 * scale)}px`);
-    sidebarList.style.setProperty("--ochre-sidebar-btn-gap", `${Math.round(8 * scale)}px`);
-    sidebarList.style.setProperty("--ochre-sidebar-label-size", `${Math.round(14 * scale)}px`);
+    sidebarList.style.setProperty("--orca-sidebar-icon-size", `${Math.round(20 * scale)}px`);
+    sidebarList.style.setProperty("--orca-sidebar-btn-height", `${Math.round(30 * scale)}px`);
+    sidebarList.style.setProperty("--orca-sidebar-btn-gap", `${Math.round(8 * scale)}px`);
+    sidebarList.style.setProperty("--orca-sidebar-label-size", `${Math.round(14 * scale)}px`);
 }
 
 // Re-apply the tinted course-content panel when the background opacity slider
@@ -4297,7 +4297,7 @@ function applyBetterSidebarContentPanel() {
     if (!contentMain) return;
     const bgOpacity = Math.max(0, Math.min(100, Number(options.bg_opacity ?? 65)));
     const bgBlur = Math.max(0, Math.min(30, Number(options.bg_blur ?? 8)));
-    contentMain.style.setProperty("background", `color-mix(in srgb, var(--ochre-background-0) ${bgOpacity}%, transparent)`, "important");
+    contentMain.style.setProperty("background", `color-mix(in srgb, var(--orca-background-0) ${bgOpacity}%, transparent)`, "important");
     contentMain.style.setProperty("backdrop-filter", `blur(${bgBlur}px)`, "important");
     contentMain.style.setProperty("-webkit-backdrop-filter", `blur(${bgBlur}px)`, "important");
 }
@@ -4360,7 +4360,7 @@ async function setupBetterSidebar(mode = getSidebarLayoutMode()) {
             contentMain?.style.setProperty("margin", "26px 38px 38px", "important");
             contentMain?.style.setProperty("padding", "10px", "important");
             contentMain?.style.setProperty("border-radius", "10px", "important");
-            contentMain?.style.setProperty("background", `color-mix(in srgb, var(--ochre-background-0) ${Math.max(0, Math.min(100, Number(options.bg_opacity ?? 65)))}%, transparent)`, "important");
+            contentMain?.style.setProperty("background", `color-mix(in srgb, var(--orca-background-0) ${Math.max(0, Math.min(100, Number(options.bg_opacity ?? 65)))}%, transparent)`, "important");
             contentMain?.style.setProperty("backdrop-filter", `blur(${Math.max(0, Math.min(30, Number(options.bg_blur ?? 8)))}px)`, "important");
             contentMain?.style.setProperty("-webkit-backdrop-filter", `blur(${Math.max(0, Math.min(30, Number(options.bg_blur ?? 8)))}px)`, "important");
         }
@@ -4388,7 +4388,7 @@ async function setupBetterSidebar(mode = getSidebarLayoutMode()) {
         }
 
         let sidebarList = makeElement("div", sidebarParent, { id: "better-sidebar-container",
-            style: `display:flex;flex-direction:column;width:50px;justify-content:center;align-items:center;box-sizing:border-box;position:relative;background-color:var(--ochre-sidebar);height:100vh;position:sticky;top:0;left:0;`
+            style: `display:flex;flex-direction:column;width:50px;justify-content:center;align-items:center;box-sizing:border-box;position:relative;background-color:var(--orca-sidebar);height:100vh;position:sticky;top:0;left:0;`
         }, true);
         let sidebarContent = makeElement("div", sidebarList, {
             style: "display:flex;flex-direction:column;gap:20px;width:100%;flex:1;justify-content:flex-start;align-items:center;margin:40px;"
@@ -4403,7 +4403,7 @@ async function setupBetterSidebar(mode = getSidebarLayoutMode()) {
                 <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                 <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                 <g id="SVGRepo_iconCarrier">
-                    <path d="M20 4V20M4 12H16M16 12L12 8M16 12L12 16" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M20 4V20M4 12H16M16 12L12 8M16 12L12 16" stroke="var(--orca-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                 </g>
             </svg>
         `
@@ -4431,11 +4431,11 @@ async function setupBetterSidebar(mode = getSidebarLayoutMode()) {
 }
 function createSidebarButton(text, url, parent, icon) {
 	let button = makeElement("a", parent, {
-        style: "width:40%;height:var(--ochre-sidebar-btn-height,30px);cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;gap:var(--ochre-sidebar-btn-gap,8px);color:var(--ochre-sidebar-text) !important;font-weight:bold;position:relative;",
-		className: "ochre-custom-btn better-sidebar-btn",
+        style: "width:40%;height:var(--orca-sidebar-btn-height,30px);cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;gap:var(--orca-sidebar-btn-gap,8px);color:var(--orca-sidebar-text) !important;font-weight:bold;position:relative;",
+		className: "orca-custom-btn better-sidebar-btn",
 		href: url,
 	});
-    button.innerHTML = `${icon ? `${icon}<span class="better-sidebar-label" style="font-size:var(--ochre-sidebar-label-size,14px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${text}</span>` : `<span class="better-sidebar-label" style="font-size:var(--ochre-sidebar-label-size,14px);">${text}</span>`}`;
+    button.innerHTML = `${icon ? `${icon}<span class="better-sidebar-label" style="font-size:var(--orca-sidebar-label-size,14px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${text}</span>` : `<span class="better-sidebar-label" style="font-size:var(--orca-sidebar-label-size,14px);">${text}</span>`}`;
     return button;
 }
 
@@ -4492,7 +4492,7 @@ function watchSidebarBadges() {
         const menu = document.getElementById("menu");
         if (!menu) return;
         // Re-observe only if the node we were watching is gone.
-        if (sidebarBadgeObserver && sidebarBadgeObserver.__ochreTarget === menu) return;
+        if (sidebarBadgeObserver && sidebarBadgeObserver.__orcaTarget === menu) return;
         attachSidebarBadgeObserver(menu);
     });
 }
@@ -4500,20 +4500,20 @@ function watchSidebarBadges() {
 function attachSidebarBadgeObserver(navMenu) {
     if (sidebarBadgeObserver) sidebarBadgeObserver.disconnect();
     sidebarBadgeObserver = new MutationObserver(scheduleSidebarBadgeSync);
-    sidebarBadgeObserver.__ochreTarget = navMenu;
+    sidebarBadgeObserver.__orcaTarget = navMenu;
     sidebarBadgeObserver.observe(navMenu, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style"] });
     scheduleSidebarBadgeSync();
 }
 function populateSidebarFromNav(sidebarContent) {
 	const excludeIds = ["global_nav_help_link", "global_nav_history_link"];
 	const customIcons = {
-		"global_nav_profile_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="var(--ochre-sidebar-text)"></path></g></svg>`,
-		"global_nav_dashboard_link": `<svg fill="var(--ochre-sidebar-text)" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><rect x="2" y="2" width="9" height="11" rx="2"></rect><rect x="13" y="2" width="9" height="7" rx="2"></rect><rect x="2" y="15" width="9" height="7" rx="2"></rect><rect x="13" y="11" width="9" height="11" rx="2"></rect></g></svg>`,
-		"global_nav_conversations_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L9 12M20 18L15 12M3 8L10.225 12.8166C10.8665 13.2443 11.1872 13.4582 11.5339 13.5412C11.8403 13.6147 12.1597 13.6147 12.4661 13.5412C12.8128 13.4582 13.1335 13.2443 13.775 12.8166L21 8M6.2 19H17.8C18.9201 19 19.4802 19 19.908 18.782C20.2843 18.5903 20.5903 18.2843 20.782 17.908C21 17.4802 21 16.9201 21 15.8V8.2C21 7.0799 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V15.8C3 16.9201 3 17.4802 3.21799 17.908C3.40973 18.2843 3.71569 18.5903 4.09202 18.782C4.51984 19 5.07989 19 6.2 19Z" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>`,
-		"global_nav_calendar_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M3 9H21M7 3V5M17 3V5M6 12H8M11 12H13M16 12H18M6 15H8M11 15H13M16 15H18M6 18H8M11 18H13M16 18H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round"></path></g></svg>`,
-		"global_nav_courses_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M20 12V4C20 2.89543 19.1046 2 18 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V18.5" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 2V14L16.8182 11L20 14V5" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>`,
-		"global_nav_groups_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6C14.3432 6 13 7.34315 13 9C13 10.6569 14.3432 12 16 12C17.6569 12 19 10.6569 19 9C19 7.34315 17.6569 6 16 6ZM11 9C11 6.23858 13.2386 4 16 4C18.7614 4 21 6.23858 21 9C21 10.3193 20.489 11.5193 19.6542 12.4128C21.4951 13.0124 22.9176 14.1993 23.8264 15.5329C24.1374 15.9893 24.0195 16.6114 23.5631 16.9224C23.1068 17.2334 22.4846 17.1155 22.1736 16.6591C21.1979 15.2273 19.4178 14 17 14C13.166 14 11 17.0742 11 19C11 19.5523 10.5523 20 10 20C9.44773 20 9.00001 19.5523 9.00001 19C9.00001 18.308 9.15848 17.57 9.46082 16.8425C9.38379 16.7931 9.3123 16.7323 9.24889 16.6602C8.42804 15.7262 7.15417 15 5.50001 15C3.84585 15 2.57199 15.7262 1.75114 16.6602C1.38655 17.075 0.754692 17.1157 0.339855 16.7511C-0.0749807 16.3865 -0.115709 15.7547 0.248886 15.3398C0.809035 14.7025 1.51784 14.1364 2.35725 13.7207C1.51989 12.9035 1.00001 11.7625 1.00001 10.5C1.00001 8.01472 3.01473 6 5.50001 6C7.98529 6 10 8.01472 10 10.5C10 11.7625 9.48013 12.9035 8.64278 13.7207C9.36518 14.0785 9.99085 14.5476 10.5083 15.0777C11.152 14.2659 11.9886 13.5382 12.9922 12.9945C11.7822 12.0819 11 10.6323 11 9ZM3.00001 10.5C3.00001 9.11929 4.1193 8 5.50001 8C6.88072 8 8.00001 9.11929 8.00001 10.5C8.00001 11.8807 6.88072 13 5.50001 13C4.1193 13 3.00001 11.8807 3.00001 10.5Z" fill="var(--ochre-sidebar-text)"></path></g></svg>`,
-		"globalNavExternalTool-69": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill-rule="evenodd" clip-rule="evenodd" d="M6 1C4.34315 1 3 2.34315 3 4V17V20C3 21.6569 4.34315 23 6 23H18C19.6569 23 21 21.6569 21 20V17V4C21 2.34315 19.6569 1 18 1H6ZM5 20V17C5 16.4477 5.44772 16 6 16H18C18.5523 16 19 16.4477 19 17V20C19 20.5523 18.5523 21 18 21H6C5.44772 21 5 20.5523 5 20ZM18 14C18.3506 14 18.6872 14.0602 19 14.1707V4C19 3.44772 18.5523 3 18 3H6C5.44772 3 5 3.44772 5 4V14.1707C5.31278 14.0602 5.64936 14 6 14H18ZM14.5 19.25C15.1904 19.25 15.75 18.6904 15.75 18C15.75 17.3096 15.1904 16.75 14.5 16.75C13.8096 16.75 13.25 17.3096 13.25 18C13.25 18.6904 13.8096 19.25 14.5 19.25Z" fill="var(--ochre-sidebar-text)"></path></g></svg>`,
+		"global_nav_profile_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="var(--orca-sidebar-text)"></path></g></svg>`,
+		"global_nav_dashboard_link": `<svg fill="var(--orca-sidebar-text)" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><rect x="2" y="2" width="9" height="11" rx="2"></rect><rect x="13" y="2" width="9" height="7" rx="2"></rect><rect x="2" y="15" width="9" height="7" rx="2"></rect><rect x="13" y="11" width="9" height="11" rx="2"></rect></g></svg>`,
+		"global_nav_conversations_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L9 12M20 18L15 12M3 8L10.225 12.8166C10.8665 13.2443 11.1872 13.4582 11.5339 13.5412C11.8403 13.6147 12.1597 13.6147 12.4661 13.5412C12.8128 13.4582 13.1335 13.2443 13.775 12.8166L21 8M6.2 19H17.8C18.9201 19 19.4802 19 19.908 18.782C20.2843 18.5903 20.5903 18.2843 20.782 17.908C21 17.4802 21 16.9201 21 15.8V8.2C21 7.0799 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V15.8C3 16.9201 3 17.4802 3.21799 17.908C3.40973 18.2843 3.71569 18.5903 4.09202 18.782C4.51984 19 5.07989 19 6.2 19Z" stroke="var(--orca-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>`,
+		"global_nav_calendar_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M3 9H21M7 3V5M17 3V5M6 12H8M11 12H13M16 12H18M6 15H8M11 15H13M16 15H18M6 18H8M11 18H13M16 18H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" stroke="var(--orca-sidebar-text)" stroke-width="2" stroke-linecap="round"></path></g></svg>`,
+		"global_nav_courses_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M20 12V4C20 2.89543 19.1046 2 18 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V18.5" stroke="var(--orca-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 2V14L16.8182 11L20 14V5" stroke="var(--orca-sidebar-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>`,
+		"global_nav_groups_link": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill-rule="evenodd" clip-rule="evenodd" d="M16 6C14.3432 6 13 7.34315 13 9C13 10.6569 14.3432 12 16 12C17.6569 12 19 10.6569 19 9C19 7.34315 17.6569 6 16 6ZM11 9C11 6.23858 13.2386 4 16 4C18.7614 4 21 6.23858 21 9C21 10.3193 20.489 11.5193 19.6542 12.4128C21.4951 13.0124 22.9176 14.1993 23.8264 15.5329C24.1374 15.9893 24.0195 16.6114 23.5631 16.9224C23.1068 17.2334 22.4846 17.1155 22.1736 16.6591C21.1979 15.2273 19.4178 14 17 14C13.166 14 11 17.0742 11 19C11 19.5523 10.5523 20 10 20C9.44773 20 9.00001 19.5523 9.00001 19C9.00001 18.308 9.15848 17.57 9.46082 16.8425C9.38379 16.7931 9.3123 16.7323 9.24889 16.6602C8.42804 15.7262 7.15417 15 5.50001 15C3.84585 15 2.57199 15.7262 1.75114 16.6602C1.38655 17.075 0.754692 17.1157 0.339855 16.7511C-0.0749807 16.3865 -0.115709 15.7547 0.248886 15.3398C0.809035 14.7025 1.51784 14.1364 2.35725 13.7207C1.51989 12.9035 1.00001 11.7625 1.00001 10.5C1.00001 8.01472 3.01473 6 5.50001 6C7.98529 6 10 8.01472 10 10.5C10 11.7625 9.48013 12.9035 8.64278 13.7207C9.36518 14.0785 9.99085 14.5476 10.5083 15.0777C11.152 14.2659 11.9886 13.5382 12.9922 12.9945C11.7822 12.0819 11 10.6323 11 9ZM3.00001 10.5C3.00001 9.11929 4.1193 8 5.50001 8C6.88072 8 8.00001 9.11929 8.00001 10.5C8.00001 11.8807 6.88072 13 5.50001 13C4.1193 13 3.00001 11.8807 3.00001 10.5Z" fill="var(--orca-sidebar-text)"></path></g></svg>`,
+		"globalNavExternalTool-69": `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill-rule="evenodd" clip-rule="evenodd" d="M6 1C4.34315 1 3 2.34315 3 4V17V20C3 21.6569 4.34315 23 6 23H18C19.6569 23 21 21.6569 21 20V17V4C21 2.34315 19.6569 1 18 1H6ZM5 20V17C5 16.4477 5.44772 16 6 16H18C18.5523 16 19 16.4477 19 17V20C19 20.5523 18.5523 21 18 21H6C5.44772 21 5 20.5523 5 20ZM18 14C18.3506 14 18.6872 14.0602 19 14.1707V4C19 3.44772 18.5523 3 18 3H6C5.44772 3 5 3.44772 5 4V14.1707C5.31278 14.0602 5.64936 14 6 14H18ZM14.5 19.25C15.1904 19.25 15.75 18.6904 15.75 18C15.75 17.3096 15.1904 16.75 14.5 16.75C13.8096 16.75 13.25 17.3096 13.25 18C13.25 18.6904 13.8096 19.25 14.5 19.25Z" fill="var(--orca-sidebar-text)"></path></g></svg>`,
 	};
 	
 	const navMenu = document.getElementById("menu");
@@ -4524,7 +4524,7 @@ function populateSidebarFromNav(sidebarContent) {
     // so either can execute first. If the search button was appended before
     // the nav buttons exist, slot the nav buttons in ahead of it so Search
     // always stays at the bottom of the sidebar.
-    const searchBtn = sidebarContent.querySelector("#ochre-gs-sidebar-btn");
+    const searchBtn = sidebarContent.querySelector("#orca-gs-sidebar-btn");
     const insertNavButton = (text, href, icon) => {
         const button = createSidebarButton(text, href, sidebarContent, icon);
         if (searchBtn && searchBtn.parentNode === sidebarContent) {
@@ -4569,25 +4569,25 @@ function populateSidebarFromNav(sidebarContent) {
                             // Check if svg already has a style attribute
                             if (icon.includes('style="')) {
                                 // Append to existing style
-                                icon = icon.replace(/style="([^"]*)"/, `style="$1 width:20px;height:20px;flex-shrink:0;fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);"`);
+                                icon = icon.replace(/style="([^"]*)"/, `style="$1 width:20px;height:20px;flex-shrink:0;fill:var(--orca-sidebar-text);stroke:var(--orca-sidebar-text);"`);
                             } else {
                                 // Add new style attribute
-                                icon = icon.replace("<svg", '<svg style="width:20px;height:20px;flex-shrink:0;fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);"');
+                                icon = icon.replace("<svg", '<svg style="width:20px;height:20px;flex-shrink:0;fill:var(--orca-sidebar-text);stroke:var(--orca-sidebar-text);"');
                             }
                         } else {
                             // Smaller SVG - just add colors
                             if (icon.includes('style="')) {
-                                icon = icon.replace(/style="([^"]*)"/, `style="$1 fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);flex-shrink:0;"`);
+                                icon = icon.replace(/style="([^"]*)"/, `style="$1 fill:var(--orca-sidebar-text);stroke:var(--orca-sidebar-text);flex-shrink:0;"`);
                             } else {
-                                icon = icon.replace("<svg", '<svg style="fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);flex-shrink:0;"');
+                                icon = icon.replace("<svg", '<svg style="fill:var(--orca-sidebar-text);stroke:var(--orca-sidebar-text);flex-shrink:0;"');
                             }
                         }
                     } else {
                         // No viewBox - just add colors
                         if (icon.includes('style="')) {
-                            icon = icon.replace(/style="([^"]*)"/, `style="$1 fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);"`);
+                            icon = icon.replace(/style="([^"]*)"/, `style="$1 fill:var(--orca-sidebar-text);stroke:var(--orca-sidebar-text);"`);
                         } else {
-                            icon = icon.replace("<svg", '<svg style="fill:var(--ochre-sidebar-text);stroke:var(--ochre-sidebar-text);"');
+                            icon = icon.replace("<svg", '<svg style="fill:var(--orca-sidebar-text);stroke:var(--orca-sidebar-text);"');
                         }
                     }
                 }
@@ -4619,8 +4619,8 @@ function updateSidebar(expanded, sidebarList, expander) {
     const buttons = document.querySelectorAll(".better-sidebar-btn");
     buttons.forEach(label => label.style.width = expanded ? "80%" : "40%");
     sidebarList.querySelectorAll(".better-sidebar-btn svg").forEach(svg => {
-        svg.style.width = "var(--ochre-sidebar-icon-size,20px)";
-        svg.style.height = "var(--ochre-sidebar-icon-size,20px)";
+        svg.style.width = "var(--orca-sidebar-icon-size,20px)";
+        svg.style.height = "var(--orca-sidebar-icon-size,20px)";
     });
 
     // Expand (or restore) the entire left-side column when the sidebar toggles
@@ -4680,10 +4680,10 @@ async function loadBetterTodo() {
     if (options.better_todo !== true || isGradesPage()) return;
     try {
         await getColors();
-        const discussion_svg = '<svg class="ochre-todo-svg" name="IconDiscussion" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"  ><g role="presentation"><path d="M677.647059,16 L677.647059,354.936471 L790.588235,354.936471 L790.588235,129.054118 L1807.05882,129.054118 L1807.05882,919.529412 L1581.06353,919.529412 L1581.06353,1179.29412 L1321.41176,919.529412 L1242.24,919.529412 L1242.24,467.877647 L677.647059,467.877647 L0,467.877647 L0,1484.34824 L338.710588,1484.34824 L338.710588,1903.24706 L756.705882,1484.34824 L1242.24,1484.34824 L1242.24,1032.47059 L1274.99294,1032.47059 L1694.11765,1451.59529 L1694.11765,1032.47059 L1920,1032.47059 L1920,16 L677.647059,16 Z M338.789647,919.563294 L903.495529,919.563294 L903.495529,806.622118 L338.789647,806.622118 L338.789647,919.563294 Z M338.789647,1145.44565 L677.726118,1145.44565 L677.726118,1032.39153 L338.789647,1032.39153 L338.789647,1145.44565 Z M112.941176,580.705882 L1129.41176,580.705882 L1129.41176,1371.40706 L710.4,1371.40706 L451.651765,1631.05882 L451.651765,1371.40706 L112.941176,1371.40706 L112.941176,580.705882 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
-        const quiz_svg = '<svg class="ochre-todo-svg" label="Quiz" name="IconQuiz" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"  ><g role="presentation"><g fill-rule="evenodd" stroke="none" stroke-width="1"><path d="M746.255375,1466.76417 L826.739372,1547.47616 L577.99138,1796.11015 L497.507383,1715.51216 L746.255375,1466.76417 Z M580.35118,1300.92837 L660.949178,1381.52637 L329.323189,1713.15236 L248.725192,1632.55436 L580.35118,1300.92837 Z M414.503986,1135.20658 L495.101983,1215.80457 L80.5979973,1630.30856 L0,1549.71056 L414.503986,1135.20658 Z M1119.32036,264.600006 C1475.79835,-91.8779816 1844.58834,86.3040124 1848.35034,88.1280123 L1848.35034,88.1280123 L1865.45034,96.564012 L1873.88634,113.664011 C1875.71034,117.312011 2053.89233,486.101999 1697.30034,842.693987 L1697.30034,842.693987 L1550.69635,989.297982 L1548.07435,1655.17196 L1325.43235,1877.81395 L993.806366,1546.30196 L415.712386,968.207982 L84.0863971,636.467994 L306.72839,413.826001 L972.602367,411.318001 Z M1436.24035,1103.75398 L1074.40436,1465.70397 L1325.43235,1716.61796 L1434.30235,1607.74796 L1436.24035,1103.75398 Z M1779.26634,182.406009 C1710.18234,156.41401 1457.90035,87.1020124 1199.91836,345.198004 L1199.91836,345.198004 L576.90838,968.207982 L993.806366,1385.10597 L1616.70235,762.095989 C1873.65834,505.139998 1804.68834,250.920007 1779.26634,182.406009 Z M858.146371,525.773997 L354.152388,527.597997 L245.282392,636.467994 L496.310383,887.609985 L858.146371,525.773997 Z"></path><path d="M1534.98715,372.558003 C1483.91515,371.190003 1403.31715,385.326002 1321.69316,466.949999 L1281.22316,507.305998 L1454.61715,680.585992 L1494.97315,640.343994 C1577.16715,558.035996 1591.87315,479.033999 1589.82115,427.164001 L1587.65515,374.610003 L1534.98715,372.558003 Z"></path></g></g></svg>';
-        const announcement_svg = '<svg class="ochre-todo-svg" label="Announcement" name="IconAnnouncement" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false" ><g role="presentation"><path d="M1587.16235,31.2784941 C1598.68235,7.78672942 1624.43294,-4.41091764 1650.63529,1.46202354 C1676.16,7.56084707 1694.11765,30.2620235 1694.11765,56.4643765 L1694.11765,56.4643765 L1694.11765,570.459671 C1822.87059,596.662024 1920,710.732612 1920,847.052612 C1920,983.372612 1822.87059,1097.55614 1694.11765,1123.75849 L1694.11765,1123.75849 L1694.11765,1637.64085 C1694.11765,1663.8432 1676.16,1686.65732 1650.63529,1692.6432 C1646.23059,1693.65967 1641.93882,1694.11144 1637.64706,1694.11144 C1616.52706,1694.11144 1596.87529,1682.36555 1587.16235,1662.93967 C1379.23765,1247.2032 964.178824,1242.34673 960,1242.34673 L960,1242.34673 L564.705882,1242.34673 L564.705882,1807.05261 L652.461176,1807.05261 C640.602353,1716.92555 634.955294,1560.05026 715.934118,1456.37026 C768.338824,1389.2832 845.590588,1355.28791 945.882353,1355.28791 L945.882353,1355.28791 L945.882353,1468.22908 C881.392941,1468.22908 835.312941,1487.09026 805.044706,1525.71614 C736.263529,1613.58438 759.981176,1789.54673 774.776471,1849.97026 C778.955294,1866.79849 775.115294,1884.6432 764.498824,1898.30908 C753.769412,1911.97496 737.28,1919.99379 720,1919.99379 L720,1919.99379 L508.235294,1919.99379 C477.063529,1919.99379 451.764706,1894.80791 451.764706,1863.5232 L451.764706,1863.5232 L451.764706,1242.34673 L395.294118,1242.34673 C239.548235,1242.34673 112.941176,1115.73967 112.941176,959.993788 L112.941176,959.993788 L112.941176,903.5232 L56.4705882,903.5232 C25.2988235,903.5232 0,878.337318 0,847.052612 C0,815.880847 25.2988235,790.582024 56.4705882,790.582024 L56.4705882,790.582024 L112.941176,790.582024 L112.941176,734.111435 C112.941176,578.478494 239.548235,451.758494 395.294118,451.758494 L395.294118,451.758494 L959.887059,451.758494 C976.828235,451.645553 1380.36706,444.756141 1587.16235,31.2784941 Z M1581.17647,249.706729 C1386.46588,492.078494 1128.96,547.871435 1016.47059,560.746729 L1016.47059,560.746729 L1016.47059,1133.47144 C1128.96,1146.34673 1386.46588,1202.02673 1581.17647,1444.51144 L1581.17647,1444.51144 Z M903.529412,564.699671 L395.294118,564.699671 C301.891765,564.699671 225.882353,640.709082 225.882353,734.111435 L225.882353,734.111435 L225.882353,959.993788 C225.882353,1053.39614 301.891765,1129.40555 395.294118,1129.40555 L395.294118,1129.40555 L903.529412,1129.40555 L903.529412,564.699671 Z M1694.11765,688.144376 L1694.11765,1006.07379 C1759.73647,982.694965 1807.05882,920.577318 1807.05882,847.052612 C1807.05882,773.527906 1759.73647,711.5232 1694.11765,688.144376 L1694.11765,688.144376 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
-        const assignment_svg = '<svg class="ochre-todo-svg" label="Assignment" name="IconAssignment" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"><g role="presentation"><path d="M1468.2137,0 L1468.2137,564.697578 L1355.27419,564.697578 L1355.27419,112.939516 L112.939516,112.939516 L112.939516,1807.03225 L1355.27419,1807.03225 L1355.27419,1581.15322 L1468.2137,1581.15322 L1468.2137,1919.97177 L2.5243549e-29,1919.97177 L2.5243549e-29,0 L1468.2137,0 Z M1597.64239,581.310981 C1619.77853,559.174836 1655.46742,559.174836 1677.60356,581.310981 L1677.60356,581.310981 L1903.4826,807.190012 C1925.5058,829.213217 1925.5058,864.902104 1903.4826,887.038249 L1903.4826,887.038249 L1225.8455,1564.67534 C1215.22919,1575.17872 1200.88587,1581.16451 1185.86491,1581.16451 L1185.86491,1581.16451 L959.985883,1581.16451 C928.814576,1581.16451 903.516125,1555.86606 903.516125,1524.69475 L903.516125,1524.69475 L903.516125,1298.81572 C903.516125,1283.79477 909.501919,1269.45145 920.005294,1258.94807 L920.005294,1258.94807 Z M1442.35055,896.29929 L1016.45564,1322.1942 L1016.45564,1468.225 L1162.48643,1468.225 L1588.38135,1042.33008 L1442.35055,896.29929 Z M677.637094,1242.34597 L677.637094,1355.28548 L338.818547,1355.28548 L338.818547,1242.34597 L677.637094,1242.34597 Z M903.516125,1016.46693 L903.516125,1129.40645 L338.818547,1129.40645 L338.818547,1016.46693 L903.516125,1016.46693 Z M1637.62298,701.026867 L1522.19879,816.451052 L1668.22958,962.481846 L1783.65377,847.057661 L1637.62298,701.026867 Z M1129.39516,338.829841 L1129.39516,790.587903 L338.818547,790.587903 L338.818547,338.829841 L1129.39516,338.829841 Z M1016.45564,451.769356 L451.758062,451.769356 L451.758062,677.648388 L1016.45564,677.648388 L1016.45564,451.769356 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
+        const discussion_svg = '<svg class="orca-todo-svg" name="IconDiscussion" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"  ><g role="presentation"><path d="M677.647059,16 L677.647059,354.936471 L790.588235,354.936471 L790.588235,129.054118 L1807.05882,129.054118 L1807.05882,919.529412 L1581.06353,919.529412 L1581.06353,1179.29412 L1321.41176,919.529412 L1242.24,919.529412 L1242.24,467.877647 L677.647059,467.877647 L0,467.877647 L0,1484.34824 L338.710588,1484.34824 L338.710588,1903.24706 L756.705882,1484.34824 L1242.24,1484.34824 L1242.24,1032.47059 L1274.99294,1032.47059 L1694.11765,1451.59529 L1694.11765,1032.47059 L1920,1032.47059 L1920,16 L677.647059,16 Z M338.789647,919.563294 L903.495529,919.563294 L903.495529,806.622118 L338.789647,806.622118 L338.789647,919.563294 Z M338.789647,1145.44565 L677.726118,1145.44565 L677.726118,1032.39153 L338.789647,1032.39153 L338.789647,1145.44565 Z M112.941176,580.705882 L1129.41176,580.705882 L1129.41176,1371.40706 L710.4,1371.40706 L451.651765,1631.05882 L451.651765,1371.40706 L112.941176,1371.40706 L112.941176,580.705882 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
+        const quiz_svg = '<svg class="orca-todo-svg" label="Quiz" name="IconQuiz" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"  ><g role="presentation"><g fill-rule="evenodd" stroke="none" stroke-width="1"><path d="M746.255375,1466.76417 L826.739372,1547.47616 L577.99138,1796.11015 L497.507383,1715.51216 L746.255375,1466.76417 Z M580.35118,1300.92837 L660.949178,1381.52637 L329.323189,1713.15236 L248.725192,1632.55436 L580.35118,1300.92837 Z M414.503986,1135.20658 L495.101983,1215.80457 L80.5979973,1630.30856 L0,1549.71056 L414.503986,1135.20658 Z M1119.32036,264.600006 C1475.79835,-91.8779816 1844.58834,86.3040124 1848.35034,88.1280123 L1848.35034,88.1280123 L1865.45034,96.564012 L1873.88634,113.664011 C1875.71034,117.312011 2053.89233,486.101999 1697.30034,842.693987 L1697.30034,842.693987 L1550.69635,989.297982 L1548.07435,1655.17196 L1325.43235,1877.81395 L993.806366,1546.30196 L415.712386,968.207982 L84.0863971,636.467994 L306.72839,413.826001 L972.602367,411.318001 Z M1436.24035,1103.75398 L1074.40436,1465.70397 L1325.43235,1716.61796 L1434.30235,1607.74796 L1436.24035,1103.75398 Z M1779.26634,182.406009 C1710.18234,156.41401 1457.90035,87.1020124 1199.91836,345.198004 L1199.91836,345.198004 L576.90838,968.207982 L993.806366,1385.10597 L1616.70235,762.095989 C1873.65834,505.139998 1804.68834,250.920007 1779.26634,182.406009 Z M858.146371,525.773997 L354.152388,527.597997 L245.282392,636.467994 L496.310383,887.609985 L858.146371,525.773997 Z"></path><path d="M1534.98715,372.558003 C1483.91515,371.190003 1403.31715,385.326002 1321.69316,466.949999 L1281.22316,507.305998 L1454.61715,680.585992 L1494.97315,640.343994 C1577.16715,558.035996 1591.87315,479.033999 1589.82115,427.164001 L1587.65515,374.610003 L1534.98715,372.558003 Z"></path></g></g></svg>';
+        const announcement_svg = '<svg class="orca-todo-svg" label="Announcement" name="IconAnnouncement" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false" ><g role="presentation"><path d="M1587.16235,31.2784941 C1598.68235,7.78672942 1624.43294,-4.41091764 1650.63529,1.46202354 C1676.16,7.56084707 1694.11765,30.2620235 1694.11765,56.4643765 L1694.11765,56.4643765 L1694.11765,570.459671 C1822.87059,596.662024 1920,710.732612 1920,847.052612 C1920,983.372612 1822.87059,1097.55614 1694.11765,1123.75849 L1694.11765,1123.75849 L1694.11765,1637.64085 C1694.11765,1663.8432 1676.16,1686.65732 1650.63529,1692.6432 C1646.23059,1693.65967 1641.93882,1694.11144 1637.64706,1694.11144 C1616.52706,1694.11144 1596.87529,1682.36555 1587.16235,1662.93967 C1379.23765,1247.2032 964.178824,1242.34673 960,1242.34673 L960,1242.34673 L564.705882,1242.34673 L564.705882,1807.05261 L652.461176,1807.05261 C640.602353,1716.92555 634.955294,1560.05026 715.934118,1456.37026 C768.338824,1389.2832 845.590588,1355.28791 945.882353,1355.28791 L945.882353,1355.28791 L945.882353,1468.22908 C881.392941,1468.22908 835.312941,1487.09026 805.044706,1525.71614 C736.263529,1613.58438 759.981176,1789.54673 774.776471,1849.97026 C778.955294,1866.79849 775.115294,1884.6432 764.498824,1898.30908 C753.769412,1911.97496 737.28,1919.99379 720,1919.99379 L720,1919.99379 L508.235294,1919.99379 C477.063529,1919.99379 451.764706,1894.80791 451.764706,1863.5232 L451.764706,1863.5232 L451.764706,1242.34673 L395.294118,1242.34673 C239.548235,1242.34673 112.941176,1115.73967 112.941176,959.993788 L112.941176,959.993788 L112.941176,903.5232 L56.4705882,903.5232 C25.2988235,903.5232 0,878.337318 0,847.052612 C0,815.880847 25.2988235,790.582024 56.4705882,790.582024 L56.4705882,790.582024 L112.941176,790.582024 L112.941176,734.111435 C112.941176,578.478494 239.548235,451.758494 395.294118,451.758494 L395.294118,451.758494 L959.887059,451.758494 C976.828235,451.645553 1380.36706,444.756141 1587.16235,31.2784941 Z M1581.17647,249.706729 C1386.46588,492.078494 1128.96,547.871435 1016.47059,560.746729 L1016.47059,560.746729 L1016.47059,1133.47144 C1128.96,1146.34673 1386.46588,1202.02673 1581.17647,1444.51144 L1581.17647,1444.51144 Z M903.529412,564.699671 L395.294118,564.699671 C301.891765,564.699671 225.882353,640.709082 225.882353,734.111435 L225.882353,734.111435 L225.882353,959.993788 C225.882353,1053.39614 301.891765,1129.40555 395.294118,1129.40555 L395.294118,1129.40555 L903.529412,1129.40555 L903.529412,564.699671 Z M1694.11765,688.144376 L1694.11765,1006.07379 C1759.73647,982.694965 1807.05882,920.577318 1807.05882,847.052612 C1807.05882,773.527906 1759.73647,711.5232 1694.11765,688.144376 L1694.11765,688.144376 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
+        const assignment_svg = '<svg class="orca-todo-svg" label="Assignment" name="IconAssignment" viewBox="0 0 1920 1920" rotate="0" aria-hidden="true" role="presentation" focusable="false"><g role="presentation"><path d="M1468.2137,0 L1468.2137,564.697578 L1355.27419,564.697578 L1355.27419,112.939516 L112.939516,112.939516 L112.939516,1807.03225 L1355.27419,1807.03225 L1355.27419,1581.15322 L1468.2137,1581.15322 L1468.2137,1919.97177 L2.5243549e-29,1919.97177 L2.5243549e-29,0 L1468.2137,0 Z M1597.64239,581.310981 C1619.77853,559.174836 1655.46742,559.174836 1677.60356,581.310981 L1677.60356,581.310981 L1903.4826,807.190012 C1925.5058,829.213217 1925.5058,864.902104 1903.4826,887.038249 L1903.4826,887.038249 L1225.8455,1564.67534 C1215.22919,1575.17872 1200.88587,1581.16451 1185.86491,1581.16451 L1185.86491,1581.16451 L959.985883,1581.16451 C928.814576,1581.16451 903.516125,1555.86606 903.516125,1524.69475 L903.516125,1524.69475 L903.516125,1298.81572 C903.516125,1283.79477 909.501919,1269.45145 920.005294,1258.94807 L920.005294,1258.94807 Z M1442.35055,896.29929 L1016.45564,1322.1942 L1016.45564,1468.225 L1162.48643,1468.225 L1588.38135,1042.33008 L1442.35055,896.29929 Z M677.637094,1242.34597 L677.637094,1355.28548 L338.818547,1355.28548 L338.818547,1242.34597 L677.637094,1242.34597 Z M903.516125,1016.46693 L903.516125,1129.40645 L338.818547,1129.40645 L338.818547,1016.46693 L903.516125,1016.46693 Z M1637.62298,701.026867 L1522.19879,816.451052 L1668.22958,962.481846 L1783.65377,847.057661 L1637.62298,701.026867 Z M1129.39516,338.829841 L1129.39516,790.587903 L338.818547,790.587903 L338.818547,338.829841 L1129.39516,338.829841 Z M1016.45564,451.769356 L451.758062,451.769356 L451.758062,677.648388 L1016.45564,677.648388 L1016.45564,451.769356 Z" fill-rule="evenodd" stroke="none" stroke-width="1"></path></g></svg>';
         const x_svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path></svg>';
         const check_svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M5 12l5 5l10 -10"></path></svg>';
         const tag_svg = '<svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7.5 7.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M3 6v5.172a2 2 0 0 0 .586 1.414l7.71 7.71a2.41 2.41 0 0 0 3.408 0l5.592 -5.592a2.41 2.41 0 0 0 0 -3.408l-7.71 -7.71a2 2 0 0 0 -1.414 -.586h-5.172a3 3 0 0 0 -3 3z" /></svg>';
@@ -4694,13 +4694,13 @@ async function loadBetterTodo() {
         const hr24 = options.todo_hr24;
         const now = new Date();
         //const csrfToken = CSRFtoken();
-        let todoAnnouncements = document.querySelector("#ochre-announcement-list");
-        let todoAssignments = document.querySelector("#ochre-todo-list");
+        let todoAnnouncements = document.querySelector("#orca-announcement-list");
+        let todoAssignments = document.querySelector("#orca-todo-list");
         let assignmentsToInsert = [];
         let announcementsToInsert = [];
 
         withApiData(assignments, data => {
-            ochreStorage.get(options.custom_assignments_overflow).then(storage => {
+            orcaStorage.get(options.custom_assignments_overflow).then(storage => {
                 //assignmentData = assignmentData === null ? data : assignmentData;
                 let items = combineAssignments(data);
                 items.forEach((item, index) => {
@@ -4729,13 +4729,13 @@ async function loadBetterTodo() {
                     if (filter === "todo" && ((itemState && itemState["rem"] === true) || (item.planner_override && item.planner_override.marked_complete === true))) return;
 
                     let listItemContainer = document.createElement("div");
-                    listItemContainer.classList.add("ochre-todo-container");
-                    listItemContainer.innerHTML = '<div class="ochre-hover-preview"><p class="ochre-preview-title"></p><p class="ochre-preview-text"></p></div><div class="ochre-todo-actions"></div><div class="ochre-todo-icon"></div><a class="ochre-todo-item"><div class="ochre-todo-item-header"></div></a><button class="ochre-todo-actions-btn"><i class="icon-more ochre-dots-icon" aria-hidden="true"></i></button>';
-                    listItemContainer.querySelector(".ochre-todo-item").href = item.html_url;
+                    listItemContainer.classList.add("orca-todo-container");
+                    listItemContainer.innerHTML = '<div class="orca-hover-preview"><p class="orca-preview-title"></p><p class="orca-preview-text"></p></div><div class="orca-todo-actions"></div><div class="orca-todo-icon"></div><a class="orca-todo-item"><div class="orca-todo-item-header"></div></a><button class="orca-todo-actions-btn"><i class="icon-more orca-dots-icon" aria-hidden="true"></i></button>';
+                    listItemContainer.querySelector(".orca-todo-item").href = item.html_url;
                     listItemContainer.dataset.id = item.plannable_id;
-                    listItemContainer.querySelector('.ochre-todo-icon').innerHTML += svg;
+                    listItemContainer.querySelector('.orca-todo-icon').innerHTML += svg;
 
-                    let listItem = listItemContainer.querySelector(".ochre-todo-item");
+                    let listItem = listItemContainer.querySelector(".orca-todo-item");
                     // Sanitized: this lands inside a style="" attribute in an
 		// innerHTML template, so an unvalidated value could close the
 		// attribute. custom_cards_3 colours come from the Canvas API
@@ -4747,29 +4747,29 @@ async function loadBetterTodo() {
                         "#cccccc";
 		const courseColorSafe = sanitizeCssColor(courseColor) || "#cccccc";
                     if (itemState?.["lbl"] && itemState["lbl"] !== "") {
-                        makeElement("span", listItem.querySelector(".ochre-todo-item-header"), { "className": "ochre-todo-label", "textContent": itemState["lbl"] });
+                        makeElement("span", listItem.querySelector(".orca-todo-item-header"), { "className": "orca-todo-label", "textContent": itemState["lbl"] });
                     }
                     if (itemState?.["crs"] === true) {
-                        listItemContainer.querySelector(".ochre-todo-item").style.textDecoration = "line-through";
+                        listItemContainer.querySelector(".orca-todo-item").style.textDecoration = "line-through";
                     }
-                    let title = makeElement("a", listItem.querySelector(".ochre-todo-item-header"), { "className": "ochre-todoitem-title", "textContent": item.plannable.title });
+                    let title = makeElement("a", listItem.querySelector(".orca-todo-item-header"), { "className": "orca-todoitem-title", "textContent": item.plannable.title });
                     if (options.todo_hide_feedback === true) title.style = "color:" + courseColorSafe + "!important;";
-                    let course = makeElement("p", listItem, { "className": "ochre-todoitem-course", "textContent": item.context_name });
+                    let course = makeElement("p", listItem, { "className": "orca-todoitem-course", "textContent": item.context_name });
                     course.style.color = courseColorSafe;
                     let format = formatTodoDate(date, item.submissions, hr24);
-                    let todoDate = makeElement("p", listItem, { "className": "ochre-todoitem-date", "textContent": format.date });
-                    if (format.dueSoon) todoDate.classList.add("ochre-due-soon");
+                    let todoDate = makeElement("p", listItem, { "className": "orca-todoitem-date", "textContent": format.date });
+                    if (format.dueSoon) todoDate.classList.add("orca-due-soon");
 
                     if (options.hover_preview === true) {
                         const customItem = item.planner_override && item.planner_override.custom && item.planner_override.custom === true;
                         listItem.addEventListener("mouseover", () => {
-                            listItem.classList.add("ochre-todo-hover");
-                            let preview = listItemContainer.querySelector(".ochre-hover-preview");
-                            let previewTitle = preview.querySelector(".ochre-preview-title");
-                            let previewText = preview.querySelector(".ochre-preview-text");
+                            listItem.classList.add("orca-todo-hover");
+                            let preview = listItemContainer.querySelector(".orca-hover-preview");
+                            let previewTitle = preview.querySelector(".orca-preview-title");
+                            let previewText = preview.querySelector(".orca-preview-text");
                             clearTimeout(delay);
                             delay = setTimeout(async () => {
-                                if (listItem.classList.contains("ochre-todo-hover")) {
+                                if (listItem.classList.contains("orca-todo-hover")) {
                                     previewTitle.textContent = item.plannable.title;
                                     // custom assignment (planner note): preview its description/details
                                     if (customItem) {
@@ -4812,38 +4812,38 @@ async function loadBetterTodo() {
                         });
 
                         listItem.addEventListener("mouseleave", () => {
-                            listItem.classList.remove("ochre-todo-hover");
-                            listItemContainer.querySelector(".ochre-hover-preview").style.display = "none";
+                            listItem.classList.remove("orca-todo-hover");
+                            listItemContainer.querySelector(".orca-hover-preview").style.display = "none";
                         });
                     }
 
-                    const actions = listItemContainer.querySelector(".ochre-todo-actions");
+                    const actions = listItemContainer.querySelector(".orca-todo-actions");
 
                     let clickOutActions = (e) => {
-                        if (e.target.className.includes("ochre")) return;
+                        if (e.target.className.includes("orca")) return;
                         document.body.removeEventListener("click", clickOutActions);
                         actions.style.display = "none";
                     }
 
-                    listItemContainer.querySelector(".ochre-todo-actions-btn").addEventListener("click", () => {
+                    listItemContainer.querySelector(".orca-todo-actions-btn").addEventListener("click", () => {
                         actions.style.display = "block";
                         setTimeout(() => {
                             document.body.addEventListener("click", clickOutActions);
                         }, 100);
                     });
 
-                    let removeBtn = makeElement("div", actions, { "className": "ochre-todo-action", "textContent": "Remove" });
+                    let removeBtn = makeElement("div", actions, { "className": "orca-todo-action", "textContent": "Remove" });
                     removeBtn.innerHTML += x_svg;
                     const dueAt = new Date(item.plannable_date).getTime();
 
-                    let crossOffBtn = makeElement("div", actions, { "className": "ochre-todo-action", "textContent": "Cross off" });
+                    let crossOffBtn = makeElement("div", actions, { "className": "orca-todo-action", "textContent": "Cross off" });
                     crossOffBtn.innerHTML += check_svg;
                     crossOffBtn.addEventListener("click", () => {
-                        setAssignmentState(item.plannable_id, { "crs": listItemContainer.querySelector(".ochre-todo-item").style.textDecoration === "line-through" ? false : true, "expire": dueAt });
+                        setAssignmentState(item.plannable_id, { "crs": listItemContainer.querySelector(".orca-todo-item").style.textDecoration === "line-through" ? false : true, "expire": dueAt });
                     });
-                    let label = makeElement("span", actions, { "className": "ochre-todo-action-tag", "textContent": "Label:" });
+                    let label = makeElement("span", actions, { "className": "orca-todo-action-tag", "textContent": "Label:" });
                     label.innerHTML += tag_svg;
-                    let labelInput = makeElement("input", actions, { "className": "ochre-todo-input", "type": "text", "placeholder": "Label", "value": itemState && itemState["lbl"] ? itemState["lbl"] : "" });
+                    let labelInput = makeElement("input", actions, { "className": "orca-todo-input", "type": "text", "placeholder": "Label", "value": itemState && itemState["lbl"] ? itemState["lbl"] : "" });
                     labelInput.addEventListener("change", (e) => {
                         setAssignmentState(item.plannable_id, { "lbl": e.target.value, "expire": dueAt });
                     });
@@ -4852,13 +4852,13 @@ async function loadBetterTodo() {
                         setAssignmentState(item.plannable_id, { "rem": filter === "todo", "expire": dueAt });
                         if (item.planner_override && item.planner_override.custom && item.planner_override.custom === true) {
                             // set item as complete locally
-                            ochreStorage.get("custom_assignments_overflow").then(overflow => {
-                                ochreStorage.get(overflow["custom_assignments_overflow"]).then(storage => {
+                            orcaStorage.get("custom_assignments_overflow").then(overflow => {
+                                orcaStorage.get(overflow["custom_assignments_overflow"]).then(storage => {
                                     overflow["custom_assignments_overflow"].forEach(overflow => {
                                         for (let i = 0; i < storage[overflow].length; i++) {
                                             if (storage[overflow][i].plannable_id === item.plannable_id) {
                                                 storage[overflow].splice(i, 1);
-                                                ochreStorage.set({ [overflow]: storage[overflow] }).then(() => {
+                                                orcaStorage.set({ [overflow]: storage[overflow] }).then(() => {
                                                 });
                                                 break;
                                             }
@@ -4874,7 +4874,7 @@ async function loadBetterTodo() {
                     } else {
                         assignmentsToInsert.push(listItemContainer);
                         if (item.submissions && item.submissions.submitted) {
-                            listItemContainer.classList.add("ochre-todo-item-completed");
+                            listItemContainer.classList.add("orca-todo-item-completed");
                         }
                     }
 
@@ -4890,7 +4890,7 @@ async function loadBetterTodo() {
                     }
                     if (i !== assignmentsToInsert.length) createTodoViewMore(todoAssignments, "assignment");
                 } else {
-                    makeElement("p", todoAssignments, { "className": "ochre-none-due", "textContent": "None" });
+                    makeElement("p", todoAssignments, { "className": "orca-none-due", "textContent": "None" });
                 }
 
                 // appending announcements all at once
@@ -4902,7 +4902,7 @@ async function loadBetterTodo() {
                     }
                     if (i !== -1) createTodoViewMore(todoAnnouncements, "announcement");
                 } else {
-                    makeElement("p", todoAnnouncements, { "className": "ochre-none-due", "textContent": "None" });
+                    makeElement("p", todoAnnouncements, { "className": "orca-none-due", "textContent": "None" });
                 }
 
                 cleanCustomAssignments();
@@ -5058,7 +5058,7 @@ async function changeColorPreset(colors) {
     }, delay);
 
     // set colors to revert back to
-    ochreStorage.get("previous_colors").then(local => {
+    orcaStorage.get("previous_colors").then(local => {
         const now = Date.now();
         const prev = local["previous_colors"];
         // Overwrite when missing or expired — and when an old list-mode run
@@ -5067,7 +5067,7 @@ async function changeColorPreset(colors) {
         // revert to). chrome.storage.local.get yields undefined (not null)
         // for an unset key, so the old `=== null` check never matched it.
         if (previous.length > 0 && (!prev || now >= prev.expire || !Array.isArray(prev.colors) || prev.colors.length === 0)) {
-            ochreStorage.set({ "previous_colors": { "colors": previous, "expire": now + 86400000 } });
+            orcaStorage.set({ "previous_colors": { "colors": previous, "expire": now + 86400000 } });
         }
     });
 }
@@ -5076,8 +5076,8 @@ async function changeColorPreset(colors) {
 Dark mode
 */
 
-// Light-mode fallbacks for the --ochre-* variables, always emitted so extension UI renders in light mode; dark mode overrides below.
-const OCHRE_LIGHT_DEFAULTS = {
+// Light-mode fallbacks for the --orca-* variables, always emitted so extension UI renders in light mode; dark mode overrides below.
+const ORCA_LIGHT_DEFAULTS = {
     "background-0": "#ffffff",
     "background-1": "#c7c7c7",
     "background-2": "#d9d9d9",
@@ -5094,7 +5094,7 @@ const OCHRE_LIGHT_DEFAULTS = {
     "text-0": "#000000",
     "text-1": "#050505",
     "text-2": "#4f4f4f",
-    // --ochre-buttons is consumed by three rules in darkmodecss.js and was
+    // --orca-buttons is consumed by three rules in darkmodecss.js and was
     // emitted by nobody, so those rules had never applied. It was lost when
     // dark mode moved from a static darkcss.json blob to CSS generated from
     // the preset keys; the blob emitted it at #262626.
@@ -5102,10 +5102,10 @@ const OCHRE_LIGHT_DEFAULTS = {
 };
 
 function generateDarkModeCSS() {
-    // Always-on light-mode defaults so var(--ochre-*) resolves in light mode too.
+    // Always-on light-mode defaults so var(--orca-*) resolves in light mode too.
     let css = ":root{\n";
-    Object.keys(OCHRE_LIGHT_DEFAULTS).forEach((key) => {
-        css += "    --ochre-" + key + ": " + OCHRE_LIGHT_DEFAULTS[key] + ";\n";
+    Object.keys(ORCA_LIGHT_DEFAULTS).forEach((key) => {
+        css += "    --orca-" + key + ": " + ORCA_LIGHT_DEFAULTS[key] + ";\n";
     });
     css += "}\n\n";
 
@@ -5120,7 +5120,7 @@ function generateDarkModeCSS() {
             // used rather than the colour one. An unusable value is skipped,
             // leaving the light-mode default in place.
             const safe = sanitizeCssValue(options.dark_preset[key]);
-            if (safe) darkBlock += "    --ochre-" + key + ": " + safe + ";\n";
+            if (safe) darkBlock += "    --orca-" + key + ": " + safe + ";\n";
         });
     }
     darkBlock += "}\n\n";
@@ -5147,16 +5147,16 @@ function toggleDarkMode() {
         document.documentElement.append(style);
     }
     style.textContent = css;
-    style.className = darkOn ? "ochre-darkmode-enabled" : "";
+    style.className = darkOn ? "orca-darkmode-enabled" : "";
     darkStyleInserted = true;
     runiframeChecker();
 }
 
 function runDarkModeFixer(override = false) {
     // Quiz safe mode: never auto-run the dark mode fixer on quiz pages.
-    if (quizSafeModeActive()) return { "path": "ochre-none", "time": "" };
-    if (options.dark_mode !== true) return { "path": "ochre-darkmode_off", "time": "" };
-    if (override === false && !options["dark_mode_fix"].includes(getRoute())) return { "path": "ochre-none", "time": "" };
+    if (quizSafeModeActive()) return { "path": "orca-none", "time": "" };
+    if (options.dark_mode !== true) return { "path": "orca-darkmode_off", "time": "" };
+    if (override === false && !options["dark_mode_fix"].includes(getRoute())) return { "path": "orca-none", "time": "" };
     let output = inspectDarkMode();
     return { "path": getRoute(), "time": output.time };
 }
@@ -5185,7 +5185,7 @@ function autoDarkModeCheck() {
         // computed state already matches dark_mode, so the 60s timer is a cheap no-op.
         if (status === options.dark_mode) return;
         options.dark_mode = status;
-        ochreStorage.set({ "dark_mode": status }).then(toggleDarkMode);
+        orcaStorage.set({ "dark_mode": status }).then(toggleDarkMode);
     }
 }
 
@@ -5209,7 +5209,7 @@ function runiframeChecker() {
         document.querySelectorAll('iframe').forEach((frame) => {
             if (frame.contentDocument && frame.contentDocument.documentElement && frame.contentDocument.documentElement.querySelector('#darkcss')) {
                 frame.contentDocument.documentElement.querySelector('#darkcss').textContent = '';
-                frame.contentDocument.body.classList.remove("ochre--darkmode--enabled");
+                frame.contentDocument.body.classList.remove("orca--darkmode--enabled");
             }
         });
         return;
@@ -5229,7 +5229,7 @@ function runiframeChecker() {
                     const new_style_element = document.createElement("style");
                     new_style_element.textContent = generateDarkModeCSS();
                     new_style_element.id = "darkcss";
-                    doc.body.classList.add("ochre--darkmode--enabled");
+                    doc.body.classList.add("orca--darkmode--enabled");
                     doc.documentElement.prepend(new_style_element);
                 } catch (_) { /* cross-origin or detached frame: ignore */ }
             }
@@ -5283,12 +5283,12 @@ function insertGrades() {
                                 const letter = percentToLetterGrade(gradepercent);
                                 if (letter) percent = `${letter} ${percent}`;
                             }
-                            let gradeContainer = cards[i].querySelector(".ochre-card-grade") || makeElement("a", cards[i].querySelector(".ic-DashboardCard__header"), { "className": "ochre-card-grade" });
+                            let gradeContainer = cards[i].querySelector(".orca-card-grade") || makeElement("a", cards[i].querySelector(".ic-DashboardCard__header"), { "className": "orca-card-grade" });
                             gradeContainer.textContent = percent;
                             if (options.grade_hover === true) {
-                                gradeContainer.classList.add("ochre-hover-only");
+                                gradeContainer.classList.add("orca-hover-only");
                             } else {
-                                gradeContainer.classList.remove("ochre-hover-only");
+                                gradeContainer.classList.remove("orca-hover-only");
                             }
                             gradeContainer.setAttribute("href", `${domain}/courses/${course_id}/grades`);
                             gradeContainer.style.display = "block";
@@ -5301,7 +5301,7 @@ function insertGrades() {
             }
         }, { feature: "Dashboard grades", container: document.querySelector("#DashboardCard_Container") });
     } else {
-        document.querySelectorAll('.ochre-card-grade').forEach(grade => {
+        document.querySelectorAll('.orca-card-grade').forEach(grade => {
             grade.style.display = "none";
         });
     }
@@ -5314,20 +5314,20 @@ Card assignments
 
 function createCardAssignment(assignment) {
     let assignmentContainer = document.createElement("div");
-    assignmentContainer.className = "ochre-assignment-container";
-    let assignmentName = makeElement("a", assignmentContainer, { "className": "ochre-assignment-link", "textContent": assignment.plannable.title, "href": assignment.html_url });
-    let assignmentDueAt = makeElement("span", assignmentContainer, { "className": "ochre-assignment-dueat", "textContent": formatCardDue(new Date(assignment.plannable_date)) });
-    if (assignment.overdue === true) assignmentDueAt.classList.add("ochre-assignment-overdue");
+    assignmentContainer.className = "orca-assignment-container";
+    let assignmentName = makeElement("a", assignmentContainer, { "className": "orca-assignment-link", "textContent": assignment.plannable.title, "href": assignment.html_url });
+    let assignmentDueAt = makeElement("span", assignmentContainer, { "className": "orca-assignment-dueat", "textContent": formatCardDue(new Date(assignment.plannable_date)) });
+    if (assignment.overdue === true) assignmentDueAt.classList.add("orca-assignment-overdue");
     if (assignment?.submissions?.submitted === true) {
-        assignmentContainer.classList.add("ochre-completed");
+        assignmentContainer.classList.add("orca-completed");
     } else {
         if (options.assignment_states[assignment.plannable_id]?.["crs"] === true) {
-            assignmentContainer.classList.add("ochre-completed");
+            assignmentContainer.classList.add("orca-completed");
         }
     }
     assignmentDueAt.addEventListener('mouseup', function () {
-        assignmentContainer.classList.toggle("ochre-completed");
-        const status = assignmentContainer.classList.contains("ochre-completed");
+        assignmentContainer.classList.toggle("orca-completed");
+        const status = assignmentContainer.classList.contains("orca-completed");
         setAssignmentState(assignment.plannable_id, { "crs": status, "expire": assignment.plannable_date });
     });
     return assignmentContainer;
@@ -5347,7 +5347,7 @@ function equalizeCardHeights() {
 
     // Clear prior min-height so we can measure fresh or fully reset.
     cards.forEach(card => {
-        const area = card.querySelector(".ochre-card-assignment");
+        const area = card.querySelector(".orca-card-assignment");
         if (area) area.style.removeProperty("min-height");
     });
 
@@ -5356,13 +5356,13 @@ function equalizeCardHeights() {
     // Stretch each assignment area to the tallest one.
     let maxHeight = 0;
     cards.forEach(card => {
-        const area = card.querySelector(".ochre-card-assignment");
+        const area = card.querySelector(".orca-card-assignment");
         if (area) maxHeight = Math.max(maxHeight, area.offsetHeight);
     });
 
     if (maxHeight > 0) {
         cards.forEach(card => {
-            const area = card.querySelector(".ochre-card-assignment");
+            const area = card.querySelector(".orca-card-assignment");
             if (area) area.style.minHeight = maxHeight + "px";
         });
     }
@@ -5406,7 +5406,7 @@ function preloadAssignmentEls() {
 
 function loadCardAssignments() {
     if (options.assignments_due !== true) {
-        document.querySelectorAll(".ochre-card-assignment").forEach(card => {
+        document.querySelectorAll(".orca-card-assignment").forEach(card => {
             card.style.display = "none";
         });
         equalizeCardHeights();
@@ -5424,7 +5424,7 @@ function loadCardAssignments() {
                 let link = card.querySelector(".ic-DashboardCard__link");
                 if (!link) return;
                 let course_id = link.href.split("courses/")[1];
-                let cardContainer = card.querySelector('.ochre-card-container');
+                let cardContainer = card.querySelector('.orca-card-container');
                 if (!cardContainer) return;
                 cardContainer.textContent = "";
                 if (cardContainer.parentElement) {
@@ -5438,15 +5438,15 @@ function loadCardAssignments() {
                         if ((options.card_overdues !== true && now >= assignment.due) || (options.card_overdues === true && assignment.submitted === true)) return;
                         if (assignment.type !== "assignment" && assignment.type !== "quiz" && assignment.type !== "discussion_topic") return;
                         if (assignment.override === true) return;
-                        //assignment.el.querySelector(".ochre-assignment-dueat").textContent = formatCardDue(assignment.due);
+                        //assignment.el.querySelector(".orca-assignment-dueat").textContent = formatCardDue(assignment.due);
                         cardContainer.appendChild(assignment.el);
                         count++;
                     });
                 }
 
                 if (count === 0) {
-                    let assignmentContainer = makeElement("div", cardContainer, { "className": "ochre-assignment-container" });
-                    let assignmentDivLink = makeElement("a", assignmentContainer, { "className": "ochre-assignment-link", "textContent": "None" });
+                    let assignmentContainer = makeElement("div", cardContainer, { "className": "orca-assignment-container" });
+                    let assignmentDivLink = makeElement("a", assignmentContainer, { "className": "orca-assignment-link", "textContent": "None" });
                 }
             });
             // Wait one frame so the browser lays out the freshly appended
@@ -5462,15 +5462,15 @@ function loadCardAssignments() {
 function setupCardAssignments() {
     if (options.assignments_due !== true) return;
     try {
-        let containersCount = document.querySelectorAll('.ochre-card-container').length;
+        let containersCount = document.querySelectorAll('.orca-card-container').length;
         if (document.querySelectorAll('.ic-DashboardCard').length > 0 && containersCount > 0) return;
         let cards = document.querySelectorAll('.ic-DashboardCard');
         cards.forEach(card => {
-            let assignmentContainer = card.querySelector(".ochre-card-assignment") || makeElement("div", card, { "className": "ochre-card-assignment" });
-            let assignmentsDueHeader = card.querySelector(".ochre-card-header-container") || makeElement("div", assignmentContainer, { "className": "ochre-card-header-container" });
-            let assignmentsDueLabel = card.querySelector(".ochre-card-header") || makeElement("h3", assignmentsDueHeader, { "className": "ochre-card-header", "textContent": chrome.i18n.getMessage("due") });
-            let cardContainer = card.querySelector(".ochre-card-container") || makeElement("div", assignmentContainer, { "className": "ochre-card-container" });
-            let skeletonText = card.querySelector(".ochre-skeleton-text") || makeElement("div", cardContainer, { "className": "ochre-skeleton-text" });
+            let assignmentContainer = card.querySelector(".orca-card-assignment") || makeElement("div", card, { "className": "orca-card-assignment" });
+            let assignmentsDueHeader = card.querySelector(".orca-card-header-container") || makeElement("div", assignmentContainer, { "className": "orca-card-header-container" });
+            let assignmentsDueLabel = card.querySelector(".orca-card-header") || makeElement("h3", assignmentsDueHeader, { "className": "orca-card-header", "textContent": chrome.i18n.getMessage("due") });
+            let cardContainer = card.querySelector(".orca-card-container") || makeElement("div", assignmentContainer, { "className": "orca-card-container" });
+            let skeletonText = card.querySelector(".orca-skeleton-text") || makeElement("div", cardContainer, { "className": "orca-skeleton-text" });
         });
     } catch (e) {
         logError(e);
@@ -5537,9 +5537,9 @@ function customizeCards(c = null) {
                 // which is what showed a placeholder instead of the course image.
                 // Saved on first mutation rather than reconstructed later, the
                 // same way changeFavicon saves the original icon href.
-                if (container.dataset.ochreCardImage == null) {
-                    container.dataset.ochreCardImage = existing ? "reused" : "created";
-                    if (existing) container.dataset.ochreOriginalBg = container.style.backgroundImage || "";
+                if (container.dataset.orcaCardImage == null) {
+                    container.dataset.orcaCardImage = existing ? "reused" : "created";
+                    if (existing) container.dataset.orcaOriginalBg = container.style.backgroundImage || "";
                 }
                 card.querySelector(".ic-DashboardCard__header").prepend(container);
                 container.appendChild(topColor);
@@ -5553,15 +5553,15 @@ function customizeCards(c = null) {
                 // Without this the picture stays on screen until a full page load,
                 // because nothing undoes the inline backgroundImage set above.
                 const currentImg = card.querySelector(".ic-DashboardCard__header_image");
-                const mark = currentImg && currentImg.dataset.ochreCardImage;
+                const mark = currentImg && currentImg.dataset.orcaCardImage;
                 const topColor = card.querySelector(".ic-DashboardCard__header_hero");
                 if (mark === "reused") {
                     // Restoring "" is correct when Canvas styled the element from a
                     // stylesheet rather than inline: removing our inline value lets
                     // the stylesheet apply again.
-                    currentImg.style.backgroundImage = currentImg.dataset.ochreOriginalBg || "";
-                    delete currentImg.dataset.ochreOriginalBg;
-                    delete currentImg.dataset.ochreCardImage;
+                    currentImg.style.backgroundImage = currentImg.dataset.orcaOriginalBg || "";
+                    delete currentImg.dataset.orcaOriginalBg;
+                    delete currentImg.dataset.orcaCardImage;
                 } else if (mark === "created") {
                     // The hero was moved inside this container on injection; move it
                     // back out first or the colour overlay is removed along with it.
@@ -5590,7 +5590,7 @@ function customizeCards(c = null) {
             }
             links = card.querySelectorAll(".ic-DashboardCard__action");
             for (let i = 0; i < 4; i++) {
-                let img = links[i].querySelector(".ochre-link-image") || makeElement("img", links[i], { "className": "ochre-link-image" });
+                let img = links[i].querySelector(".orca-link-image") || makeElement("img", links[i], { "className": "orca-link-image" });
                 links[i].style.display = "inherit";
                 if (cardOptions_2.links[i].path === "none") {
                     links[i].style.display = "none";
@@ -5637,10 +5637,10 @@ GPA calculator
 
 function calculateGPA2() {
     let qualityPoints = 0, numCredits = 0, weightedQualityPoints = 0, cumulativePoints = 0, cumulativeCredits = 0;
-    document.querySelectorAll('.ochre-gpa-course').forEach(course => {
-        const weight = course.querySelector('.ochre-course-weight').value;
-        const credits = parseFloat(course.querySelector('.ochre-course-credit').value);
-        const grade = parseFloat(course.querySelector('.ochre-course-percent').value);
+    document.querySelectorAll('.orca-gpa-course').forEach(course => {
+        const weight = course.querySelector('.orca-course-weight').value;
+        const credits = parseFloat(course.querySelector('.orca-course-credit').value);
+        const grade = parseFloat(course.querySelector('.orca-course-percent').value);
         if (weight === "dnc" || !credits || !grade) return;
         let letter = "--";
         let gpa;
@@ -5684,7 +5684,7 @@ function calculateGPA2() {
             letter = "F";
             gpa = options.gpa_calc_bounds["F"].gpa;
         }
-            course.querySelector(".ochre-gpa-letter-grade").textContent = letter;
+            course.querySelector(".orca-gpa-letter-grade").textContent = letter;
 
             let weightMultiplier = 0;
             if (weight === "ap") {
@@ -5699,21 +5699,21 @@ function calculateGPA2() {
 
 
     });
-    document.querySelector("#ochre-gpa-unweighted").textContent = (qualityPoints / numCredits).toFixed(2);
-    document.querySelector("#ochre-gpa-weighted").textContent = (weightedQualityPoints / numCredits).toFixed(2);
-    const cGPA = document.querySelector("#ochre-cumulative-gpa");
-    const g = parseFloat(cGPA.querySelector(".ochre-course-percent").value);
-    const c = parseInt(cGPA.querySelector(".ochre-course-credit").value);
-    document.querySelector("#ochre-gpa-cumulative").textContent = (((options.gpa_calc_weighted === true ? weightedQualityPoints : qualityPoints) + (g * c)) / (numCredits + c)).toFixed(2);
+    document.querySelector("#orca-gpa-unweighted").textContent = (qualityPoints / numCredits).toFixed(2);
+    document.querySelector("#orca-gpa-weighted").textContent = (weightedQualityPoints / numCredits).toFixed(2);
+    const cGPA = document.querySelector("#orca-cumulative-gpa");
+    const g = parseFloat(cGPA.querySelector(".orca-course-percent").value);
+    const c = parseInt(cGPA.querySelector(".orca-course-credit").value);
+    document.querySelector("#orca-gpa-cumulative").textContent = (((options.gpa_calc_weighted === true ? weightedQualityPoints : qualityPoints) + (g * c)) / (numCredits + c)).toFixed(2);
 }
 
 function changeGPASettings(course_id, update) {
     calculateGPA2();
-    ochreStorage.get(["custom_cards", "cumulative_gpa"]).then(storage => {
+    orcaStorage.get(["custom_cards", "cumulative_gpa"]).then(storage => {
         if (course_id === "cumulative") {
-            ochreStorage.set({ "cumulative_gpa": { ...storage["cumulative_gpa"], ...update } });
+            orcaStorage.set({ "cumulative_gpa": { ...storage["cumulative_gpa"], ...update } });
         } else {
-            ochreStorage.set({ "custom_cards": { ...storage["custom_cards"], [course_id]: { ...storage["custom_cards"][course_id], ...update } } });
+            orcaStorage.set({ "custom_cards": { ...storage["custom_cards"], [course_id]: { ...storage["custom_cards"][course_id], ...update } } });
         }
     });
 }
@@ -5733,15 +5733,15 @@ function createGPACalcCourse(location, course) {
     }
     if (customs.hidden === true) return;
 
-    let courseContainer = makeElement("div", location, { "className": course.id === "cumulative" ? "ochre-gpa-cumulative" : "ochre-gpa-course", "innerHTML": '<div class="ochre-gpa-letter-grade"></div>' });
-    let courseName = makeElement("p", courseContainer, { "className": "ochre-gpa-name", "textContent": customs.name === "" ? course.course_code : customs.name });
-    let changerContainer = makeElement("div", courseContainer, { "className": "ochre-gpa-percent-container" });
+    let courseContainer = makeElement("div", location, { "className": course.id === "cumulative" ? "orca-gpa-cumulative" : "orca-gpa-course", "innerHTML": '<div class="orca-gpa-letter-grade"></div>' });
+    let courseName = makeElement("p", courseContainer, { "className": "orca-gpa-name", "textContent": customs.name === "" ? course.course_code : customs.name });
+    let changerContainer = makeElement("div", courseContainer, { "className": "orca-gpa-percent-container" });
 
-    let credits = makeElement("div", courseContainer, { "className": "ochre-course-credits", "innerHTML": '<input class="ochre-course-credit" value="1"></input><span class="ochre-course-percent-sign">cr</span>' });
-    let creditsChanger = credits.querySelector(".ochre-course-credit");
+    let credits = makeElement("div", courseContainer, { "className": "orca-course-credits", "innerHTML": '<input class="orca-course-credit" value="1"></input><span class="orca-course-percent-sign">cr</span>' });
+    let creditsChanger = credits.querySelector(".orca-course-credit");
     creditsChanger.value = customs.credits;
-    let changer = makeElement("input", changerContainer, { "className": "ochre-course-percent" });
-    let percent = makeElement("span", changerContainer, { "className": "ochre-course-percent-sign", "textContent": course.id === "cumulative" ? "/4" : "%" });
+    let changer = makeElement("input", changerContainer, { "className": "orca-course-percent" });
+    let percent = makeElement("span", changerContainer, { "className": "orca-course-percent-sign", "textContent": course.id === "cumulative" ? "/4" : "%" });
     let courseGrade = course?.enrollments[0].has_grading_periods === true ? course.enrollments[0].current_period_computed_current_score : course.enrollments[0].computed_current_score;
 
     if (customs["gr"] !== null) {
@@ -5753,14 +5753,14 @@ function createGPACalcCourse(location, course) {
     }
 
     if (course.id !== "cumulative") {
-        let weightSelections = makeElement("form", courseContainer, { "className": "ochre-course-weights" });
-        weightSelections.innerHTML = '<select name="weight-selection" class="ochre-course-weight"><option value="dnc">Do not count</option><option value="regular">Regular/College</option><option value="honors">Honors</option><option value="ap">AP/IB</option></select>';
-        let weightChanger = weightSelections.querySelector(".ochre-course-weight");
+        let weightSelections = makeElement("form", courseContainer, { "className": "orca-course-weights" });
+        weightSelections.innerHTML = '<select name="weight-selection" class="orca-course-weight"><option value="dnc">Do not count</option><option value="regular">Regular/College</option><option value="honors">Honors</option><option value="ap">AP/IB</option></select>';
+        let weightChanger = weightSelections.querySelector(".orca-course-weight");
         weightChanger.value = changer.value === "--" ? "dnc" : customs.weight;   
-        weightChanger.addEventListener('change', () => changeGPASettings(course.id, { "weight": weightSelections.querySelector(".ochre-course-weight").value }));
+        weightChanger.addEventListener('change', () => changeGPASettings(course.id, { "weight": weightSelections.querySelector(".orca-course-weight").value }));
 
-        let useCustomGr = makeElement("input", courseContainer, { "className": "ochre-course-customgr", "type": "checkbox", "checked": customs.gr !== null ? true : false });
-        let useCustomGrLabel = makeElement("span", courseContainer, { "className": "ochre-course-customgr-label", "textContent": "Save custom grade" });
+        let useCustomGr = makeElement("input", courseContainer, { "className": "orca-course-customgr", "type": "checkbox", "checked": customs.gr !== null ? true : false });
+        let useCustomGrLabel = makeElement("span", courseContainer, { "className": "orca-course-customgr-label", "textContent": "Save custom grade" });
         useCustomGr.addEventListener("input", () => {
             if (options["custom_cards"][course.id]) {
                 if (options["custom_cards"][course.id]["gr"] !== undefined && options["custom_cards"][course.id]["gr"] !== null) {
@@ -5781,7 +5781,7 @@ function createGPACalcCourse(location, course) {
         }
     });
 
-    credits.querySelector(".ochre-course-credit").addEventListener('input', () => changeGPASettings(course.id, { "credits": credits.querySelector(".ochre-course-credit").value }));
+    credits.querySelector(".orca-course-credit").addEventListener('input', () => changeGPASettings(course.id, { "credits": credits.querySelector(".orca-course-credit").value }));
     return courseContainer;
 }
 
@@ -5794,26 +5794,26 @@ function setupGPACalc() {
             const dashboardContainer = sortableContainer || document.querySelector("#DashboardCard_Container");
             if (!dashboardContainer) return;
 
-            let container2 = document.querySelector(".ochre-gpa-card");
-            let container = document.querySelector(".ochre-gpa");
-            const alreadyRendered = container2?.dataset?.ochreGpaRendered === "true" && container?.dataset?.ochreGpaRendered === "true";
+            let container2 = document.querySelector(".orca-gpa-card");
+            let container = document.querySelector(".orca-gpa");
+            const alreadyRendered = container2?.dataset?.orcaGpaRendered === "true" && container?.dataset?.orcaGpaRendered === "true";
 
             if (!container2) {
                 container2 = document.createElement("div");
-                container2.className = "ochre-gpa-card";
+                container2.className = "orca-gpa-card";
             }
             if (!container) {
                 container = document.createElement("div");
-                container.className = "ochre-gpa";
+                container.className = "orca-gpa";
             }
 
             container2.style.display = options.gpa_calc === true ? "inline-block" : "none";
 
             if (!alreadyRendered) {
-                container2.innerHTML = `<h3 class="ochre-gpa-header">GPA</h3><div><div><p id="ochre-gpa-unweighted"></p><p>Current</p></div><div style="display:${options["gpa_calc_weighted"] ? "block" : "none"}"><p id="ochre-gpa-weighted"></p><p>Weighted</p></div><div style="display:${options["gpa_calc_cumulative"] ? "block" : "none"}"><p id="ochre-gpa-cumulative"></p><p>Cumulative</p></div></div>`;
-                let editBtn = makeElement("button", container2, { "className": "ochre-gpa-edit-btn", "textContent": "Edit Calculator" });
+                container2.innerHTML = `<h3 class="orca-gpa-header">GPA</h3><div><div><p id="orca-gpa-unweighted"></p><p>Current</p></div><div style="display:${options["gpa_calc_weighted"] ? "block" : "none"}"><p id="orca-gpa-weighted"></p><p>Weighted</p></div><div style="display:${options["gpa_calc_cumulative"] ? "block" : "none"}"><p id="orca-gpa-cumulative"></p><p>Cumulative</p></div></div>`;
+                let editBtn = makeElement("button", container2, { "className": "orca-gpa-edit-btn", "textContent": "Edit Calculator" });
 
-                container.innerHTML = '<h3 class="ochre-gpa-header">GPA Calculator</h3><div class="ochre-gpa-courses-container"><div class="ochre-gpa-courses"></div></div>';
+                container.innerHTML = '<h3 class="orca-gpa-header">GPA Calculator</h3><div class="orca-gpa-courses-container"><div class="orca-gpa-courses"></div></div>';
 
                 if (options.gpa_calc_prepend === true) {
                     dashboardContainer.prepend(container2);
@@ -5823,11 +5823,11 @@ function setupGPACalc() {
                     dashboardContainer.appendChild(container);
                 }
 
-                let location = document.querySelector(".ochre-gpa-courses");
+                let location = document.querySelector(".orca-gpa-courses");
                 if (!location) return;
 
                 let cumulative = createGPACalcCourse(location, { "id": "cumulative", "enrollments": [{ "has_grading_periods": true, "current_period_computed_current_score": 0 }] });
-                cumulative.id = "ochre-cumulative-gpa";
+                cumulative.id = "orca-cumulative-gpa";
                 result.forEach(course => createGPACalcCourse(location, course));
 
                 container.style.display = "none";
@@ -5842,11 +5842,11 @@ function setupGPACalc() {
                     }
                 });
 
-                container2.dataset.ochreGpaRendered = "true";
-                container.dataset.ochreGpaRendered = "true";
+                container2.dataset.orcaGpaRendered = "true";
+                container.dataset.orcaGpaRendered = "true";
             } else {
-                const weighted = container2.querySelector("#ochre-gpa-weighted")?.parentElement;
-                const cumulative = container2.querySelector("#ochre-gpa-cumulative")?.parentElement;
+                const weighted = container2.querySelector("#orca-gpa-weighted")?.parentElement;
+                const cumulative = container2.querySelector("#orca-gpa-cumulative")?.parentElement;
                 if (weighted) weighted.style.display = options.gpa_calc_weighted ? "block" : "none";
                 if (cumulative) cumulative.style.display = options.gpa_calc_cumulative ? "block" : "none";
 
@@ -5885,7 +5885,7 @@ let dashboardNotesTimer;
 function delayDashboardNotesStorage(text) {
     clearTimeout(dashboardNotesTimer);
     dashboardNotesTimer = setTimeout(() => {
-        ochreStorage.set({ dashboard_notes_text: text });
+        orcaStorage.set({ dashboard_notes_text: text });
     }, 250);
 }
 
@@ -6063,8 +6063,8 @@ function toggleDashboardNoteTask(editor, taskIndex) {
             lines[idx] = m[1] + "[" + newMark + "]" + m[3] + line.slice(m[0].length);
             editor.value = lines.join("\n");
             editor.dispatchEvent(new Event("input", { bubbles: true }));
-            const notes = editor.closest(".ochre-dashboard-notes");
-            const rendered = notes ? notes.querySelector(".ochre-notes-rendered") : null;
+            const notes = editor.closest(".orca-dashboard-notes");
+            const rendered = notes ? notes.querySelector(".orca-notes-rendered") : null;
             if (rendered) renderDashboardNotesPreview(rendered, editor.value);
             return;
         }
@@ -6073,7 +6073,7 @@ function toggleDashboardNoteTask(editor, taskIndex) {
 }
 
 const DASHBOARD_NOTES_HTML = `
-    <div class="ochre-notes-toolbar" role="toolbar" aria-label="Format notes">
+    <div class="orca-notes-toolbar" role="toolbar" aria-label="Format notes">
         <button type="button" class="cr-fmt" data-action="bold" title="Bold (Ctrl/Cmd+B)"><strong>B</strong></button>
         <button type="button" class="cr-fmt" data-action="italic" title="Italic (Ctrl/Cmd+I)"><em>I</em></button>
         <button type="button" class="cr-fmt" data-action="strike" title="Strikethrough"><s>S</s></button>
@@ -6091,15 +6091,15 @@ const DASHBOARD_NOTES_HTML = `
         <button type="button" class="cr-fmt" data-action="hr" title="Horizontal rule">&mdash;</button>
         <button type="button" class="cr-fmt" data-action="codeblock" title="Code block">&#96;&#96;&#96;</button>
     </div>
-    <div class="ochre-notes-surface">
-        <div class="ochre-notes-rendered" tabindex="0" aria-label="Dashboard notes — click to edit" title="Click to edit"></div>
-        <textarea class="ochre-notes-editor" placeholder="Type away!" spellcheck="false"></textarea>
+    <div class="orca-notes-surface">
+        <div class="orca-notes-rendered" tabindex="0" aria-label="Dashboard notes — click to edit" title="Click to edit"></div>
+        <textarea class="orca-notes-editor" placeholder="Type away!" spellcheck="false"></textarea>
     </div>
 `;
 
 function wireDashboardNotes(notes) {
-    const editor = notes.querySelector(".ochre-notes-editor");
-    const rendered = notes.querySelector(".ochre-notes-rendered");
+    const editor = notes.querySelector(".orca-notes-editor");
+    const rendered = notes.querySelector(".orca-notes-rendered");
     editor.value = options.dashboard_notes_text || "";
     renderDashboardNotesPreview(rendered, editor.value);
 
@@ -6135,7 +6135,7 @@ function wireDashboardNotes(notes) {
     });
 
     // preventDefault on the toolbar keeps focus in the editor across misclicks.
-    const toolbar = notes.querySelector(".ochre-notes-toolbar");
+    const toolbar = notes.querySelector(".orca-notes-toolbar");
     if (toolbar) toolbar.addEventListener("mousedown", e => e.preventDefault());
     notes.querySelectorAll(".cr-fmt").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -6159,15 +6159,15 @@ function loadDashboardNotes() {
     const container = document.querySelector("#DashboardCard_Container");
     if (options.dashboard_notes === true) {
         if (!container) return;
-        let notes = document.querySelector('.ochre-dashboard-notes');
+        let notes = document.querySelector('.orca-dashboard-notes');
         // Rebuild older (split edit/preview) markup into the new single-surface layout.
-        if (notes && !notes.querySelector(".ochre-notes-surface")) {
+        if (notes && !notes.querySelector(".orca-notes-surface")) {
             notes.remove();
             notes = null;
         }
         if (!notes) {
             notes = document.createElement("div");
-            notes.classList.add("ochre-dashboard-notes");
+            notes.classList.add("orca-dashboard-notes");
             notes.innerHTML = DASHBOARD_NOTES_HTML;
             // Mount as a full-width sibling above the card grid. Prepending inside the
             // DashboardCard_Container makes the notes a masonry/grid cell (narrow & broken).
@@ -6177,8 +6177,8 @@ function loadDashboardNotes() {
             wireDashboardNotes(notes);
         } else {
             notes.style.display = "";
-            const editor = notes.querySelector(".ochre-notes-editor");
-            const rendered = notes.querySelector(".ochre-notes-rendered");
+            const editor = notes.querySelector(".orca-notes-editor");
+            const rendered = notes.querySelector(".orca-notes-rendered");
             // Only sync and render in view mode; the textarea is the source of truth while editing.
             if (!notes.classList.contains("is-editing")) {
                 if (editor && editor.value !== (options.dashboard_notes_text || "")) {
@@ -6188,7 +6188,7 @@ function loadDashboardNotes() {
             }
         }
     } else {
-        let notes = document.querySelector('.ochre-dashboard-notes');
+        let notes = document.querySelector('.orca-dashboard-notes');
         if (notes) notes.style.display = "none";
     }
 }
@@ -6270,8 +6270,8 @@ function debouncedApplyAestheticChanges(delay = 150) {
 function applyAestheticChanges() {
     // Quiz safe mode: don't inject custom layout/aesthetic CSS on quiz pages.
     if (quizSafeModeActive()) return;
-    let style = document.querySelector("#ochre-aesthetics") || document.createElement('style');
-    style.id = "ochre-aesthetics";
+    let style = document.querySelector("#orca-aesthetics") || document.createElement('style');
+    style.id = "orca-aesthetics";
     style.textContent = "";
     if (options.condensed_cards === true) style.textContent += ".ic-DashboardCard__header_hero {height:60px!important}.ic-DashboardCard__header-subtitle, .ic-DashboardCard__header-term{display:none}";
     if (options.remlogo === true) style.textContent += ".ic-app-header__logomark-container{display:none}";
@@ -6310,9 +6310,9 @@ function applyAestheticChanges() {
         if (options.cardHeight !== undefined && options.cardHeight !== null && options.cardHeight !== "") {
             style.textContent += `.ic-DashboardCard {height: ${options.cardHeight}px!important;}`;
             // Canvas sets overflow:hidden on .ic-DashboardCard. With a fixed
-            // height that clips the appended .ochre-card-assignment area
+            // height that clips the appended .orca-card-assignment area
             // (the assignment rows live at the bottom of the card), making the
-            // .ochre-assignment-link anchors unclickable for users with
+            // .orca-assignment-link anchors unclickable for users with
             // custom card styles enabled. Allow overflow so those rows stay
             // visible and interactive when card assignments are shown.
             if (options.assignments_due === true) style.textContent += `.ic-DashboardCard {overflow: visible!important;}`;
@@ -6341,11 +6341,11 @@ with a toggle for Quiz Safe Mode and a "Don't show again" button.
 */
 function setupQuizSafeModeBanner() {
     if (!isQuizPreTakePage()) return;
-    if (document.getElementById("ochre-quiz-safe-banner")) return;
+    if (document.getElementById("orca-quiz-safe-banner")) return;
 
-    ochreStorage.get("quiz_safe_mode_reminder_dismissed").then(local => {
+    orcaStorage.get("quiz_safe_mode_reminder_dismissed").then(local => {
         if (local && local.quiz_safe_mode_reminder_dismissed === true) return;
-        ochreStorage.get("quiz_safe_mode").then(sync => {
+        orcaStorage.get("quiz_safe_mode").then(sync => {
             const safeModeOn = sync && sync.quiz_safe_mode === true;
             injectQuizSafeModeBanner(safeModeOn);
         });
@@ -6362,44 +6362,44 @@ function injectQuizSafeModeBanner(safeModeOn) {
 
     const insertInto = (container) => {
         if (!container) return false;
-        if (document.getElementById("ochre-quiz-safe-banner")) return true;
+        if (document.getElementById("orca-quiz-safe-banner")) return true;
 
         const banner = makeElement("div", container, {
-            id: "ochre-quiz-safe-banner",
-            className: "ochre-quiz-safe-banner",
+            id: "orca-quiz-safe-banner",
+            className: "orca-quiz-safe-banner",
         }, true);
 
         makeElement("div", banner, {
-            className: "ochre-quiz-safe-title",
+            className: "orca-quiz-safe-title",
             textContent: "Ochre — Quiz Safe Mode",
         });
 
         makeElement("p", banner, {
-            className: "ochre-quiz-safe-info",
+            className: "orca-quiz-safe-info",
             textContent: "This extension hasn't been 100% approved by all teachers. Quiz Safe Mode turns off most Ochre features that could interfere with this quiz page, giving you the default Canvas quiz experience.",
         });
 
-        const toggleRow = makeElement("div", banner, { className: "ochre-quiz-safe-row" });
-        const toggleWrap = makeElement("label", toggleRow, { className: "ochre-quiz-safe-toggle" });
+        const toggleRow = makeElement("div", banner, { className: "orca-quiz-safe-row" });
+        const toggleWrap = makeElement("label", toggleRow, { className: "orca-quiz-safe-toggle" });
         const checkbox = makeElement("input", toggleWrap, { type: "checkbox" });
         checkbox.checked = !!safeModeOn;
         checkbox.addEventListener("change", () => {
-            ochreStorage.set({ quiz_safe_mode: checkbox.checked });
+            orcaStorage.set({ quiz_safe_mode: checkbox.checked });
             // The storage.onChanged listener (applyOptionsChanges) reloads quiz pages.
         });
         makeElement("span", toggleWrap, {
-            className: "ochre-quiz-safe-toggle-label",
+            className: "orca-quiz-safe-toggle-label",
             textContent: "Enable Quiz Safe Mode",
         });
 
         const dismissBtn = makeElement("button", toggleRow, {
-            className: "ochre-quiz-safe-dismiss",
+            className: "orca-quiz-safe-dismiss",
  type: "button",
             textContent: "Don't show again",
             title: "Hides this reminder permanently. You can still toggle Quiz Safe Mode in the extension popup.",
         });
         dismissBtn.addEventListener("click", () => {
-            ochreStorage.set({ quiz_safe_mode_reminder_dismissed: true });
+            orcaStorage.set({ quiz_safe_mode_reminder_dismissed: true });
             banner.remove();
         });
 
@@ -6429,7 +6429,7 @@ let globalSearchIndex = null;            // [{type,title,course,courseId,url}]
 let globalSearchIndexPromise = null;     // in-flight build so concurrent opens share one fetch
 let globalSearchIndexAt = 0;             // ms timestamp of last successful build
 const GLOBAL_SEARCH_INDEX_TTL = 10 * 60 * 1000; // 10 minutes
-const GLOBAL_SEARCH_STORAGE_KEY = "ochre_global_search_index";
+const GLOBAL_SEARCH_STORAGE_KEY = "orca_global_search_index";
 let _gsShortcutBound = false;
 
 function setupGlobalSearch() {
@@ -6442,7 +6442,7 @@ function setupGlobalSearch() {
 }
 
 function removeGlobalSearch() {
-    document.getElementById("ochre-global-search-header-btn")?.remove();
+    document.getElementById("orca-global-search-header-btn")?.remove();
     removeGlobalSearchBetterSidebarButton();
     removeGlobalSearchNativeSidebarButton();
     closeGlobalSearchModal();
@@ -6454,7 +6454,7 @@ function removeGlobalSearch() {
 }
 
 // Shared search icon used by the sidebar + header triggers.
-const GLOBAL_SEARCH_ICON_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle cx="11" cy="11" r="7" stroke="var(--ochre-sidebar-text)" stroke-width="2" fill="none"/><path d="m20 20-3.2-3.2" stroke="var(--ochre-sidebar-text)" stroke-width="2" stroke-linecap="round"/></g></svg>`;
+const GLOBAL_SEARCH_ICON_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle cx="11" cy="11" r="7" stroke="var(--orca-sidebar-text)" stroke-width="2" fill="none"/><path d="m20 20-3.2-3.2" stroke="var(--orca-sidebar-text)" stroke-width="2" stroke-linecap="round"/></g></svg>`;
 
 // Placement: a search trigger is injected into whichever left sidebar is
 // active — the Better Sidebar (when enabled) or Canvas' native global nav —
@@ -6496,7 +6496,7 @@ function placeGlobalSearchTrigger() {
     if (isDashboardPage() && headerActions) {
         ensureGlobalSearchHeaderButton(headerActions);
     } else {
-        document.getElementById("ochre-global-search-header-btn")?.remove();
+        document.getElementById("orca-global-search-header-btn")?.remove();
     }
 }
 
@@ -6506,16 +6506,16 @@ function ensureGlobalSearchBetterSidebarButton(betterSidebar) {
     // The first child of #better-sidebar-container is the button list.
     const sidebarContent = betterSidebar.querySelector("div");
     if (!sidebarContent) return;
-    if (sidebarContent.querySelector("#ochre-gs-sidebar-btn")) return;
+    if (sidebarContent.querySelector("#orca-gs-sidebar-btn")) return;
     const btn = document.createElement("a");
-    btn.id = "ochre-gs-sidebar-btn";
-    btn.className = "ochre-custom-btn better-sidebar-btn ochre-gs-sidebar-btn";
+    btn.id = "orca-gs-sidebar-btn";
+    btn.className = "orca-custom-btn better-sidebar-btn orca-gs-sidebar-btn";
     btn.href = "#";
     btn.title = "Search Canvas (Ctrl+K)";
     btn.setAttribute("role", "button");
     btn.setAttribute("aria-label", "Search Canvas");
-    btn.style.cssText = "width:40%;height:var(--ochre-sidebar-btn-height,30px);cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;gap:var(--ochre-sidebar-btn-gap,8px);color:var(--ochre-sidebar-text) !important;font-weight:bold;position:relative;";
-    btn.innerHTML = `${GLOBAL_SEARCH_ICON_SVG}<span class="better-sidebar-label" style="font-size:var(--ochre-sidebar-label-size,14px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">Search</span>`;
+    btn.style.cssText = "width:40%;height:var(--orca-sidebar-btn-height,30px);cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;gap:var(--orca-sidebar-btn-gap,8px);color:var(--orca-sidebar-text) !important;font-weight:bold;position:relative;";
+    btn.innerHTML = `${GLOBAL_SEARCH_ICON_SVG}<span class="better-sidebar-label" style="font-size:var(--orca-sidebar-label-size,14px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">Search</span>`;
     btn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); openGlobalSearchModal(); });
     // Append so it sits at the bottom of the sidebar item list.
     sidebarContent.appendChild(btn);
@@ -6526,7 +6526,7 @@ function ensureGlobalSearchBetterSidebarButton(betterSidebar) {
 }
 
 function removeGlobalSearchBetterSidebarButton() {
-    document.getElementById("ochre-gs-sidebar-btn")?.remove();
+    document.getElementById("orca-gs-sidebar-btn")?.remove();
 }
 
 // Apply the Better Sidebar's current expanded/collapsed styling to the search
@@ -6538,8 +6538,8 @@ function applyGlobalSearchSidebarButtonMode(btn, expanded) {
     const label = btn.querySelector(".better-sidebar-label");
     if (label) label.style.display = expanded ? "block" : "none";
     btn.querySelectorAll("svg").forEach(svg => {
-        svg.style.width = "var(--ochre-sidebar-icon-size,20px)";
-        svg.style.height = "var(--ochre-sidebar-icon-size,20px)";
+        svg.style.width = "var(--orca-sidebar-icon-size,20px)";
+        svg.style.height = "var(--orca-sidebar-icon-size,20px)";
     });
 }
 
@@ -6548,10 +6548,10 @@ function applyGlobalSearchSidebarButtonMode(btn, expanded) {
 function ensureGlobalSearchNativeSidebarButton() {
     const navMenu = document.getElementById("menu");
     if (!navMenu) return;
-    if (navMenu.querySelector("#ochre-gs-nav-item")) return;
+    if (navMenu.querySelector("#orca-gs-nav-item")) return;
     const li = document.createElement("li");
-    li.id = "ochre-gs-nav-item";
-    li.className = "ic-app-header__menu-list-item ochre-gs-nav-item";
+    li.id = "orca-gs-nav-item";
+    li.className = "ic-app-header__menu-list-item orca-gs-nav-item";
     const link = document.createElement("a");
     link.className = "ic-app-header__menu-list-link";
     link.href = "#";
@@ -6566,20 +6566,20 @@ function ensureGlobalSearchNativeSidebarButton() {
 }
 
 function removeGlobalSearchNativeSidebarButton() {
-    document.getElementById("ochre-gs-nav-item")?.remove();
+    document.getElementById("orca-gs-nav-item")?.remove();
 }
 
 // --- Dashboard header trigger -----------------------------------------------
 
 function ensureGlobalSearchHeaderButton(headerActions) {
-    if (headerActions.querySelector("#ochre-global-search-header-btn")) return;
+    if (headerActions.querySelector("#orca-global-search-header-btn")) return;
     const btn = document.createElement("button");
-    btn.id = "ochre-global-search-header-btn";
+    btn.id = "orca-global-search-header-btn";
     btn.type = "button";
-    btn.className = "ochre-gs-header-btn";
+    btn.className = "orca-gs-header-btn";
     btn.title = "Search Canvas (Ctrl+K)";
     btn.setAttribute("aria-label", "Search Canvas");
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.2-3.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="ochre-gs-header-btn-label">Search</span>`;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.2-3.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="orca-gs-header-btn-label">Search</span>`;
     btn.addEventListener("click", openGlobalSearchModal);
     // Insert as the first child of the actions row so it sits just to the left
     // of the "Dashboard Options" (⋯) button, right-aligned with it.
@@ -6602,7 +6602,7 @@ function onGlobalSearchShortcut(e) {
     // because getRoute() can be stale after Canvas' client-side navigation.
     if (/^\/courses\/\d+\/quizzes\/\d+(?:\/|$)/.test(getRoute())) return;
 
-    const modal = document.getElementById("ochre-global-search-modal");
+    const modal = document.getElementById("orca-global-search-modal");
     if (modal && modal.dataset.open === "true") {
         closeGlobalSearchModal();
     } else {
@@ -6612,23 +6612,23 @@ function onGlobalSearchShortcut(e) {
 }
 
 function openGlobalSearchModal() {
-    if (document.getElementById("ochre-global-search-modal")) return;
+    if (document.getElementById("orca-global-search-modal")) return;
 
     // Show the platform-appropriate modifier in keybind hints (⌘ on Mac).
     const modKey = /Mac|iPhone|iPad/.test(navigator.platform) ? "\u2318" : "Ctrl";
     const modal = document.createElement("div");
-    modal.id = "ochre-global-search-modal";
-    modal.className = "ochre-gs-modal";
+    modal.id = "orca-global-search-modal";
+    modal.className = "orca-gs-modal";
     modal.dataset.open = "true";
     modal.innerHTML = `
-        <div class="ochre-gs-card" role="dialog" aria-modal="true" aria-label="Search Canvas">
-            <div class="ochre-gs-input-row">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20" class="ochre-gs-input-icon"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.2-3.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input id="ochre-gs-input" class="ochre-gs-input" type="text" placeholder="Search modules & assignments\u2026" autocomplete="off" spellcheck="false" />
-                <button id="ochre-gs-close" class="ochre-gs-close" type="button" title="Close (Esc)">Esc</button>
+        <div class="orca-gs-card" role="dialog" aria-modal="true" aria-label="Search Canvas">
+            <div class="orca-gs-input-row">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20" class="orca-gs-input-icon"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.2-3.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input id="orca-gs-input" class="orca-gs-input" type="text" placeholder="Search modules & assignments\u2026" autocomplete="off" spellcheck="false" />
+                <button id="orca-gs-close" class="orca-gs-close" type="button" title="Close (Esc)">Esc</button>
             </div>
-            <div id="ochre-gs-results" class="ochre-gs-results"></div>
-            <div class="ochre-gs-footer">
+            <div id="orca-gs-results" class="orca-gs-results"></div>
+            <div class="orca-gs-footer">
                 <span><kbd>\u2191</kbd><kbd>\u2193</kbd> navigate</span>
                 <span><kbd>Enter</kbd> open</span>
                 <span><kbd>${modKey}</kbd>+<kbd>Enter</kbd> new tab</span>
@@ -6638,9 +6638,9 @@ function openGlobalSearchModal() {
         </div>`;
     document.body.appendChild(modal);
 
-    const input = modal.querySelector("#ochre-gs-input");
-    const resultsEl = modal.querySelector("#ochre-gs-results");
-    const closeBtn = modal.querySelector("#ochre-gs-close");
+    const input = modal.querySelector("#orca-gs-input");
+    const resultsEl = modal.querySelector("#orca-gs-results");
+    const closeBtn = modal.querySelector("#orca-gs-close");
     let selected = -1;
     let currentResults = [];
 
@@ -6684,11 +6684,11 @@ function openGlobalSearchModal() {
     // Kick off indexing immediately so the first keystroke is fast.
     ensureGlobalSearchIndex();
     // Render an initial hint.
-    resultsEl.innerHTML = `<div class="ochre-gs-hint">Start typing to search your modules and assignments.</div>`;
+    resultsEl.innerHTML = `<div class="orca-gs-hint">Start typing to search your modules and assignments.</div>`;
 }
 
 function closeGlobalSearchModal() {
-    const modal = document.getElementById("ochre-global-search-modal");
+    const modal = document.getElementById("orca-global-search-modal");
     if (!modal) return;
     modal.remove();
 }
@@ -6699,7 +6699,7 @@ function openGlobalSearchResult(item, newTab) {
         // Opening in a new tab keeps the search menu open so the user can keep
         // searching. Refocus the input for the next keystroke.
         window.open(item.url, "_blank", "noopener");
-        const input = document.getElementById("ochre-gs-input");
+        const input = document.getElementById("orca-gs-input");
         if (input) input.focus();
     } else {
         closeGlobalSearchModal();
@@ -6708,10 +6708,10 @@ function openGlobalSearchResult(item, newTab) {
 }
 
 function renderGlobalSearchSelection(resultsEl, selected) {
-    const rows = resultsEl.querySelectorAll(".ochre-gs-row");
+    const rows = resultsEl.querySelectorAll(".orca-gs-row");
     rows.forEach((row, i) => {
-        if (i === selected) { row.classList.add("ochre-gs-selected"); row.scrollIntoView({ block: "nearest" }); }
-        else row.classList.remove("ochre-gs-selected");
+        if (i === selected) { row.classList.add("orca-gs-selected"); row.scrollIntoView({ block: "nearest" }); }
+        else row.classList.remove("orca-gs-selected");
     });
 }
 
@@ -6937,15 +6937,15 @@ function prettyModuleItemType(type) {
 
 async function runGlobalSearch(query, resultsEl) {
     if (!globalSearchIndex && globalSearchIndexPromise) {
-        resultsEl.innerHTML = `<div class="ochre-gs-loading">Building search index\u2026</div>`;
+        resultsEl.innerHTML = `<div class="orca-gs-loading">Building search index\u2026</div>`;
     }
     const index = await ensureGlobalSearchIndex();
     if (!query) {
-        resultsEl.innerHTML = `<div class="ochre-gs-hint">Start typing to search your modules and assignments.</div>`;
+        resultsEl.innerHTML = `<div class="orca-gs-hint">Start typing to search your modules and assignments.</div>`;
         return [];
     }
     if (!index || !index.length) {
-        resultsEl.innerHTML = `<div class="ochre-gs-hint">No modules or assignments found. Open the search again later if your courses are still loading.</div>`;
+        resultsEl.innerHTML = `<div class="orca-gs-hint">No modules or assignments found. Open the search again later if your courses are still loading.</div>`;
         return [];
     }
 
@@ -6967,20 +6967,20 @@ async function runGlobalSearch(query, resultsEl) {
     const top = matches.slice(0, 50);
 
     if (!top.length) {
-        resultsEl.innerHTML = `<div class="ochre-gs-hint">No results for \u201c${escapeGlobalSearchHtml(query)}\u201d.</div>`;
+        resultsEl.innerHTML = `<div class="orca-gs-hint">No results for \u201c${escapeGlobalSearchHtml(query)}\u201d.</div>`;
         return [];
     }
 
     resultsEl.innerHTML = top.map((item, i) => `
-        <div class="ochre-gs-row" data-i="${i}" data-url="${escapeGlobalSearchAttr(item.url)}">
-            <div class="ochre-gs-row-main">
-                <span class="ochre-gs-type ochre-gs-type-${escapeGlobalSearchAttr((item.type || "").toLowerCase().replace(/\s+/g, "-"))}">${escapeGlobalSearchHtml(item.type || "")}</span>
-                <span class="ochre-gs-title">${escapeGlobalSearchHtml(item.title || "")}</span>
+        <div class="orca-gs-row" data-i="${i}" data-url="${escapeGlobalSearchAttr(item.url)}">
+            <div class="orca-gs-row-main">
+                <span class="orca-gs-type orca-gs-type-${escapeGlobalSearchAttr((item.type || "").toLowerCase().replace(/\s+/g, "-"))}">${escapeGlobalSearchHtml(item.type || "")}</span>
+                <span class="orca-gs-title">${escapeGlobalSearchHtml(item.title || "")}</span>
             </div>
-            <span class="ochre-gs-course">${escapeGlobalSearchHtml(item.course || "")}</span>
+            <span class="orca-gs-course">${escapeGlobalSearchHtml(item.course || "")}</span>
         </div>`).join("");
 
-    resultsEl.querySelectorAll(".ochre-gs-row").forEach((row) => {
+    resultsEl.querySelectorAll(".orca-gs-row").forEach((row) => {
         // Plain click / Ctrl+click: honor modifier for new-tab behavior.
         row.addEventListener("click", (e) => {
             const url = row.getAttribute("data-url");
@@ -7047,7 +7047,7 @@ function showUpdateMsg() {
     if (!el) return;
 
     // option off or div already created
-    let div = document.getElementById("ochre-update-msg");
+    let div = document.getElementById("orca-update-msg");
     if (options.show_updates !== true || options.update_msg === "") {
         if (div) div.style.display = "none";
         return;
@@ -7057,9 +7057,9 @@ function showUpdateMsg() {
     }
 
     // first creation
-    div = makeElement("div", el, { "id": "ochre-update-msg" });
+    div = makeElement("div", el, { "id": "orca-update-msg" });
     makeElement("p", div, { "textContent": options.update_msg });
-    const close = makeElement("button", div, { "id": "ochre-update-close", "textContent": "Close" });
+    const close = makeElement("button", div, { "id": "orca-update-close", "textContent": "Close" });
     close.addEventListener("click", () => {
         readUpdate();
         div.remove();
@@ -7067,7 +7067,7 @@ function showUpdateMsg() {
 }
 
 function readUpdate() {
-    ochreStorage.set({ "update_msg": "" });
+    orcaStorage.set({ "update_msg": "" });
 }
 
 /*
@@ -7087,8 +7087,8 @@ function combineAssignments(data) {
 }
 
 function cleanCustomAssignments() {
-    ochreStorage.get("custom_assignments_overflow").then(overflows => {
-        ochreStorage.get(overflows["custom_assignments_overflow"]).then(storage => {
+    orcaStorage.get("custom_assignments_overflow").then(overflows => {
+        orcaStorage.get(overflows["custom_assignments_overflow"]).then(storage => {
             const now = new Date();
 
             overflows["custom_assignments_overflow"].forEach(overflow => {
@@ -7100,7 +7100,7 @@ function cleanCustomAssignments() {
                         changed = true;
                     }
                 }
-                if (changed) ochreStorage.set({ [overflow]: storage[overflow] });
+                if (changed) orcaStorage.set({ [overflow]: storage[overflow] });
             });
 
         });
@@ -7120,7 +7120,7 @@ function getColors() {
             Object.keys(cards).forEach(key => {
                 cards[key] = { ...cards[key], "color": data["custom_colors"]["course_" + key] ? data["custom_colors"]["course_" + key] : null };
             });
-            ochreStorage.set({ "custom_cards_3": cards });
+            orcaStorage.set({ "custom_cards_3": cards });
             return cards;
         });
     }
@@ -7137,12 +7137,12 @@ function changeFavicon() {
     // visible now because the route cycle makes leaving a course a thing that
     // happens without a reload. Saved rather than reconstructed because the
     // original href varies by Canvas instance and version.
-    if (link.dataset.ochreOriginalHref == null) {
-        link.dataset.ochreOriginalHref = link.getAttribute("href") || "";
+    if (link.dataset.orcaOriginalHref == null) {
+        link.dataset.orcaOriginalHref = link.getAttribute("href") || "";
     }
 
     const restore = () => {
-        const original = link.dataset.ochreOriginalHref;
+        const original = link.dataset.orcaOriginalHref;
         if (original && link.getAttribute("href") !== original) link.setAttribute("href", original);
     };
 
@@ -7237,23 +7237,23 @@ const GA_ZONE_COLORS = (() => {
 const GA_OPEN_KEY = "grade_analytics_open";
 
 async function getGradeAnalyticsOpenState() {
-    const result = await ochreStorage.get(GA_OPEN_KEY);
+    const result = await orcaStorage.get(GA_OPEN_KEY);
     return result[GA_OPEN_KEY] ?? true;
 }
 
 function setGradeAnalyticsOpenState(open) {
-    ochreStorage.set({ [GA_OPEN_KEY]: open });
+    orcaStorage.set({ [GA_OPEN_KEY]: open });
 }
 
 const GA_FIT_Y_KEY = "grade_analytics_fit_y";
 
 async function getGradeAnalyticsFitY() {
-    const result = await ochreStorage.get(GA_FIT_Y_KEY);
+    const result = await orcaStorage.get(GA_FIT_Y_KEY);
     return result[GA_FIT_Y_KEY] ?? false;
 }
 
 function setGradeAnalyticsFitY(fit) {
-    ochreStorage.set({ [GA_FIT_Y_KEY]: fit });
+    orcaStorage.set({ [GA_FIT_Y_KEY]: fit });
 }
 
 // Final-grade calculator settings, stored per course so each course's final
@@ -7270,7 +7270,7 @@ async function getGaCalcSettings(courseId) {
     const empty = { weight: null, target: null, show: false };
     if (courseId == null) return empty;
     const key = gaCalcStorageKey(courseId);
-    const result = await ochreStorage.get(key);
+    const result = await orcaStorage.get(key);
     const v = result[key];
     return v && typeof v === "object" ? v : empty;
 }
@@ -7278,7 +7278,7 @@ async function getGaCalcSettings(courseId) {
 function saveGaCalcSettings() {
     const courseId = getCurrentCourseId();
     if (courseId == null || !gaCalc) return;
-    ochreStorage.set({ [gaCalcStorageKey(courseId)]: gaCalc });
+    orcaStorage.set({ [gaCalcStorageKey(courseId)]: gaCalc });
 }
 
 let gaObserver = null;
@@ -7385,8 +7385,8 @@ function syncGradeAnalyticsUI() {
     // canvas backing store at width 0 in that case, so a 0-width canvas means
     // "never drawn" — redraw now that layout is real.
     if (gaOpen && gaData) {
-        const pie = panel.querySelector("#ochre-ga-pie");
-        const line = panel.querySelector("#ochre-ga-line");
+        const pie = panel.querySelector("#orca-ga-pie");
+        const line = panel.querySelector("#orca-ga-line");
         if ((pie && pie.width === 0) || (line && line.width === 0)) {
             renderGradeAnalytics();
         }
@@ -7399,7 +7399,7 @@ function removeGradeAnalyticsPanel() {
     // panel goes away.
     gaClearImagineUI();
     gaRestoreImagineTotal();
-    document.getElementById("ochre-grade-analytics")?.remove();
+    document.getElementById("orca-grade-analytics")?.remove();
 }
 
 // Applies the in-memory open/closed state (restored from storage) to the panel
@@ -7407,8 +7407,8 @@ function removeGradeAnalyticsPanel() {
 // is reused, so a stored preference is never lost to a creation race (the DOM
 // observer can build the panel before the storage read resolves).
 function applyGradeAnalyticsOpenState(panel) {
-    const body = panel.querySelector("#ochre-ga-body");
-    const btn = panel.querySelector("#ochre-ga-toggle");
+    const body = panel.querySelector("#orca-ga-body");
+    const btn = panel.querySelector("#orca-ga-toggle");
     if (!body || !btn) return;
     body.style.display = gaOpen ? "" : "none";
     const svg = btn.querySelector("svg");
@@ -7420,11 +7420,11 @@ function applyGradeAnalyticsOpenState(panel) {
 // Called at panel creation and whenever an already-attached panel is
 // reused, mirroring applyGradeAnalyticsOpenState.
 function applyGradeAnalyticsImagineState(panel) {
-    const btn = panel.querySelector("#ochre-ga-imagine");
+    const btn = panel.querySelector("#orca-ga-imagine");
     if (!btn) return;
     btn.setAttribute("aria-pressed", String(gaImagineIf));
-    btn.style.borderColor = gaImagineIf ? "#2563eb" : "var(--ochre-borders)";
-    btn.style.color = gaImagineIf ? "#2563eb" : "var(--ochre-text-0)";
+    btn.style.borderColor = gaImagineIf ? "#2563eb" : "var(--orca-borders)";
+    btn.style.color = gaImagineIf ? "#2563eb" : "var(--orca-text-0)";
     btn.style.fontWeight = gaImagineIf ? "600" : "";
 }
 
@@ -7432,7 +7432,7 @@ function applyGradeAnalyticsImagineState(panel) {
 // grades page. Returns null (and retries via the DOM observer) if the anchor
 // hasn't rendered yet.
 function ensureGradeAnalyticsPanel() {
-    let panel = document.getElementById("ochre-grade-analytics");
+    let panel = document.getElementById("orca-grade-analytics");
     const anchor = document.getElementById("print-grades-container");
     if (panel && panel.isConnected) {
         // Canvas re-renders can shift the anchor or our position; keep the
@@ -7449,64 +7449,64 @@ function ensureGradeAnalyticsPanel() {
     const container = anchor || findContentContainer();
     if (!container) return null;
     panel = document.createElement("div");
-    panel.id = "ochre-grade-analytics";
+    panel.id = "orca-grade-analytics";
     if (anchor) {
         anchor.insertAdjacentElement("afterend", panel);
     } else {
         // Fallback: top of the content container until the anchor renders.
         container.insertBefore(panel, container.firstChild);
     }
-    panel.style.cssText = `margin:18px 0;padding:16px;border:1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent);border-radius:10px;background-color:var(--ochre-background-0);color:var(--ochre-text-0);font-family:"Lato","Helvetica Neue",Helvetica,Arial,sans-serif;box-sizing:border-box;`;
+    panel.style.cssText = `margin:18px 0;padding:16px;border:1px solid color-mix(in srgb, var(--orca-borders) 75%, transparent);border-radius:10px;background-color:var(--orca-background-0);color:var(--orca-text-0);font-family:"Lato","Helvetica Neue",Helvetica,Arial,sans-serif;box-sizing:border-box;`;
     panel.innerHTML = `
         <div style="display:flex;align-items:center;gap:10px;">
-            <h2 style="margin:0;font-size:18px;color:var(--ochre-text-0);">Grade Analytics</h2>
-            <button id="ochre-ga-imagine" type="button" aria-pressed="false" title="Toggle Imagine-If mode" style="margin-left:auto;background:var(--ochre-background-1);color:var(--ochre-text-0);border:1px solid var(--ochre-borders);border-radius:8px;padding:4px 12px;font-size:14px;line-height:1.4;cursor:pointer;">Imagine-If mode</button>
-            <button id="ochre-ga-toggle" type="button" aria-expanded="true" title="Toggle Grade Analytics" style="background:var(--ochre-background-1);color:var(--ochre-text-0);border:1px solid var(--ochre-borders);border-radius:8px;padding:4px 12px;font-size:14px;line-height:1.4;cursor:pointer;"><svg style="transform:rotate(180deg);display:block;" fill="currentColor" width="16px" height="16px" viewBox="-6.5 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><path d="M18.813 11.406l-7.906 9.906c-0.75 0.906-1.906 0.906-2.625 0l-7.906-9.906c-0.75-0.938-0.375-1.656 0.781-1.656h16.875c1.188 0 1.531 0.719 0.781 1.656z"/></svg></button>
+            <h2 style="margin:0;font-size:18px;color:var(--orca-text-0);">Grade Analytics</h2>
+            <button id="orca-ga-imagine" type="button" aria-pressed="false" title="Toggle Imagine-If mode" style="margin-left:auto;background:var(--orca-background-1);color:var(--orca-text-0);border:1px solid var(--orca-borders);border-radius:8px;padding:4px 12px;font-size:14px;line-height:1.4;cursor:pointer;">Imagine-If mode</button>
+            <button id="orca-ga-toggle" type="button" aria-expanded="true" title="Toggle Grade Analytics" style="background:var(--orca-background-1);color:var(--orca-text-0);border:1px solid var(--orca-borders);border-radius:8px;padding:4px 12px;font-size:14px;line-height:1.4;cursor:pointer;"><svg style="transform:rotate(180deg);display:block;" fill="currentColor" width="16px" height="16px" viewBox="-6.5 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><path d="M18.813 11.406l-7.906 9.906c-0.75 0.906-1.906 0.906-2.625 0l-7.906-9.906c-0.75-0.938-0.375-1.656 0.781-1.656h16.875c1.188 0 1.531 0.719 0.781 1.656z"/></svg></button>
         </div>
-        <div id="ochre-ga-body">
-        <p id="ochre-ga-status" style="margin:0 0 10px;color:var(--ochre-text-1);font-size:13px;">Loading grade data…</p>
-        <div id="ochre-ga-tabs" style="display:flex;gap:4px;border-bottom:1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent);margin-bottom:14px;">
+        <div id="orca-ga-body">
+        <p id="orca-ga-status" style="margin:0 0 10px;color:var(--orca-text-1);font-size:13px;">Loading grade data…</p>
+        <div id="orca-ga-tabs" style="display:flex;gap:4px;border-bottom:1px solid color-mix(in srgb, var(--orca-borders) 75%, transparent);margin-bottom:14px;">
             <button type="button" data-ga-tab="overview" style="${gaTabStyle(true)}">Overview</button>
             <button type="button" data-ga-tab="calc" style="${gaTabStyle(false)}">Final Calculator</button>
             <button type="button" data-ga-tab="heatmap" style="${gaTabStyle(false)}">Heatmap</button>
         </div>
-        <div id="ochre-ga-tab-overview">
-        <div id="ochre-ga-stats" style="display:none;flex-wrap:wrap;gap:10px;margin-bottom:14px;"></div>
-        <div id="ochre-ga-charts" style="display:none;gap:24px;flex-wrap:wrap;">
-            <div id="ochre-ga-box-pie" style="flex:1 1 calc(33.333% - 8px);min-width:0;">
-                <h3 style="margin:0 0 8px;font-size:14px;color:var(--ochre-text-0);">Score distribution (graded assignments)</h3>
-                <div style="position:relative;height:280px;"><canvas id="ochre-ga-pie"></canvas><div id="ochre-ga-pie-tip" style="position:absolute;display:none;pointer-events:none;background:var(--ochre-background-1);color:var(--ochre-text-0);border:1px solid var(--ochre-borders);border-radius:6px;padding:6px 10px;font-size:12px;z-index:10;white-space:nowrap;"></div></div>
+        <div id="orca-ga-tab-overview">
+        <div id="orca-ga-stats" style="display:none;flex-wrap:wrap;gap:10px;margin-bottom:14px;"></div>
+        <div id="orca-ga-charts" style="display:none;gap:24px;flex-wrap:wrap;">
+            <div id="orca-ga-box-pie" style="flex:1 1 calc(33.333% - 8px);min-width:0;">
+                <h3 style="margin:0 0 8px;font-size:14px;color:var(--orca-text-0);">Score distribution (graded assignments)</h3>
+                <div style="position:relative;height:280px;"><canvas id="orca-ga-pie"></canvas><div id="orca-ga-pie-tip" style="position:absolute;display:none;pointer-events:none;background:var(--orca-background-1);color:var(--orca-text-0);border:1px solid var(--orca-borders);border-radius:6px;padding:6px 10px;font-size:12px;z-index:10;white-space:nowrap;"></div></div>
             </div>
-            <div id="ochre-ga-box-line" style="flex:1 1 calc(66.666% - 16px);min-width:0;">
+            <div id="orca-ga-box-line" style="flex:1 1 calc(66.666% - 16px);min-width:0;">
                 <div style="display:flex;align-items:center;gap:10px;margin:0 0 8px;">
-                    <h3 style="margin:0;font-size:14px;color:var(--ochre-text-0);">Overall grade over time</h3>
-                    <label for="ochre-ga-fity" style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ochre-text-1);cursor:pointer;user-select:none;"><input type="checkbox" id="ochre-ga-fity"> Fit Y axis</label>
+                    <h3 style="margin:0;font-size:14px;color:var(--orca-text-0);">Overall grade over time</h3>
+                    <label for="orca-ga-fity" style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--orca-text-1);cursor:pointer;user-select:none;"><input type="checkbox" id="orca-ga-fity"> Fit Y axis</label>
                 </div>
-                <div style="position:relative;height:280px;"><canvas id="ochre-ga-line"></canvas><div id="ochre-ga-line-tip" style="position:absolute;display:none;pointer-events:none;background:var(--ochre-background-1);color:var(--ochre-text-0);border:1px solid var(--ochre-borders);border-radius:6px;padding:8px 10px;font-size:12px;z-index:20;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,0.25);"></div></div>
+                <div style="position:relative;height:280px;"><canvas id="orca-ga-line"></canvas><div id="orca-ga-line-tip" style="position:absolute;display:none;pointer-events:none;background:var(--orca-background-1);color:var(--orca-text-0);border:1px solid var(--orca-borders);border-radius:6px;padding:8px 10px;font-size:12px;z-index:20;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,0.25);"></div></div>
             </div>
         </div>
         </div>
-        <div id="ochre-ga-tab-calc" style="display:none;">
+        <div id="orca-ga-tab-calc" style="display:none;">
             <div style="max-width:620px;">
-                <p style="margin:0 0 14px;color:var(--ochre-text-1);font-size:13px;">Enter how much your final is worth and the overall grade you want to show see what grade you need on the final.</p>
+                <p style="margin:0 0 14px;color:var(--orca-text-1);font-size:13px;">Enter how much your final is worth and the overall grade you want to show see what grade you need on the final.</p>
                 <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
-                    <label style="flex:1 1 200px;font-size:12px;color:var(--ochre-text-1);">Final exam weight (% of grade)
-                        <input id="ochre-ga-calc-weight" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="20" style="display:block;width:100%;margin-top:4px;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--ochre-borders);background:var(--ochre-background-1);color:var(--ochre-text-0);font-size:15px;">
+                    <label style="flex:1 1 200px;font-size:12px;color:var(--orca-text-1);">Final exam weight (% of grade)
+                        <input id="orca-ga-calc-weight" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="20" style="display:block;width:100%;margin-top:4px;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--orca-borders);background:var(--orca-background-1);color:var(--orca-text-0);font-size:15px;">
                     </label>
-                    <label style="flex:1 1 200px;font-size:12px;color:var(--ochre-text-1);">Target overall grade (%)
-                        <input id="ochre-ga-calc-target" type="number" min="0" step="0.1" inputmode="decimal" placeholder="90" style="display:block;width:100%;margin-top:4px;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--ochre-borders);background:var(--ochre-background-1);color:var(--ochre-text-0);font-size:15px;">
+                    <label style="flex:1 1 200px;font-size:12px;color:var(--orca-text-1);">Target overall grade (%)
+                        <input id="orca-ga-calc-target" type="number" min="0" step="0.1" inputmode="decimal" placeholder="90" style="display:block;width:100%;margin-top:4px;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--orca-borders);background:var(--orca-background-1);color:var(--orca-text-0);font-size:15px;">
                     </label>
                 </div>
-                <label for="ochre-ga-calc-show" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ochre-text-0);cursor:pointer;user-select:none;margin-bottom:14px;"><input type="checkbox" id="ochre-ga-calc-show"> Show grade goal on the overview</label>
-                <div id="ochre-ga-calc-result" style="padding:12px 16px;border-radius:8px;background:var(--ochre-background-1);border:1px solid color-mix(in srgb, var(--ochre-borders) 75%, transparent);font-size:14px;"></div>
+                <label for="orca-ga-calc-show" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--orca-text-0);cursor:pointer;user-select:none;margin-bottom:14px;"><input type="checkbox" id="orca-ga-calc-show"> Show grade goal on the overview</label>
+                <div id="orca-ga-calc-result" style="padding:12px 16px;border-radius:8px;background:var(--orca-background-1);border:1px solid color-mix(in srgb, var(--orca-borders) 75%, transparent);font-size:14px;"></div>
             </div>
         </div>
-        <div id="ochre-ga-tab-heatmap" style="display:none;position:relative;">
+        <div id="orca-ga-tab-heatmap" style="display:none;position:relative;">
             <div style="overflow-x:auto;max-width:100%;padding:2px 2px 6px;">
-                <div id="ochre-ga-heatmap-grid" style="display:inline-flex;gap:4px;"></div>
+                <div id="orca-ga-heatmap-grid" style="display:inline-flex;gap:4px;"></div>
             </div>
-            <div id="ochre-ga-heatmap-note" style="margin:0;color:var(--ochre-text-1);font-size:12px;"></div>
-            <div style="display:flex;align-items:center;gap:4px;margin-top:8px;font-size:11px;color:var(--ochre-text-1);">
+            <div id="orca-ga-heatmap-note" style="margin:0;color:var(--orca-text-1);font-size:12px;"></div>
+            <div style="display:flex;align-items:center;gap:4px;margin-top:8px;font-size:11px;color:var(--orca-text-1);">
                 <span>0%</span>
                 <span style="width:11px;height:11px;border-radius:3px;display:inline-block;background:${GA_ZONE_COLORS[0]};"></span>
                 <span style="width:11px;height:11px;border-radius:3px;display:inline-block;background:${GA_ZONE_COLORS[5]};"></span>
@@ -7514,16 +7514,16 @@ function ensureGradeAnalyticsPanel() {
                 <span style="width:11px;height:11px;border-radius:3px;display:inline-block;background:${GA_ZONE_COLORS[15]};"></span>
                 <span style="width:11px;height:11px;border-radius:3px;display:inline-block;background:${GA_ZONE_COLORS[19]};"></span>
                 <span>100%</span>
-                <span style="margin-left:12px;display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;display:inline-block;background:color-mix(in srgb, var(--ochre-text-1) 20%, transparent);"></span>No grade/assignment</span>
+                <span style="margin-left:12px;display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;display:inline-block;background:color-mix(in srgb, var(--orca-text-1) 20%, transparent);"></span>No grade/assignment</span>
             </div>
-            <style>#ochre-grade-analytics .ochre-ga-hcell:hover{outline:1px solid var(--ochre-text-0);outline-offset:1px;}</style>
-            <div id="ochre-ga-heatmap-tip" style="position:absolute;display:none;pointer-events:none;z-index:100;background:var(--ochre-background-1);color:var(--ochre-text-0);border:1px solid var(--ochre-borders);border-radius:6px;padding:6px 10px;font-size:12px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,0.25);"></div>
+            <style>#orca-grade-analytics .orca-ga-hcell:hover{outline:1px solid var(--orca-text-0);outline-offset:1px;}</style>
+            <div id="orca-ga-heatmap-tip" style="position:absolute;display:none;pointer-events:none;z-index:100;background:var(--orca-background-1);color:var(--orca-text-0);border:1px solid var(--orca-borders);border-radius:6px;padding:6px 10px;font-size:12px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,0.25);"></div>
         </div>
         </div>
     `;
-    const toggleBtn = panel.querySelector("#ochre-ga-toggle");
-    const imagineBtn = panel.querySelector("#ochre-ga-imagine");
-    const fitYCheckbox = panel.querySelector("#ochre-ga-fity");
+    const toggleBtn = panel.querySelector("#orca-ga-toggle");
+    const imagineBtn = panel.querySelector("#orca-ga-imagine");
+    const fitYCheckbox = panel.querySelector("#orca-ga-fity");
     const applyOpenState = () => applyGradeAnalyticsOpenState(panel);
     toggleBtn.addEventListener("click", () => {
         gaOpen = !gaOpen;
@@ -7547,7 +7547,7 @@ function ensureGradeAnalyticsPanel() {
         gaFitY = fitYCheckbox.checked;
         setGradeAnalyticsFitY(gaFitY);
         if (gaData) {
-            gaDrawLine(panel.querySelector("#ochre-ga-line"), panel.querySelector("#ochre-ga-line-tip"));
+            gaDrawLine(panel.querySelector("#orca-ga-line"), panel.querySelector("#orca-ga-line-tip"));
         }
     });
     // Tab switching between the charts overview and the final calculator.
@@ -7556,9 +7556,9 @@ function ensureGradeAnalyticsPanel() {
     });
     // Final-grade calculator inputs persist per course; every change re-saves
     // and recomputes the result against the live current grade.
-    const calcWeight = panel.querySelector("#ochre-ga-calc-weight");
-    const calcTarget = panel.querySelector("#ochre-ga-calc-target");
-    const calcShow = panel.querySelector("#ochre-ga-calc-show");
+    const calcWeight = panel.querySelector("#orca-ga-calc-weight");
+    const calcTarget = panel.querySelector("#orca-ga-calc-target");
+    const calcShow = panel.querySelector("#orca-ga-calc-show");
     const onCalcInput = () => {
         gaCalc = gaCalc || { weight: null, target: null, show: false };
         const w = parseFloat(calcWeight.value);
@@ -7587,7 +7587,7 @@ async function loadGradeAnalytics() {
     const courseId = getCurrentCourseId();
     if (courseId == null) return;
     gaLoading = true;
-    const status = document.getElementById("ochre-ga-status");
+    const status = document.getElementById("orca-ga-status");
     if (status) status.textContent = "Reading grade data…";
     try {
         // Parse the grades table the page already rendered instead of hitting
@@ -7603,7 +7603,7 @@ async function loadGradeAnalytics() {
         renderGradeAnalytics();
     } catch (err) {
         logError(err);
-        const s = document.getElementById("ochre-ga-status");
+        const s = document.getElementById("orca-ga-status");
         if (s) s.textContent = "Grade Analytics failed to load: " + (err && err.message ? err.message : err);
     } finally {
         gaLoading = false;
@@ -7744,20 +7744,20 @@ function computeGradeAnalyticsFromPage(table) {
 // when the final calculator's "show" checkbox is on; it recomputes against
 // the live current grade so it stays accurate as new grades come in.
 function renderGaStats() {
-    const panel = document.getElementById("ochre-grade-analytics");
+    const panel = document.getElementById("orca-grade-analytics");
     if (!panel || !gaData) return;
-    const stats = panel.querySelector("#ochre-ga-stats");
+    const stats = panel.querySelector("#orca-ga-stats");
     if (!stats) return;
     stats.style.display = "flex";
     const stat = (cap, val, color) =>
-        `<div style="padding:8px 14px;border-radius:8px;background:var(--ochre-background-1);"><div style="font-size:18px;font-weight:700;color:${color || "var(--ochre-text-0)"};">${val}</div><div style="font-size:11px;text-transform:uppercase;color:var(--ochre-text-1);">${cap}</div></div>`;
+        `<div style="padding:8px 14px;border-radius:8px;background:var(--orca-background-1);"><div style="font-size:18px;font-weight:700;color:${color || "var(--orca-text-0)"};">${val}</div><div style="font-size:11px;text-transform:uppercase;color:var(--orca-text-1);">${cap}</div></div>`;
     // Trend card: arrow + colored delta of the overall grade over the last 5
     // graded assignments (green climbing, red falling, grey steady).
-    let trendVal = "-", trendColor = "var(--ochre-text-0)";
+    let trendVal = "-", trendColor = "var(--orca-text-0)";
     if (gaData.trend != null) {
         if (gaData.trend > 0.05) { trendVal = "\u25B2 +" + gaData.trend.toFixed(1) + "%"; trendColor = "#16a34a"; }
         else if (gaData.trend < -0.05) { trendVal = "\u25BC " + gaData.trend.toFixed(1) + "%"; trendColor = "#dc2626"; }
-        else { trendVal = "\u25BA " + gaData.trend.toFixed(1) + "%"; trendColor = "var(--ochre-text-1)"; }
+        else { trendVal = "\u25BA " + gaData.trend.toFixed(1) + "%"; trendColor = "var(--orca-text-1)"; }
     }
     // Grade goal card from the Final Calculator tab: the score needed on the
     // final to hit the stored target grade.
@@ -7780,20 +7780,20 @@ function renderGaStats() {
 }
 
 function renderGradeAnalytics() {
-    const panel = document.getElementById("ochre-grade-analytics");
+    const panel = document.getElementById("orca-grade-analytics");
     if (!panel || !gaData) return;
-    const status = panel.querySelector("#ochre-ga-status");
+    const status = panel.querySelector("#orca-ga-status");
     if (status) status.style.display = "none";
 
     renderGaStats();
 
-    const charts = panel.querySelector("#ochre-ga-charts");
+    const charts = panel.querySelector("#orca-ga-charts");
     charts.style.display = "flex";
-    const fitYBox = panel.querySelector("#ochre-ga-fity");
+    const fitYBox = panel.querySelector("#orca-ga-fity");
     if (fitYBox) fitYBox.checked = gaFitY;
 
-    gaDrawPie(panel.querySelector("#ochre-ga-pie"), panel.querySelector("#ochre-ga-pie-tip"));
-    gaDrawLine(panel.querySelector("#ochre-ga-line"), panel.querySelector("#ochre-ga-line-tip"));
+    gaDrawPie(panel.querySelector("#orca-ga-pie"), panel.querySelector("#orca-ga-pie-tip"));
+    gaDrawLine(panel.querySelector("#orca-ga-line"), panel.querySelector("#orca-ga-line-tip"));
     renderGaHeatmap();
     renderGaCalculator();
 }
@@ -7803,20 +7803,20 @@ function renderGradeAnalytics() {
 // Inline style for one panel tab button; the active tab gets the accent
 // underline, matching how the rest of the panel is styled inline.
 function gaTabStyle(active) {
-    return `background:transparent;border:none;padding:6px 14px;font-size:14px;font-weight:600;cursor:pointer;color:${active ? "var(--ochre-text-0)" : "var(--ochre-text-1)"};border-bottom:2px solid ${active ? "#2563eb" : "transparent"};`;
+    return `background:transparent;border:none;padding:6px 14px;font-size:14px;font-weight:600;cursor:pointer;color:${active ? "var(--orca-text-0)" : "var(--orca-text-1)"};border-bottom:2px solid ${active ? "#2563eb" : "transparent"};`;
 }
 
 function gaSetTab(tab) {
     gaTab = tab;
-    const panel = document.getElementById("ochre-grade-analytics");
+    const panel = document.getElementById("orca-grade-analytics");
     if (!panel) return;
     for (const name of ["overview", "calc", "heatmap"]) {
-        const el = panel.querySelector(`#ochre-ga-tab-${name}`);
+        const el = panel.querySelector(`#orca-ga-tab-${name}`);
         if (el) el.style.display = name === tab ? "" : "none";
     }
     panel.querySelectorAll("[data-ga-tab]").forEach(btn => {
         const active = btn.dataset.gaTab === tab;
-        btn.style.color = active ? "var(--ochre-text-0)" : "var(--ochre-text-1)";
+        btn.style.color = active ? "var(--orca-text-0)" : "var(--orca-text-1)";
         btn.style.borderBottomColor = active ? "#2563eb" : "transparent";
     });
     if (tab === "overview") {
@@ -7833,7 +7833,7 @@ function gaSetTab(tab) {
 // Severity color for an arbitrary score percentage — the same palette the
 // doughnut / zone charts use, so a 70 renders yellow, an 85 green, etc.
 function gaSeverityColor(pct) {
-    if (pct == null || !isFinite(pct)) return "var(--ochre-text-0)";
+    if (pct == null || !isFinite(pct)) return "var(--orca-text-0)";
     const b = GA_BUCKETS.find(b => pct >= b.min && pct < b.max);
     return (b || GA_BUCKETS[GA_BUCKETS.length - 1]).color;
 }
@@ -7849,7 +7849,7 @@ const GA_NEEDED_COLORS = [
 ];
 
 function gaNeededColor(needed) {
-    if (needed == null || !isFinite(needed)) return "var(--ochre-text-0)";
+    if (needed == null || !isFinite(needed)) return "var(--orca-text-0)";
     const b = GA_NEEDED_COLORS.find(b => needed >= b.min);
     return (b || GA_NEEDED_COLORS[GA_NEEDED_COLORS.length - 1]).color;
 }
@@ -7857,9 +7857,9 @@ function gaNeededColor(needed) {
 // Pushes the stored calculator settings into the tab's inputs without
 // clobbering a field the user is actively typing in.
 function applyGaCalcState(panel) {
-    const w = panel.querySelector("#ochre-ga-calc-weight");
-    const t = panel.querySelector("#ochre-ga-calc-target");
-    const s = panel.querySelector("#ochre-ga-calc-show");
+    const w = panel.querySelector("#orca-ga-calc-weight");
+    const t = panel.querySelector("#orca-ga-calc-target");
+    const s = panel.querySelector("#orca-ga-calc-show");
     if (!w || !t || !s) return;
     if (document.activeElement !== w) w.value = gaCalc && gaCalc.weight != null ? gaCalc.weight : "";
     if (document.activeElement !== t) t.value = gaCalc && gaCalc.target != null ? gaCalc.target : "";
@@ -7871,19 +7871,19 @@ function applyGaCalcState(panel) {
 // w is the final's weight. Always recomputed from the live current grade so
 // stored goals stay accurate after reloads and as new grades post.
 function renderGaCalculator() {
-    const panel = document.getElementById("ochre-grade-analytics");
+    const panel = document.getElementById("orca-grade-analytics");
     if (!panel) return;
-    const box = panel.querySelector("#ochre-ga-calc-result");
+    const box = panel.querySelector("#orca-ga-calc-result");
     if (!box) return;
     if (!gaCalc || gaCalc.weight == null || !(gaCalc.weight > 0) || gaCalc.target == null) {
-        box.innerHTML = `<span style="color:var(--ochre-text-1);">Enter your final's weight and your target grade to see what you need on the final.</span>`;
+        box.innerHTML = `<span style="color:var(--orca-text-1);">Enter your final's weight and your target grade to see what you need on the final.</span>`;
         return;
     }
     const w = gaCalc.weight / 100;
     const target = gaCalc.target;
     const current = gaData ? gaData.current : null;
     if (current == null) {
-        box.innerHTML = `<span style="color:var(--ochre-text-1);">Waiting for grade data…</span>`;
+        box.innerHTML = `<span style="color:var(--orca-text-1);">Waiting for grade data…</span>`;
         return;
     }
     const needed = (target - current * (1 - w)) / w;
@@ -7900,7 +7900,7 @@ function renderGaCalculator() {
         head = `<span style="font-size:20px;font-weight:700;color:${gaNeededColor(needed)};">You need ≥ ${needed.toFixed(1)}% on the final</span>`;
         sub = `You got this!`;
     }
-    box.innerHTML = head + `<div style="margin-top:6px;color:var(--ochre-text-1);font-size:13px;">${sub}</div>`;
+    box.innerHTML = head + `<div style="margin-top:6px;color:var(--orca-text-1);font-size:13px;">${sub}</div>`;
 }
 
 // --- Heatmap tab ----------------------------------------------------------
@@ -8007,8 +8007,8 @@ function gaBuildHeatmapData() {
 function gaHeatmapShowTip(tip, e, cell, avg) {
     const d = cell.date;
     const rows = cell.items.map(p =>
-        `<div style="margin-top:2px;color:var(--ochre-text-1);">${gaEscHtml(p.title)} — <b style="color:${gaHeatmapColor(p.pct)};">${p.pct.toFixed(1)}%</b></div>`).join("");
-    tip.innerHTML = `<b>${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}</b> — avg <b style="color:${gaHeatmapColor(avg)};">${avg.toFixed(1)}%</b><div style="margin-top:4px;font-size:11px;color:var(--ochre-text-1);">${cell.items.length} assignment${cell.items.length === 1 ? "" : "s"}:</div>${rows}`;
+        `<div style="margin-top:2px;color:var(--orca-text-1);">${gaEscHtml(p.title)} — <b style="color:${gaHeatmapColor(p.pct)};">${p.pct.toFixed(1)}%</b></div>`).join("");
+    tip.innerHTML = `<b>${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}</b> — avg <b style="color:${gaHeatmapColor(avg)};">${avg.toFixed(1)}%</b><div style="margin-top:4px;font-size:11px;color:var(--orca-text-1);">${cell.items.length} assignment${cell.items.length === 1 ? "" : "s"}:</div>${rows}`;
     tip.style.display = "block";
     const host = tip.offsetParent || tip.parentNode;
     const hostRect = host.getBoundingClientRect();
@@ -8030,11 +8030,11 @@ function gaHeatmapShowTip(tip, e, cell, avg) {
 // canvas) so it needs no redraw on resize; a token guards against rebuilds
 // when renderGradeAnalytics re-fires for the same data.
 function renderGaHeatmap() {
-    const panel = document.getElementById("ochre-grade-analytics");
+    const panel = document.getElementById("orca-grade-analytics");
     if (!panel) return;
-    const grid = panel.querySelector("#ochre-ga-heatmap-grid");
-    const note = panel.querySelector("#ochre-ga-heatmap-note");
-    const tip = panel.querySelector("#ochre-ga-heatmap-tip");
+    const grid = panel.querySelector("#orca-ga-heatmap-grid");
+    const note = panel.querySelector("#orca-ga-heatmap-note");
+    const tip = panel.querySelector("#orca-ga-heatmap-tip");
     if (!grid || !note || !tip) return;
     const data = gaBuildHeatmapData();
     const token = data ? `${gaCourseId}:${data.min.getTime()}:${data.max.getTime()}:${gaData.points.length}` : "none";
@@ -8059,7 +8059,7 @@ function renderGaHeatmap() {
     labels.style.cssText = `display:flex;flex-direction:column;gap:${GA_HM_GAP}px;padding-top:${GA_HM_MONTH_H}px;`;
     ["", "Mon", "", "Wed", "", "Fri", ""].forEach(t => {
         const l = document.createElement("div");
-        l.style.cssText = `height:${GA_HM_CELL}px;font-size:9px;line-height:${GA_HM_CELL}px;color:var(--ochre-text-1);white-space:nowrap;`;
+        l.style.cssText = `height:${GA_HM_CELL}px;font-size:9px;line-height:${GA_HM_CELL}px;color:var(--orca-text-1);white-space:nowrap;`;
         l.textContent = t;
         labels.appendChild(l);
     });
@@ -8084,14 +8084,14 @@ function renderGaHeatmap() {
             prevMonth = thursday.getMonth();
             const lab = document.createElement("div");
             lab.textContent = months[prevMonth];
-            lab.style.cssText = `position:absolute;top:0;left:${wk * (GA_HM_CELL + GA_HM_GAP)}px;font-size:10px;line-height:1;color:var(--ochre-text-1);white-space:nowrap;`;
+            lab.style.cssText = `position:absolute;top:0;left:${wk * (GA_HM_CELL + GA_HM_GAP)}px;font-size:10px;line-height:1;color:var(--orca-text-1);white-space:nowrap;`;
             wrap.appendChild(lab);
         }
         for (let d = 0; d < 7; d++) {
             const cell = data.byDay.get(cursor.getTime());
             const div = document.createElement("div");
-            div.className = "ochre-ga-hcell";
-            div.style.cssText = `width:${GA_HM_CELL}px;height:${GA_HM_CELL}px;border-radius:3px;background:${cell ? gaHeatmapColor(cell.sum / cell.items.length) : "color-mix(in srgb, var(--ochre-text-1) 20%, transparent)"};`;
+            div.className = "orca-ga-hcell";
+            div.style.cssText = `width:${GA_HM_CELL}px;height:${GA_HM_CELL}px;border-radius:3px;background:${cell ? gaHeatmapColor(cell.sum / cell.items.length) : "color-mix(in srgb, var(--orca-text-1) 20%, transparent)"};`;
             if (cell) {
                 const avg = cell.sum / cell.items.length;
                 div.addEventListener("mousemove", (e) => gaHeatmapShowTip(tip, e, cell, avg));
@@ -8389,7 +8389,7 @@ function gaDrawLine(canvas, tooltip) {
 
 // Redraw open charts when the window is resized.
 window.addEventListener("resize", () => {
-    const panel = document.getElementById("ochre-grade-analytics");
+    const panel = document.getElementById("orca-grade-analytics");
     if (panel && gaOpen && gaData) renderGradeAnalytics();
 });
 
@@ -8552,11 +8552,11 @@ function gaApplyImagineTotal() {
     // Italic note under the "Total" label restating the real grade.
     const th = gaFindTotalTitleCell();
     if (th) {
-        let note = th.querySelector(".ochre-ga-if-note");
+        let note = th.querySelector(".orca-ga-if-note");
         if (!note) {
             note = document.createElement("div");
-            note.className = "ochre-ga-if-note";
-            note.style.cssText = "font-size:11px;font-style:italic;color:var(--ochre-text-1);margin-top:2px;";
+            note.className = "orca-ga-if-note";
+            note.style.cssText = "font-size:11px;font-style:italic;color:var(--orca-text-1);margin-top:2px;";
             th.appendChild(note);
         }
         if (note.dataset.gaIfHtml !== "Imagine-If scenario; not your actual grade.") {
@@ -8573,14 +8573,14 @@ function gaRestoreImagineTotal() {
         delete span._gaImagineHtml;
         if (gaOriginalFinalHtml != null) span.innerHTML = gaOriginalFinalHtml;
     }
-    document.querySelectorAll("#grades_summary tr.final_grade .ochre-ga-if-note").forEach(n => n.remove());
+    document.querySelectorAll("#grades_summary tr.final_grade .orca-ga-if-note").forEach(n => n.remove());
 }
 
 // Compact inline styles for controls injected into the grades table.
 // Canvas's table CSS gives selects/inputs an 11px bottom margin and a tall
 // native select box, which made our rows taller than the page's own —
 // margin:0 and a fixed select height keep the rows even.
-const GA_IF_TD_INPUT = "box-sizing:border-box;padding:3px 6px;border-radius:5px;border:1px solid var(--ochre-borders);background:var(--ochre-background-1);color:var(--ochre-text-0);font-size:12px;margin:0;";
+const GA_IF_TD_INPUT = "box-sizing:border-box;padding:3px 6px;border-radius:5px;border:1px solid var(--orca-borders);background:var(--orca-background-1);color:var(--orca-text-0);font-size:12px;margin:0;";
 const GA_IF_TD_NUM = GA_IF_TD_INPUT + "width:58px;";
 const GA_IF_TD_SEL = GA_IF_TD_INPUT + "max-width:170px;height:26px;padding:2px 4px;";
 const GA_IF_TD_BTN = GA_IF_TD_INPUT + "cursor:pointer;white-space:nowrap;";
@@ -8627,23 +8627,23 @@ function gaIfDelButton(attr, title) {
 // context line under the title, and an icon-only remove button goes in the
 // row's last cell.
 function gaIfBuildAssignmentControls(tr, a) {
-    if (tr.querySelector(".ochre-ga-if-edit")) return;
+    if (tr.querySelector(".orca-ga-if-edit")) return;
     const scoreTd = tr.querySelector("td.assignment_score");
     if (!scoreTd) return;
     const tooltip = scoreTd.querySelector("span.tooltip");
     if (tooltip) { tooltip.style.display = "none"; tooltip.dataset.gaIfHidden = "1"; }
     const edit = document.createElement("span");
-    edit.className = "ochre-ga-if-edit";
+    edit.className = "orca-ga-if-edit";
     edit.style.cssText = "display:inline-flex;align-items:center;gap:4px;";
     edit.innerHTML = `<input data-ga-if-score type="number" step="any" placeholder="—" value="${a.score == null ? "" : a.score}" title="Imagine-If score (numerator); blank = not counted" style="${GA_IF_TD_NUM}">`
-        + ` <span style="color:var(--ochre-text-1);">/</span> `
+        + ` <span style="color:var(--orca-text-1);">/</span> `
         + `<input data-ga-if-pts type="number" step="any" min="0" placeholder="—" value="${a.points == null ? "" : a.points}" title="Imagine-If points possible (denominator)" style="${GA_IF_TD_NUM}">`;
     (scoreTd.querySelector(".score_holder") || scoreTd).appendChild(edit);
     const th = tr.querySelector("th.title");
     const ctx = th?.querySelector("div.context");
     if (ctx) { ctx.style.display = "none"; ctx.dataset.gaIfHidden = "1"; }
     const ctl = document.createElement("div");
-    ctl.className = "ochre-ga-if-ctl";
+    ctl.className = "orca-ga-if-ctl";
     ctl.style.cssText = "display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;";
     ctl.innerHTML = gaIfSelectHtml(a.gid);
     (th || tr).appendChild(ctl);
@@ -8659,14 +8659,14 @@ function gaIfBuildAssignmentControls(tr, a) {
 // value — see gaIfUpdateGroupPcts) and an icon-only remove button in the
 // row's last cell.
 function gaIfBuildGroupControls(tr, g) {
-    if (tr.querySelector(".ochre-ga-if-edit")) return;
+    if (tr.querySelector(".orca-ga-if-edit")) return;
     const scoreTd = tr.querySelector("td.assignment_score");
     if (!scoreTd) return;
     const edit = document.createElement("span");
-    edit.className = "ochre-ga-if-edit";
+    edit.className = "orca-ga-if-edit";
     edit.style.cssText = "display:inline-flex;align-items:center;gap:4px;margin-left:8px;";
     edit.innerHTML = `<input data-ga-if-gweight type="number" min="0" max="100" step="0.1" value="${g.weight}" title="Imagine-If group weight (% of grade)" style="${GA_IF_TD_NUM}">`
-        + ` <span style="color:var(--ochre-text-1);">%</span>`;
+        + ` <span style="color:var(--orca-text-1);">%</span>`;
     (scoreTd.querySelector(".score_holder") || scoreTd).appendChild(edit);
     // Icon-only remove button in the row's last cell.
     const lastTd = tr.cells[tr.cells.length - 1];
@@ -8681,7 +8681,7 @@ function gaIfBuildGroupControls(tr, g) {
 // our rows.
 function gaIfMakeAssignmentRow(a) {
     const tr = document.createElement("tr");
-    tr.className = "ochre-ga-if-newrow";
+    tr.className = "orca-ga-if-newrow";
     tr.innerHTML = `
         <th class="title" scope="row"><input data-ga-if-title type="text" value="${gaEscHtml(a.title)}" title="Assignment name" style="${GA_IF_TD_INPUT}width:100%;max-width:260px;"></th>
         <td class="due"></td><td class="submitted"></td><td class="status"></td>
@@ -8695,8 +8695,8 @@ function gaIfMakeAssignmentRow(a) {
     // !important beats the stylesheet's), to win the edge conflicts and
     // paint the white line the custom background shows on real rows.
     for (const cell of tr.cells) {
-        cell.style.setProperty("border-top", "1px solid var(--ochre-text-1,#e2e2e2)", "important");
-        cell.style.setProperty("border-bottom", "1px solid var(--ochre-text-1,#e2e2e2)", "important");
+        cell.style.setProperty("border-top", "1px solid var(--orca-text-1,#e2e2e2)", "important");
+        cell.style.setProperty("border-bottom", "1px solid var(--orca-text-1,#e2e2e2)", "important");
     }
     return tr;
 }
@@ -8704,7 +8704,7 @@ function gaIfMakeAssignmentRow(a) {
 // A brand-new group-total row (user-added), with an editable name.
 function gaIfMakeGroupRow(g) {
     const tr = document.createElement("tr");
-    tr.className = "ochre-ga-if-newrow";
+    tr.className = "orca-ga-if-newrow";
     tr.innerHTML = `
         <th class="title" scope="row"><input data-ga-if-gname type="text" value="${gaEscHtml(g.name)}" title="Group name" style="${GA_IF_TD_INPUT}width:100%;max-width:260px;"></th>
         <td class="due"></td><td class="submitted"></td><td class="status"></td>
@@ -8712,8 +8712,8 @@ function gaIfMakeGroupRow(g) {
         <td class="asset_processors_cell"></td><td class="details"></td><td></td>`;
     // Same cell-level separators as gaIfMakeAssignmentRow.
     for (const cell of tr.cells) {
-        cell.style.setProperty("border-top", "1px solid var(--ochre-text-1,#e2e2e2)", "important");
-        cell.style.setProperty("border-bottom", "1px solid var(--ochre-text-1,#e2e2e2)", "important");
+        cell.style.setProperty("border-top", "1px solid var(--orca-text-1,#e2e2e2)", "important");
+        cell.style.setProperty("border-bottom", "1px solid var(--orca-text-1,#e2e2e2)", "important");
     }
     return tr;
 }
@@ -8721,7 +8721,7 @@ function gaIfMakeGroupRow(g) {
 // New assignments go right below the table header, above the first real
 // assignment (stacking in add order).
 function gaIfInsertAssignmentRow(table, tr) {
-    const lastNew = [...table.querySelectorAll("tr.ochre-ga-if-newrow[data-ga-if-key]")].pop();
+    const lastNew = [...table.querySelectorAll("tr.orca-ga-if-newrow[data-ga-if-key]")].pop();
     if (lastNew) { lastNew.after(tr); return; }
     const firstReal = [...table.querySelectorAll("tr.student_assignment")]
         .find(r => !r.classList.contains("group_total") && !r.classList.contains("final_grade"));
@@ -8730,7 +8730,7 @@ function gaIfInsertAssignmentRow(table, tr) {
 }
 
 function gaIfInsertGroupRow(table, tr) {
-    const lastNew = [...table.querySelectorAll("tr.ochre-ga-if-newrow[data-ga-if-gid]")].pop();
+    const lastNew = [...table.querySelectorAll("tr.orca-ga-if-newrow[data-ga-if-gid]")].pop();
     const lastReal = [...table.querySelectorAll("tr.group_total")].pop();
     (lastNew || lastReal || table.querySelector("tr.final_grade") || table.lastElementChild).after(tr);
 }
@@ -8739,13 +8739,13 @@ function gaIfInsertGroupRow(table, tr) {
 // table — right below the header, above the first (or first user-added)
 // assignment — so new assignments are created right where they appear.
 function gaIfEnsureAddAssignmentRow(table) {
-    if (table.querySelector("#ochre-ga-if-add-asg")) return;
+    if (table.querySelector("#orca-ga-if-add-asg")) return;
     const tr = document.createElement("tr");
-    tr.className = "ochre-ga-if-addrow";
+    tr.className = "orca-ga-if-addrow";
     tr.innerHTML = `<td colspan="8" style="border:none!important;padding:6px 8px;">`
-        + `<button type="button" id="ochre-ga-if-add-asg" style="${GA_IF_TD_BTN}padding:4px 10px;">+ Add assignment</button>`
+        + `<button type="button" id="orca-ga-if-add-asg" style="${GA_IF_TD_BTN}padding:4px 10px;">+ Add assignment</button>`
         + `</td>`;
-    const firstNew = table.querySelector("tr.ochre-ga-if-newrow[data-ga-if-key]");
+    const firstNew = table.querySelector("tr.orca-ga-if-newrow[data-ga-if-key]");
     const firstReal = [...table.querySelectorAll("tr.student_assignment")]
         .find(r => !r.classList.contains("group_total") && !r.classList.contains("final_grade"));
     const anchor = firstNew || firstReal;
@@ -8756,11 +8756,11 @@ function gaIfEnsureAddAssignmentRow(table) {
 // The "+ Add group" button sits on its own row right above the table's
 // Total row, where the group totals live.
 function gaIfEnsureAddGroupRow(table) {
-    if (table.querySelector("#ochre-ga-if-add-group")) return;
+    if (table.querySelector("#orca-ga-if-add-group")) return;
     const tr = document.createElement("tr");
-    tr.className = "ochre-ga-if-addrow";
+    tr.className = "orca-ga-if-addrow";
     tr.innerHTML = `<td colspan="8" style="border:none!important;padding:10px 8px;">`
-        + `<button type="button" id="ochre-ga-if-add-group" style="${GA_IF_TD_BTN}padding:6px 12px;">+ Add group</button>`
+        + `<button type="button" id="orca-ga-if-add-group" style="${GA_IF_TD_BTN}padding:6px 12px;">+ Add group</button>`
         + `</td>`;
     (table.querySelector("tr.final_grade") || table.lastElementChild).before(tr);
 }
@@ -8797,7 +8797,7 @@ function gaClearImagineUI(table) {
     if (!table) return;
     delete table.dataset.gaIfUi;
     delete table.dataset.gaIfBuilt;
-    table.querySelectorAll(".ochre-ga-if-edit, .ochre-ga-if-ctl, tr.ochre-ga-if-newrow, tr.ochre-ga-if-addrow").forEach(el => el.remove());
+    table.querySelectorAll(".orca-ga-if-edit, .orca-ga-if-ctl, tr.orca-ga-if-newrow, tr.orca-ga-if-addrow").forEach(el => el.remove());
     table.querySelectorAll("[data-ga-if-hidden]").forEach(el => { el.style.display = ""; delete el.dataset.gaIfHidden; });
     table.querySelectorAll(".grade[data-ga-if-orig]").forEach(el => { el.textContent = el.dataset.gaIfOrig; delete el.dataset.gaIfOrig; });
     table.querySelectorAll("tr[data-ga-if-deleted]").forEach(tr => { tr.style.display = ""; delete tr.dataset.gaIfDeleted; });
@@ -8859,7 +8859,7 @@ function gaIfBindTable(table) {
             else { tr.style.display = "none"; tr.dataset.gaIfDeleted = "1"; }
             gaIfRefreshSelects(table);
             gaApplyImagineTotal();
-        } else if (btn.id === "ochre-ga-if-add-asg") {
+        } else if (btn.id === "orca-ga-if-add-asg") {
             const groups = gaScenario.groups.filter(g => !g.deleted);
             const a = { key: "new-asg-" + (++gaIfCounter), title: "New assignment", score: null, points: 100, gid: groups[0] ? String(groups[0].gid) : "", _new: true };
             gaScenario.assignments.push(a);
@@ -8870,7 +8870,7 @@ function gaIfBindTable(table) {
             tr.scrollIntoView({ block: "nearest" });
             tr.querySelector("[data-ga-if-title]")?.focus();
             gaApplyImagineTotal();
-        } else if (btn.id === "ochre-ga-if-add-group") {
+        } else if (btn.id === "orca-ga-if-add-group") {
             const g = { gid: "new-group-" + (++gaIfCounter), name: "New group", weight: 0, _new: true };
             gaScenario.groups.push(g);
             const tr = gaIfMakeGroupRow(g);
@@ -8994,8 +8994,8 @@ function makeActivatable(el, { label, role = "button", pressed } = {}) {
     if (!el) return el;
     if (label) el.setAttribute("aria-label", label);
     if (pressed !== undefined) el.setAttribute("aria-pressed", String(pressed));
-    if (el.dataset.ochreActivatable === "1") return el;
-    el.dataset.ochreActivatable = "1";
+    if (el.dataset.orcaActivatable === "1") return el;
+    el.dataset.orcaActivatable = "1";
     const tag = (el.tagName || "").toLowerCase();
     const native = tag === "button" || tag === "a" || tag === "input" || tag === "select" || tag === "textarea";
     if (!native) {
@@ -9325,7 +9325,7 @@ function withApiData(promise, onData, { feature = "Canvas data", container = nul
 }
 
 function apiErrorId(feature) {
-    return "ochre-api-error-" + String(feature).replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+    return "orca-api-error-" + String(feature).replace(/[^a-z0-9]+/gi, "-").toLowerCase();
 }
 
 function clearApiError(feature) {
@@ -9342,7 +9342,7 @@ function showApiError(error, { feature = "Canvas data", container = null } = {})
 
     const box = ensureInjected(apiErrorId(feature), parent, () => {
         const el = document.createElement("div");
-        el.className = "ochre-api-error";
+        el.className = "orca-api-error";
         el.setAttribute("role", "status");
         return el;
     });
@@ -9350,7 +9350,7 @@ function showApiError(error, { feature = "Canvas data", container = null } = {})
 
     box.textContent = "";
     const text = document.createElement("span");
-    text.className = "ochre-api-error-text";
+    text.className = "orca-api-error-text";
     text.textContent = `${detail} ${feature} couldn't load.`;
     box.appendChild(text);
 
@@ -9358,7 +9358,7 @@ function showApiError(error, { feature = "Canvas data", container = null } = {})
     if (!(error instanceof CanvasApiError && error.isAuth)) {
         const retry = document.createElement("button");
         retry.type = "button";
-        retry.className = "ochre-api-error-retry";
+        retry.className = "orca-api-error-retry";
         retry.textContent = "Retry";
         retry.addEventListener("click", () => {
             box.remove();
@@ -9460,11 +9460,11 @@ function formatCardDue(date) {
 }
 
 function logError(e) {
-    ochreStorage.get("errors").then(storage => {
+    orcaStorage.get("errors").then(storage => {
         if (storage.errors.length > 20) {
             storage["errors"] = [];
         }
-        ochreStorage.set({ "errors": storage["errors"].concat(e.stack) });
+        orcaStorage.set({ "errors": storage["errors"].concat(e.stack) });
 
         console.log(e.stack);
         console.log(storage["errors"].concat(e.stack));

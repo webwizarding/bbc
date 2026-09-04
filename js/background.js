@@ -2,7 +2,7 @@
 // Firefox uses background.scripts and has already loaded defaults.js by now.
 // importScripts exists only in the worker, so this covers both without
 // double-loading.
-if (typeof OCHRE_DEFAULTS === "undefined" && typeof importScripts === "function") {
+if (typeof ORCA_DEFAULTS === "undefined" && typeof importScripts === "function") {
     importScripts("/js/defaults.js");
 }
 
@@ -14,7 +14,7 @@ if (typeof OCHRE_DEFAULTS === "undefined" && typeof importScripts === "function"
 // there is no per-item limit. Duplicated from content.js rather than imported
 // because the service worker and the content script share no module system
 // until the Phase 2 build lands; the test asserts the two lists match.
-const OCHRE_LOCAL_KEYS = [
+const ORCA_LOCAL_KEYS = [
     "custom_cards", "custom_cards_2", "custom_cards_3",
     "assignments_done", "assignment_states", "custom_assignments",
     "custom_task_links", "reminders", "dark_mode_fix",
@@ -22,7 +22,7 @@ const OCHRE_LOCAL_KEYS = [
     "previous_colors", "previous_theme", "errors",
     "saved_themes", "liked_themes",
 ];
-const OCHRE_STORAGE_VERSION = 1;
+const ORCA_STORAGE_VERSION = 1;
 
 /**
  * Move bulk keys from sync to local, once.
@@ -36,15 +36,15 @@ const OCHRE_STORAGE_VERSION = 1;
  * writes to sync for these keys after the migration runs.
  */
 async function migrateStorage() {
-    const local = await chrome.storage.local.get(["ochre_storage_version"]);
-    if ((local.ochre_storage_version || 0) >= OCHRE_STORAGE_VERSION) return { migrated: [], skipped: true };
+    const local = await chrome.storage.local.get(["orca_storage_version"]);
+    if ((local.orca_storage_version || 0) >= ORCA_STORAGE_VERSION) return { migrated: [], skipped: true };
 
-    const sync = await chrome.storage.sync.get(OCHRE_LOCAL_KEYS);
-    const existingLocal = await chrome.storage.local.get(OCHRE_LOCAL_KEYS);
+    const sync = await chrome.storage.sync.get(ORCA_LOCAL_KEYS);
+    const existingLocal = await chrome.storage.local.get(ORCA_LOCAL_KEYS);
 
     const toMove = {};
     const staleInSync = [];
-    for (const key of OCHRE_LOCAL_KEYS) {
+    for (const key of ORCA_LOCAL_KEYS) {
         if (sync[key] === undefined) continue;
         if (existingLocal[key] !== undefined) {
             // Present in both. Local is authoritative, so this sync copy is a
@@ -72,7 +72,7 @@ async function migrateStorage() {
     const toRemove = moved.concat(staleInSync);
     if (toRemove.length) await chrome.storage.sync.remove(toRemove);
 
-    await chrome.storage.local.set({ ochre_storage_version: OCHRE_STORAGE_VERSION });
+    await chrome.storage.local.set({ orca_storage_version: ORCA_STORAGE_VERSION });
     console.log("[Ochre] storage migration complete:", moved);
     return { migrated: moved };
 }
@@ -90,10 +90,10 @@ async function migrateStorage() {
 // problem, a performance problem, and the thing store reviewers push back on.
 // ===========================================================================
 
-const OCHRE_DYNAMIC_SCRIPT_ID = "ochre-custom-domain";
+const ORCA_DYNAMIC_SCRIPT_ID = "orca-custom-domain";
 
 // Must stay in step with the static entry in manifest.json. A test asserts it.
-const OCHRE_CONTENT_FILES = {
+const ORCA_CONTENT_FILES = {
     js: ["css/darkmodecss.js", "js/backgrounds.js", "js/markdown.js",
          "js/defaults.js", "js/sanitize.js", "js/storage.js", "js/content.js"],
     css: ["css/content.css"],
@@ -140,19 +140,19 @@ async function syncDynamicContentScripts() {
         if (granted) patterns.push(pattern);
     }
 
-    const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [OCHRE_DYNAMIC_SCRIPT_ID] })
+    const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [ORCA_DYNAMIC_SCRIPT_ID] })
         .catch(() => []);
     if (!patterns.length) {
         if (existing.length) {
-            await chrome.scripting.unregisterContentScripts({ ids: [OCHRE_DYNAMIC_SCRIPT_ID] }).catch(() => {});
+            await chrome.scripting.unregisterContentScripts({ ids: [ORCA_DYNAMIC_SCRIPT_ID] }).catch(() => {});
         }
         return;
     }
     const spec = {
-        id: OCHRE_DYNAMIC_SCRIPT_ID,
+        id: ORCA_DYNAMIC_SCRIPT_ID,
         matches: patterns,
-        js: OCHRE_CONTENT_FILES.js,
-        css: OCHRE_CONTENT_FILES.css,
+        js: ORCA_CONTENT_FILES.js,
+        css: ORCA_CONTENT_FILES.css,
         runAt: "document_start",
         persistAcrossSessions: true,
     };
@@ -187,7 +187,7 @@ if (chrome.runtime.onStartup) chrome.runtime.onStartup.addListener(() => syncDyn
 // mode is untouched.
 // ===========================================================================
 
-const OCHRE_DARK_BASE_ID = "ochre-dark-base";
+const ORCA_DARK_BASE_ID = "orca-dark-base";
 
 async function syncDarkBaseStyle() {
     if (!chrome.scripting || !chrome.scripting.registerContentScripts) return;
@@ -195,12 +195,12 @@ async function syncDarkBaseStyle() {
     const wanted = dark_mode === true || device_dark === true;
 
     const existing = await chrome.scripting
-        .getRegisteredContentScripts({ ids: [OCHRE_DARK_BASE_ID] })
+        .getRegisteredContentScripts({ ids: [ORCA_DARK_BASE_ID] })
         .catch(() => []);
 
     if (!wanted) {
         if (existing.length) {
-            await chrome.scripting.unregisterContentScripts({ ids: [OCHRE_DARK_BASE_ID] }).catch(() => {});
+            await chrome.scripting.unregisterContentScripts({ ids: [ORCA_DARK_BASE_ID] }).catch(() => {});
         }
         return;
     }
@@ -220,7 +220,7 @@ async function syncDarkBaseStyle() {
     }
 
     const spec = {
-        id: OCHRE_DARK_BASE_ID,
+        id: ORCA_DARK_BASE_ID,
         matches,
         css: ["css/darkbase.css"],
         runAt: "document_start",
@@ -248,7 +248,7 @@ chrome.runtime.onInstalled.addListener(function () {
 
     // Defaults live in js/defaults.js, the single source of truth shared with
     // the popup and the content script.
-    let default_options = OCHRE_DEFAULTS;
+    let default_options = ORCA_DEFAULTS;
     const updateMsg = "Ochre for Canvas is installed.\nOpen the extension popup on your Canvas dashboard to get started.";
 
     chrome.storage.local.get(null, local => {
@@ -311,7 +311,7 @@ chrome.runtime.onInstalled.addListener(function () {
             // local; seeding them into sync would immediately recreate the
             // condition the migration exists to undo, and burn sync quota on
             // an empty object for every new install.
-            for (const key of OCHRE_LOCAL_KEYS) {
+            for (const key of ORCA_LOCAL_KEYS) {
                 if (key in newSyncOptions) {
                     newLocalOptions[key] = newSyncOptions[key];
                     delete newSyncOptions[key];

@@ -74,7 +74,7 @@ const apiurl = "none";
 // background.js and content.js. This used to be a second, drifted copy: it
 // backed the "reset storage" button, so resetting produced a different profile
 // from a fresh install.
-const defaultOptions = OCHRE_DEFAULTS;
+const defaultOptions = ORCA_DEFAULTS;
 sendFromPopup("getCards");
 
 // refresh the cards if new ones were just recieved
@@ -87,7 +87,7 @@ chrome.storage.onChanged.addListener((changes) => {
 });
 
 function displayErrors() {
-    ochreStorage.get("errors").then(storage => {
+    orcaStorage.get("errors").then(storage => {
         storage["errors"].forEach(e => {
             document.querySelector("#error_log_output").value += (e + "\n\n");
         })
@@ -97,18 +97,18 @@ function displayErrors() {
 function displayDarkModeFixUrls() {
     let output = document.getElementById("dark-mode-fix-urls");
     output.textContent = "";
-    ochreStorage.get("dark_mode_fix").then(sync => {
+    orcaStorage.get("dark_mode_fix").then(sync => {
         sync["dark_mode_fix"].forEach(url => {
             //let div = makeElement("div", "customization-button", output, url);
             let div = makeElement("div", output, { "className": "customization-button", "textContent": url });
             div.classList.add("fixed-url");
             let btn = makeElement("button", div, { "className": "dd", "textContent": "x" });
             btn.addEventListener("click", () => {
-                ochreStorage.get("dark_mode_fix").then(sync => {
+                orcaStorage.get("dark_mode_fix").then(sync => {
                     for (let i = 0; i < sync["dark_mode_fix"].length; i++) {
                         if (sync["dark_mode_fix"][i] === url) {
                             sync["dark_mode_fix"].splice(i);
-                            ochreStorage.set({ "dark_mode_fix": sync["dark_mode_fix"] }).then(() => div.remove());
+                            orcaStorage.set({ "dark_mode_fix": sync["dark_mode_fix"] }).then(() => div.remove());
                         }
                     }
                 });
@@ -125,7 +125,7 @@ function setupAssignmentsSlider(initial) {
     document.querySelector('#numAssignments').textContent = initial;
     el.addEventListener('input', function () {
         document.querySelector('#numAssignments').textContent = this.value;
-        ochreStorage.set({ "num_assignments": this.value });
+        orcaStorage.set({ "num_assignments": this.value });
     });
 }
 
@@ -135,7 +135,7 @@ function setupTodoSlider(initial) {
     document.querySelector('#numTodoItems').textContent = initial;
     document.querySelector('#numTodoItemsSlider').addEventListener('input', function () {
         document.querySelector('#numTodoItems').textContent = this.value;
-        ochreStorage.set({ "num_todo_items": this.value });
+        orcaStorage.set({ "num_todo_items": this.value });
     });
 }
 
@@ -146,7 +146,7 @@ function setupSidebarScaleSlider(initial) {
     document.querySelector("#sidebarScaleValue").textContent = initial;
     el.addEventListener("input", function () {
         document.querySelector("#sidebarScaleValue").textContent = this.value;
-        ochreStorage.set({ "sidebar_scale": parseInt(this.value) });
+        orcaStorage.set({ "sidebar_scale": parseInt(this.value) });
     });
 }
 
@@ -163,7 +163,7 @@ function setupRangeSlider(key, sliderId, valueId, resetId, defaultValue, max, un
     out.textContent = `${value}${unit}`;
     el.addEventListener("input", function () {
         out.textContent = `${this.value}${unit}`;
-        ochreStorage.set({ [key]: parseInt(this.value) });
+        orcaStorage.set({ [key]: parseInt(this.value) });
     });
     const reset = document.querySelector("#" + resetId);
     if (reset) {
@@ -171,7 +171,7 @@ function setupRangeSlider(key, sliderId, valueId, resetId, defaultValue, max, un
             const v = Math.max(0, Math.min(max, parseInt(defaultValue)));
             el.value = v;
             out.textContent = `${v}${unit}`;
-            ochreStorage.set({ [key]: v });
+            orcaStorage.set({ [key]: v });
         });
     }
 }
@@ -188,7 +188,7 @@ function setupProgressRingsSelect(initial) {
     if (!allowed.includes(value)) value = "rings";
     el.value = value;
     el.addEventListener("change", function () {
-        ochreStorage.set({ "todo_progress_rings": this.value });
+        orcaStorage.set({ "todo_progress_rings": this.value });
     });
 }
 
@@ -201,7 +201,7 @@ function setupTimeframeSelect(initial) {
     let value = allowed.includes(initial) ? initial : "all";
     el.value = value;
     el.addEventListener("change", function () {
-        ochreStorage.set({ "todo_timeframe": this.value });
+        orcaStorage.set({ "todo_timeframe": this.value });
     });
 }
 
@@ -210,7 +210,7 @@ function setupAutoDarkInput(initial, time) {
     el.value = initial.hour + ":" + initial.minute;
     el.addEventListener('change', function () {
         let timeinput = { "hour": this.value.split(':')[0], "minute": this.value.split(':')[1] };
-        time === "auto_dark_start" ? ochreStorage.set({ auto_dark_start: timeinput }) : ochreStorage.set({ auto_dark_end: timeinput });
+        time === "auto_dark_start" ? orcaStorage.set({ auto_dark_start: timeinput }) : orcaStorage.set({ auto_dark_end: timeinput });
     });
 }
 
@@ -220,7 +220,7 @@ function setupCardLimitSlider(initial) {
     el.value = initial;
     document.querySelector("#card_limit_num").textContent = initial;
     el.addEventListener("change", (e) => {
-        ochreStorage.set({ "custom_cards": {}, "custom_cards_2": {}, "custom_cards_3": {}, "card_limit": parseInt(e.target.value)});
+        orcaStorage.set({ "custom_cards": {}, "custom_cards_2": {}, "custom_cards_3": {}, "card_limit": parseInt(e.target.value)});
     });
     el.addEventListener("input", (e) => {
         document.querySelector("#card_limit_num").textContent = e.target.value;
@@ -232,7 +232,7 @@ function setupDashboardMethod(initial) {
     el.checked = initial === true ? true : false;
 
     el.addEventListener("change", (e) => {
-        ochreStorage.set({ "custom_cards": {}, "custom_cards_2": {}, "custom_cards_3": {}, "card_method_dashboard": e.target.checked });
+        orcaStorage.set({ "custom_cards": {}, "custom_cards_2": {}, "custom_cards_3": {}, "card_method_dashboard": e.target.checked });
     });
 }
 
@@ -247,7 +247,7 @@ const cardStyleSetTimers = {};
 function debouncedCardStyleSet(key, value, delay = 200) {
     if (cardStyleSetTimers[key]) clearTimeout(cardStyleSetTimers[key]);
     cardStyleSetTimers[key] = setTimeout(() => {
-        ochreStorage.set({ [key]: value });
+        orcaStorage.set({ [key]: value });
     }, delay);
 }
 
@@ -312,7 +312,7 @@ function setupCustomBackgroundLink(initial) {
     el.value = initial || "";
     toggleOpacityOptions();
     el.addEventListener("input", (e) => {
-        ochreStorage.set({ "customBackgroundLink": e.target.value });
+        orcaStorage.set({ "customBackgroundLink": e.target.value });
         renderBackgroundPresetSelection();
         toggleOpacityOptions();
     });
@@ -328,7 +328,7 @@ function setupCustomBackgroundScale(initial) {
     el.addEventListener("input", (e) => {
         const nextValue = parseInt(e.target.value);
         output.textContent = `${nextValue}%`;
-        ochreStorage.set({ "customBackgroundScale": nextValue });
+        orcaStorage.set({ "customBackgroundScale": nextValue });
         renderBackgroundPresetSelection();
     });
 }
@@ -394,7 +394,7 @@ function displayBackgroundPresets() {
             document.querySelector("#customBackgroundLink").value = backgroundUrl;
             document.querySelector("#customBackgroundScale").value = backgroundScale;
             document.querySelector("#customBackgroundScaleValue").textContent = `${backgroundScale}%`;
-            ochreStorage.set({ "customBackgroundLink": backgroundUrl, "customBackgroundScale": backgroundScale });
+            orcaStorage.set({ "customBackgroundLink": backgroundUrl, "customBackgroundScale": backgroundScale });
             renderBackgroundPresetSelection();
             toggleOpacityOptions();
         });
@@ -973,7 +973,7 @@ function setup() {
 		],
 	};
 
-    ochreStorage.get(menu.switches).then(sync => {
+    orcaStorage.get(menu.switches).then(sync => {
         menu.switches.forEach(option => {
             let optionSwitch = document.getElementById(option);
             let status = sync[option] === true ? "#on" : "#off";
@@ -985,7 +985,7 @@ function setup() {
                 optionSwitch.querySelector("#on").checked = status;
                 optionSwitch.querySelector("#on").classList.toggle("checked");
                 optionSwitch.querySelector("#off").classList.toggle("checked");
-                ochreStorage.set({ [option]: status });
+                orcaStorage.set({ [option]: status });
                 if (option === "auto_dark") {
                     toggleDarkModeDisable(status);
                 }
@@ -1005,7 +1005,7 @@ function setup() {
         toggleAlternateColorsVisibility(sync["dark_mode"] === true);
     });
 
-    ochreStorage.get(menu.checkboxes).then(sync => {
+    orcaStorage.get(menu.checkboxes).then(sync => {
         menu.checkboxes.forEach(option => {
 			const checkbox = document.querySelector("#" + option);
 			if (!checkbox) {console.log(option); return;}
@@ -1013,12 +1013,12 @@ function setup() {
                 let status = this.checked;
                 if (option === "customBackgroundDaily" && status) {
                     document.querySelector("#customBackgroundNasaDaily").checked = false;
-                    ochreStorage.set({ "customBackgroundDaily": true, "customBackgroundNasaDaily": false });
+                    orcaStorage.set({ "customBackgroundDaily": true, "customBackgroundNasaDaily": false });
                 } else if (option === "customBackgroundNasaDaily" && status) {
                     document.querySelector("#customBackgroundDaily").checked = false;
-                    ochreStorage.set({ "customBackgroundNasaDaily": true, "customBackgroundDaily": false });
+                    orcaStorage.set({ "customBackgroundNasaDaily": true, "customBackgroundDaily": false });
                 } else {
-                    ochreStorage.set(JSON.parse(`{"${option}": ${status}}`));
+                    orcaStorage.set(JSON.parse(`{"${option}": ${status}}`));
                 }
                 syncCustomBackgroundDailyState(document.querySelector("#customBackgroundDaily")?.checked === true || document.querySelector("#customBackgroundNasaDaily")?.checked === true);
                 toggleOpacityOptions();
@@ -1033,7 +1033,7 @@ function setup() {
     });
 
     const specialOptions = menu.special.map(obj => obj.identifier);
-    ochreStorage.get(specialOptions).then(sync => {
+    orcaStorage.get(specialOptions).then(sync => {
         console.log(sync);
         menu.special.forEach(option => {
             if (option.setup !== null) {
@@ -1090,7 +1090,7 @@ function setup() {
     // activate dark mode fixer button
     document.querySelector("#fix-dm-btn").addEventListener("click", async function () {
         let output = await sendFromPopup("fixdm");
-        if (output.path === "ochre-none" || output.path === "ochre-darkmode_off") return;
+        if (output.path === "orca-none" || output.path === "orca-darkmode_off") return;
         let rating = "bad";
         if (output.time < 100) {
             rating = "good";
@@ -1098,17 +1098,17 @@ function setup() {
             rating = "ok";
         }
         document.getElementById("fix-dm-output").textContent = "Fix took " + Math.round(output.time) + "ms (rating: " + rating + ")";
-        ochreStorage.get("dark_mode_fix").then(sync => {
+        orcaStorage.get("dark_mode_fix").then(sync => {
             if (sync["dark_mode_fix"].includes(output.path)) return;
             sync["dark_mode_fix"].push(output.path);
-            ochreStorage.set({ "dark_mode_fix": sync["dark_mode_fix"] }).then(() => displayDarkModeFixUrls());
+            orcaStorage.set({ "dark_mode_fix": sync["dark_mode_fix"] }).then(() => displayDarkModeFixUrls());
         })
     });
 
     // activate storage dump button
     document.querySelector("#rk_btn").addEventListener("click", () => {
-        ochreStorage.getAll().then(local => {
-            ochreStorage.getAll().then(sync => {
+        orcaStorage.getAll().then(local => {
+            orcaStorage.getAll().then(sync => {
                 document.querySelector("#rk_output").value = JSON.stringify(local) + JSON.stringify(sync);
             })
         })
@@ -1116,7 +1116,7 @@ function setup() {
 
     // activate storage reset button
     document.querySelector("#storage-reset-btn").addEventListener("click", () => {
-        ochreStorage.set(defaultOptions["sync"]);
+        orcaStorage.set(defaultOptions["sync"]);
     });
 
     // activate custom url input
@@ -1135,7 +1135,7 @@ function setup() {
                 displayAlert(true, "The URL you entered appears to be invalid, so it might not work.");
             }
         });
-        ochreStorage.set({ custom_domain: domains });
+        orcaStorage.set({ custom_domain: domains });
     });
 
     // Host access is requested when the user finishes typing, not on every
@@ -1147,7 +1147,7 @@ function setup() {
     });
 
     // setup custom url
-    ochreStorage.get(["custom_domain"]).then(storage => {
+    orcaStorage.get(["custom_domain"]).then(storage => {
         document.querySelector("#customDomain").value = storage.custom_domain ? storage.custom_domain : "";
     });
 
@@ -1177,7 +1177,7 @@ function setup() {
     // activate export checkbox
     document.querySelectorAll(".export-details input").forEach(input => {
         input.addEventListener("change", () => {
-            ochreStorage.get(syncedSwitches.concat(syncedSubOptions).concat(["dark_preset", "custom_cards", "custom_font", "gpa_calc_bounds", "custom_styles"])).then(async storage => {
+            orcaStorage.get(syncedSwitches.concat(syncedSubOptions).concat(["dark_preset", "custom_cards", "custom_font", "gpa_calc_bounds", "custom_styles"])).then(async storage => {
                 let final = {};
                 for await (item of document.querySelectorAll(".export-details input")) {
                     if (item.checked) {
@@ -1240,7 +1240,7 @@ function setup() {
 
     // activate revert to original button
     document.querySelector("#theme-revert").addEventListener("click", () => {
-        ochreStorage.get("previous_theme").then(local => {
+        orcaStorage.get("previous_theme").then(local => {
             if (local["previous_theme"] !== null) {
                 importTheme(local["previous_theme"]);
             }
@@ -1263,7 +1263,7 @@ function setup() {
         sendFromPopup("setcolors", colors);
     });
     document.querySelector("#setGradientColor").addEventListener("click", () => {
-        ochreStorage.get("custom_cards").then(sync => {
+        orcaStorage.get("custom_cards").then(sync => {
             length = 0;
             Object.keys(sync["custom_cards"]).forEach(key => {
                 if (sync["custom_cards"][key].hidden !== true) length++;
@@ -1280,7 +1280,7 @@ function setup() {
 
     // activate revert to original card colors button
     document.querySelector("#revert-colors").addEventListener("click", () => {
-        ochreStorage.get("previous_colors").then(local => {
+        orcaStorage.get("previous_colors").then(local => {
             const prev = local["previous_colors"];
             // Guard against unset/expired-shape entries and the empty lists
             // old list-mode runs stored — sending [] would be a silent no-op.
@@ -1307,7 +1307,7 @@ function setup() {
     // activate sidebar tool radio
     ["#radio-sidebar-image", "#radio-sidebar-gradient", "#radio-sidebar-solid"].forEach(radio => {
         document.querySelector(radio).addEventListener("click", () => {
-            ochreStorage.get(["dark_preset"]).then(storage => {
+            orcaStorage.get(["dark_preset"]).then(storage => {
                 let mode = radio === "#radio-sidebar-image" ? "image" : radio === "#radio-sidebar-gradient" ? "gradient" : "solid";
                 displaySidebarMode(mode, storage["dark_preset"]["sidebar"]);
             });
@@ -1444,7 +1444,7 @@ function setup() {
     // is what blew the sync write quota when adjusting card styles quickly.
 
     document.getElementById("clearCustomBackground").addEventListener("click", () => {
-                ochreStorage.set({ "customBackgroundLink": "", "customBackgroundScale": 100 });
+                orcaStorage.set({ "customBackgroundLink": "", "customBackgroundScale": 100 });
         document.querySelector("#customBackgroundLink").value = "";
 		document.querySelector("#customBackgroundScale").value = 100;
 		document.querySelector("#customBackgroundScaleValue").textContent = "100%";
@@ -1463,7 +1463,7 @@ function setup() {
         arrow.style.transform = isOpen ? "rotate(180deg)" : "rotate(0deg)";
     };
 
-    ochreStorage.get([fontsDropdownStateKey]).then((storage) => {
+    orcaStorage.get([fontsDropdownStateKey]).then((storage) => {
         const isOpen = storage[fontsDropdownStateKey] !== false;
         applyFontsDropdownState(isOpen);
     });
@@ -1475,13 +1475,13 @@ function setup() {
         const isCurrentlyOpen = getComputedStyle(el).display !== "none" && getComputedStyle(el2).display !== "none";
         const nextOpen = !isCurrentlyOpen;
         applyFontsDropdownState(nextOpen);
-        ochreStorage.set({ [fontsDropdownStateKey]: nextOpen });
+        orcaStorage.set({ [fontsDropdownStateKey]: nextOpen });
     });
 
 }
 
 function applyGPAPreset(bounds) {
-    ochreStorage.set({ "gpa_calc_bounds": bounds }).then(() => {
+    orcaStorage.set({ "gpa_calc_bounds": bounds }).then(() => {
         displayGPABounds();
     });
 }
@@ -1493,7 +1493,7 @@ function setupNasaApiKey(initial) {
     el.addEventListener("change", (e) => {
         // Trimmed, so a stray space does not become part of the key and
         // produce a 403 that looks like a rejected key.
-        ochreStorage.set({ "nasa_api_key": e.target.value.trim() });
+        orcaStorage.set({ "nasa_api_key": e.target.value.trim() });
     });
 }
 
@@ -1501,7 +1501,7 @@ function setupCustomStyle(initial) {
     const el = document.getElementById("custom-styles");
     el.value = initial;
     el.addEventListener("change", (e) => {
-        ochreStorage.set({ "custom_styles": e.target.value });
+        orcaStorage.set({ "custom_styles": e.target.value });
     });
 }
 
@@ -1641,8 +1641,8 @@ let fallback = false;
 
 function saveCurrentTheme() {
     const allOptions = syncedSwitches.concat(syncedSubOptions).concat(["dark_preset", "custom_cards", "custom_font", "gpa_calc_bounds", "card_colors", "custom_styles"]);
-    ochreStorage.get("saved_themes").then(local => {
-        ochreStorage.get(allOptions).then(async sync => {
+    orcaStorage.get("saved_themes").then(local => {
+        orcaStorage.get(allOptions).then(async sync => {
             let current = await getExport(sync, allOptions);
             let trimmed = { 
                 "disable_color_overlay": current["disable_color_overlay"], 
@@ -1685,7 +1685,7 @@ function saveCurrentTheme() {
             }
             const now = new Date();
             local["saved_themes"][now.getTime()] = trimmed;
-            ochreStorage.set({ "saved_themes": local["saved_themes"] }).then(() => {
+            orcaStorage.set({ "saved_themes": local["saved_themes"] }).then(() => {
                 displaySavedThemes();
             });
         });        
@@ -1722,11 +1722,11 @@ function displayThemeSearchList(themesToShow, pageDir = 0) {
             makeElement("p", themeBtn, {"className": "theme-button-creator", "textContent": split[1] });
             themeBtn.addEventListener("click", () => {
                 const allOptions = syncedSwitches.concat(syncedSubOptions).concat(["dark_preset", "custom_cards", "custom_font", "gpa_calc_bounds", "card_colors", "custom_styles"]);
-                ochreStorage.get(allOptions).then(sync => {
-                    ochreStorage.get(["previous_theme"]).then(async local => {
+                orcaStorage.get(allOptions).then(sync => {
+                    orcaStorage.get(["previous_theme"]).then(async local => {
                         if (local["previous_theme"] === null) {
                             let previous = await getExport(sync, allOptions);
-                            ochreStorage.set({ "previous_theme": previous });
+                            orcaStorage.set({ "previous_theme": previous });
                         }
                         importTheme(theme.exports);
                     });
@@ -1759,7 +1759,7 @@ function getRelativeDate(date, short = false) {
 }
 
 function displaySavedThemes() {
-    ochreStorage.get("saved_themes").then(local => {
+    orcaStorage.get("saved_themes").then(local => {
         const target = document.getElementById("saved-themes");
         target.textContent = "";
         Object.keys(local["saved_themes"]).forEach((key, index) => {
@@ -1773,9 +1773,9 @@ function displaySavedThemes() {
                 importTheme(local["saved_themes"][key]);
             });
             remove.addEventListener("click", () => {
-                ochreStorage.get("saved_themes").then(local => {
+                orcaStorage.get("saved_themes").then(local => {
                     delete local["saved_themes"][key];
-                    ochreStorage.set({ "saved_themes": local["saved_themes"] }).then(() => {
+                    orcaStorage.set({ "saved_themes": local["saved_themes"] }).then(() => {
                         btn.remove();
                     })
                 })
@@ -1798,7 +1798,7 @@ function importTheme(theme) {
     try {
         let keys = Object.keys(theme);
         let final = {};
-        ochreStorage.get("custom_cards").then(sync => {
+        orcaStorage.get("custom_cards").then(sync => {
             keys.forEach(key => {
                 switch (key) {
                     case "dark_preset":
@@ -1837,7 +1837,7 @@ function importTheme(theme) {
                         break;
                 }
             });
-            ochreStorage.set(final);
+            orcaStorage.set(final);
         });
     } catch (e) {
         console.log(e);
@@ -1845,8 +1845,8 @@ function importTheme(theme) {
 }
 
 function updateCards(key, value) {
-    ochreStorage.get(["custom_cards"]).then(result => {
-        ochreStorage.set({ "custom_cards": { ...result["custom_cards"], [key]: { ...result["custom_cards"][key], ...value } } }).then(() => {
+    orcaStorage.get(["custom_cards"]).then(result => {
+        orcaStorage.set({ "custom_cards": { ...result["custom_cards"], [key]: { ...result["custom_cards"][key], ...value } } }).then(() => {
             if (chrome.runtime.lastError) {
                 displayAlert(true, "The data you're entering is exceeding the storage limit, so it won't save. Try using shorter links, and make sure to press \"copy image address\" and not \"copy image\" for links.");
             }
@@ -1855,7 +1855,7 @@ function updateCards(key, value) {
 }
 
 function displayCustomFont() {
-    ochreStorage.get(["custom_font"]).then(storage => {
+    orcaStorage.get(["custom_font"]).then(storage => {
         let el = document.querySelector(".custom-font");
         let linkContainer = document.querySelector(".custom-font-flex") || makeElement("div", el, {"className": "custom-font-flex" });
         linkContainer.innerHTML = '<span>https://fonts.googleapis.com/css2?family=</span><input class="card-input" id="custom-font-link"></input>';
@@ -1867,7 +1867,7 @@ function displayCustomFont() {
             let familyVal = linkVal.replace("+", " ");
             linkVal += linkVal === "" ? "" : ":wght@400;700";
             familyVal = linkVal === "" ? "" : "'" + familyVal + "'";
-            ochreStorage.set({ "custom_font": { "link": linkVal, "family": familyVal } });
+            orcaStorage.set({ "custom_font": { "link": linkVal, "family": familyVal } });
             link.value = linkVal;
         });
 
@@ -1876,14 +1876,14 @@ function displayCustomFont() {
         quickFonts.textContent = "";
         let noFont = makeElement("button", quickFonts, { "className": "customization-button", "textContent": "None" });
         noFont.addEventListener("click", () => {
-            ochreStorage.set({ "custom_font": { "link": "", "family": "" } });
+            orcaStorage.set({ "custom_font": { "link": "", "family": "" } });
             link.value = "";
         })
         popularFonts.forEach(font => {
             let btn = makeElement("button", quickFonts, { "className":"customization-button", "textContent": font });
             btn.addEventListener("click", () => {
                 let linkVal = font.replace(" ", "+") + ":wght@400;700";
-                ochreStorage.set({ "custom_font": { "link": linkVal, "family": "'" + font + "'" } });
+                orcaStorage.set({ "custom_font": { "link": linkVal, "family": "'" + font + "'" } });
                 link.value = linkVal;
             });
         });
@@ -1891,7 +1891,7 @@ function displayCustomFont() {
 }
 
 function displayGPABounds() {
-    ochreStorage.get(["gpa_calc_bounds"]).then(storage => {
+    orcaStorage.get(["gpa_calc_bounds"]).then(storage => {
         const order = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F"];
         const el = document.querySelector(".gpa-bounds");
         el.textContent = "";
@@ -1903,14 +1903,14 @@ function displayGPABounds() {
             inputs.querySelector(".gpa-bounds-gpa").value = storage["gpa_calc_bounds"][key].gpa;
 
             inputs.querySelector(".gpa-bounds-cutoff").addEventListener("change", function (e) {
-                ochreStorage.get(["gpa_calc_bounds"]).then(existing => {
-                    ochreStorage.set({ "gpa_calc_bounds": { ...existing["gpa_calc_bounds"], [key]: { ...existing["gpa_calc_bounds"][key], "cutoff": parseFloat(e.target.value) } } });
+                orcaStorage.get(["gpa_calc_bounds"]).then(existing => {
+                    orcaStorage.set({ "gpa_calc_bounds": { ...existing["gpa_calc_bounds"], [key]: { ...existing["gpa_calc_bounds"][key], "cutoff": parseFloat(e.target.value) } } });
                 });
             });
 
             inputs.querySelector(".gpa-bounds-gpa").addEventListener("change", function (e) {
-                ochreStorage.get(["gpa_calc_bounds"]).then(existing => {
-                    ochreStorage.set({ "gpa_calc_bounds": { ...existing["gpa_calc_bounds"], [key]: { ...existing["gpa_calc_bounds"][key], "gpa": parseFloat(e.target.value) } } });
+                orcaStorage.get(["gpa_calc_bounds"]).then(existing => {
+                    orcaStorage.set({ "gpa_calc_bounds": { ...existing["gpa_calc_bounds"], [key]: { ...existing["gpa_calc_bounds"][key], "gpa": parseFloat(e.target.value) } } });
                 });
             });
         });
@@ -1952,14 +1952,14 @@ async function displayAdvancedCards() {
     // install) or when older cards predate the stored fullName field. Once
     // every card has a fullName this is a no-op and the grid renders instantly.
     const needsSync = await new Promise(resolve => {
-        ochreStorage.get("custom_cards").then(s => {
+        orcaStorage.get("custom_cards").then(s => {
             const c = s.custom_cards || {};
             const ids = Object.keys(c);
             resolve(!ids.length || ids.some(id => !c[id].fullName));
         });
     });
     if (needsSync) await sendFromPopup("getCards");
-    ochreStorage.get(["custom_cards", "custom_cards_2"]).then(storage => {
+    orcaStorage.get(["custom_cards", "custom_cards_2"]).then(storage => {
 
 
 		const cardGrid = document.getElementById("card-grid");
@@ -2263,7 +2263,7 @@ function displaySidebarMode(mode, style) {
 
 let presetChangeTimeout = null;
 
-ochreStorage.get(["dark_preset"]).then(storage => {
+orcaStorage.get(["dark_preset"]).then(storage => {
     let tab = document.querySelector(".customize-dark");
     Object.keys(storage["dark_preset"]).forEach(key => {
         if (key !== "sidebar") {
@@ -2309,7 +2309,7 @@ ochreStorage.get(["dark_preset"]).then(storage => {
 });
 
 function refreshColors() {
-    ochreStorage.get(["dark_preset"]).then(storage => {
+    orcaStorage.get(["dark_preset"]).then(storage => {
         Object.keys(storage["dark_preset"]).forEach(key => {
             let c = document.querySelector("#dp_" + key);
             let color = c.querySelector('input[type="color"]');
@@ -2323,9 +2323,9 @@ function refreshColors() {
 }
 
 function changeCSS(name, color) {
-    ochreStorage.get("dark_preset").then(storage => {
+    orcaStorage.get("dark_preset").then(storage => {
         storage["dark_preset"][name] = color;
-        ochreStorage.set({ "dark_preset": storage["dark_preset"] }).then(() => refreshColors());
+        orcaStorage.set({ "dark_preset": storage["dark_preset"] }).then(() => refreshColors());
     });
 }
 
@@ -2351,7 +2351,7 @@ function changeToPresetCSS(e, preset = null) {
 }
 
 function applyPreset(preset) {
-    ochreStorage.set({ "dark_preset": preset }).then(() => refreshColors());
+    orcaStorage.set({ "dark_preset": preset }).then(() => refreshColors());
 }
 
 function makeElement(element, location, options) {

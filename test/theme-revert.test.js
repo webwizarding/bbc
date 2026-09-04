@@ -130,12 +130,12 @@ function runImport(theme, liveCards) {
     // importTheme writes through the shared storage layer now, so the harness
     // stubs that rather than chrome.storage directly.
     // A synchronously-resolving thenable, not a real Promise. importTheme now
-    // reads through ochreStorage.get(...).then(...), which defers to a
+    // reads through orcaStorage.get(...).then(...), which defers to a
     // microtask, and this harness is deliberately synchronous -- an async test
     // body here could not fail (see the harness note above). Resolving inline
     // keeps the assertions in the same tick while still driving the real code.
     const inline = (v) => ({ then: (f) => inline(f(v)) });
-    ctx.ochreStorage = {
+    ctx.orcaStorage = {
         get: () => inline({ custom_cards: liveCards }),
         set: (obj) => { written = obj; return inline(undefined); },
     };
@@ -218,8 +218,8 @@ test("customizeCards clears an image it injected once storage says empty", () =>
     const injected = card.querySelector(".ic-DashboardCard__header_image");
     assert.ok(injected, "image should have been injected");
     assert.match(injected.style.backgroundImage, /a\.gif/);
-    assert.ok(["created", "reused"].includes(injected.dataset.ochreCardImage),
-        `injection should record how it started, got ${JSON.stringify(injected.dataset.ochreCardImage)}`);
+    assert.ok(["created", "reused"].includes(injected.dataset.orcaCardImage),
+        `injection should record how it started, got ${JSON.stringify(injected.dataset.orcaCardImage)}`);
 
     // revert: storage now says no image
     ctx.options.custom_cards[101].img = "";

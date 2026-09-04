@@ -7,10 +7,10 @@ background service worker keeps its own copy of the key list for the
 migration, because it runs in a separate context with no shared script; a test
 asserts the two lists agree.
 
-Exposes: ochreStorage, storageAreaFor, coerceStoredValue, coerceStoredValues.
+Exposes: orcaStorage, storageAreaFor, coerceStoredValue, coerceStoredValues.
 */
 // ===========================================================================
-// ochreStorage
+// orcaStorage
 //
 // chrome.storage.sync allows 8,192 bytes per item and 102,400 bytes in total.
 // Ten keys grow without bound as the extension is used -- per-course card
@@ -35,7 +35,7 @@ Exposes: ochreStorage, storageAreaFor, coerceStoredValue, coerceStoredValues.
 // grows must be added here, which is the one enumeration this module keeps --
 // it cannot be derived, because whether a key grows is a fact about how the
 // feature uses it, not about the value.
-const OCHRE_LOCAL_KEYS = new Set([
+const ORCA_LOCAL_KEYS = new Set([
     "custom_cards", "custom_cards_2", "custom_cards_3",
     "assignments_done", "assignment_states", "custom_assignments",
     "custom_task_links", "reminders", "dark_mode_fix",
@@ -44,19 +44,19 @@ const OCHRE_LOCAL_KEYS = new Set([
     "saved_themes", "liked_themes",
 ]);
 
-const OCHRE_STORAGE_VERSION = 1;
+const ORCA_STORAGE_VERSION = 1;
 
 // Key families that are generated at runtime, so they cannot be listed
 // individually: cached images by date, per-course calculator state, per-mode
 // sidebar state. Prefix matching keeps them out of sync without requiring the
 // set to be known ahead of time -- which matters most for the per-course ones,
 // where the number of keys grows with the number of courses.
-const OCHRE_LOCAL_KEY_PREFIXES = [
+const ORCA_LOCAL_KEY_PREFIXES = [
     "picsum_daily_",
     "nasa_apod_",
     "grade_analytics_",
     "better_sidebar_expanded_",
-    "ochre_global_search_",
+    "orca_global_search_",
     "quiz_safe_mode_reminder_",
     // Covers the chunked custom_assignments_2.. keys and the
     // custom_assignments_overflow index that names them. Index and data must
@@ -65,8 +65,8 @@ const OCHRE_LOCAL_KEY_PREFIXES = [
 ];
 
 function storageAreaFor(key) {
-    if (OCHRE_LOCAL_KEYS.has(key)) return "local";
-    for (const prefix of OCHRE_LOCAL_KEY_PREFIXES) {
+    if (ORCA_LOCAL_KEYS.has(key)) return "local";
+    for (const prefix of ORCA_LOCAL_KEY_PREFIXES) {
         if (typeof key === "string" && key.startsWith(prefix)) return "local";
     }
     return "sync";
@@ -144,8 +144,8 @@ function storageGet(keys) {
 /** Read everything from both areas, local winning on collision. */
 function storageGetAll() {
     return Promise.all([
-        Promise.resolve().then(() => ochreStorage.get(null)),
-        Promise.resolve().then(() => ochreStorage.get(null)),
+        Promise.resolve().then(() => orcaStorage.get(null)),
+        Promise.resolve().then(() => orcaStorage.get(null)),
     ]).then(([sync, local]) => coerceStoredValues({ ...sync, ...local }));
 }
 
@@ -172,7 +172,7 @@ function storageRemove(keys) {
 //
 // Coercion is by declared type, not by a list of known-bad keys: a list would
 // need updating every time a new key drifts, and the drift is silent.
-const OCHRE_NUMERIC_KEYS = new Set([
+const ORCA_NUMERIC_KEYS = new Set([
     "imageSize", "cardRoundness", "cardSpacing", "cardWidth", "cardHeight",
     "cardPadding", "imageRoundness", "customBackgroundScale", "bg_opacity",
     "sidebar_opacity", "bg_blur", "sidebar_blur", "card_opacity", "card_blur",
@@ -182,7 +182,7 @@ const OCHRE_NUMERIC_KEYS = new Set([
 
 // Keys whose value is one of a fixed set of mode strings. Anything else --
 // including the booleans older versions wrote -- falls back to the default.
-const OCHRE_ENUM_KEYS = {
+const ORCA_ENUM_KEYS = {
     todo_progress_rings: { values: ["rings", "rainbow", "lines", "oneline", "none"], fallback: "rings" },
     todo_timeframe: { values: ["all", "week", "month"], fallback: "all" },
     dashboard_notes_mode: { values: ["edit", "preview"], fallback: "edit" },
@@ -191,11 +191,11 @@ const OCHRE_ENUM_KEYS = {
 /** Coerce one stored value to the type the code expects. */
 function coerceStoredValue(key, value) {
     if (value === undefined || value === null) return value;
-    if (OCHRE_NUMERIC_KEYS.has(key)) {
+    if (ORCA_NUMERIC_KEYS.has(key)) {
         const n = typeof value === "number" ? value : parseFloat(value);
         return Number.isFinite(n) ? n : undefined;
     }
-    const spec = OCHRE_ENUM_KEYS[key];
+    const spec = ORCA_ENUM_KEYS[key];
     if (spec) {
         return spec.values.includes(value) ? value : spec.fallback;
     }
@@ -212,7 +212,7 @@ function coerceStoredValues(items) {
     return out;
 }
 
-const ochreStorage = {
+const orcaStorage = {
     set: storageSet,
     get: storageGet,
     getAll: storageGetAll,
@@ -220,6 +220,6 @@ const ochreStorage = {
     areaFor: storageAreaFor,
     coerce: coerceStoredValue,
     coerceAll: coerceStoredValues,
-    LOCAL_KEYS: OCHRE_LOCAL_KEYS,
-    VERSION: OCHRE_STORAGE_VERSION,
+    LOCAL_KEYS: ORCA_LOCAL_KEYS,
+    VERSION: ORCA_STORAGE_VERSION,
 };

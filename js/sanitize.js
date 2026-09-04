@@ -19,7 +19,7 @@ Exposes: sanitizeCssColor, sanitizeFontFamily, sanitizeCssValue, sanitizeHttpUrl
 
 // Characters and constructs that let a value escape the declaration it sits in.
 // Applied as a backstop after each shape check, never as the only check.
-const OCHRE_CSS_BREAKOUT = /[;{}<>\\]|@import|expression\s*\(/i;
+const ORCA_CSS_BREAKOUT = /[;{}<>\\]|@import|expression\s*\(/i;
 
 /**
  * A CSS colour: hex, rgb/rgba, hsl/hsla, or a bare keyword such as
@@ -28,7 +28,7 @@ const OCHRE_CSS_BREAKOUT = /[;{}<>\\]|@import|expression\s*\(/i;
 function sanitizeCssColor(value) {
     if (typeof value !== "string") return "";
     const v = value.trim();
-    if (v === "" || OCHRE_CSS_BREAKOUT.test(v)) return "";
+    if (v === "" || ORCA_CSS_BREAKOUT.test(v)) return "";
     if (/^#[0-9a-f]{3,8}$/i.test(v)) return v;
     if (/^(?:rgb|hsl)a?\(\s*[0-9a-z.,%\s\/+-]+\)$/i.test(v)) return v;
     if (/^[a-z]{3,20}$/i.test(v)) return v;
@@ -43,7 +43,7 @@ function sanitizeCssColor(value) {
 function sanitizeFontFamily(value) {
     if (typeof value !== "string") return "";
     const v = value.trim();
-    if (v === "" || v.length > 200 || OCHRE_CSS_BREAKOUT.test(v)) return "";
+    if (v === "" || v.length > 200 || ORCA_CSS_BREAKOUT.test(v)) return "";
     for (const raw of v.split(",")) {
         const part = raw.trim();
         if (part === "") return "";
@@ -96,7 +96,7 @@ function sanitizeCssValue(value) {
         return safe ? " URL " : " BAD ";
     });
     if (urls.includes(null)) return "";
-    if (OCHRE_CSS_BREAKOUT.test(withoutUrls)) return "";
+    if (ORCA_CSS_BREAKOUT.test(withoutUrls)) return "";
     // What is left must look like CSS values: colours, keywords, numbers,
     // units, commas, percentages, and parens for gradients.
     if (!/^[\w\s#.,%()\/'" -]*$/.test(withoutUrls)) return "";

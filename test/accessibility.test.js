@@ -51,17 +51,17 @@ test("the contrast helper matches known reference values", () => {
 
 function lightPreset() {
     const src = read("js/content.js");
-    const m = /const OCHRE_LIGHT_DEFAULTS = \{[\s\S]*?\n\};/.exec(src);
-    assert.ok(m, "OCHRE_LIGHT_DEFAULTS not found");
+    const m = /const ORCA_LIGHT_DEFAULTS = \{[\s\S]*?\n\};/.exec(src);
+    assert.ok(m, "ORCA_LIGHT_DEFAULTS not found");
     const ctx = {};
     vm.createContext(ctx);
-    vm.runInContext(m[0] + "\n;globalThis.__p = OCHRE_LIGHT_DEFAULTS;", ctx);
+    vm.runInContext(m[0] + "\n;globalThis.__p = ORCA_LIGHT_DEFAULTS;", ctx);
     return ctx.__p;
 }
 function darkPreset() {
     const ctx = {};
     vm.createContext(ctx);
-    vm.runInContext(read("js/defaults.js") + "\n;globalThis.__d = OCHRE_DEFAULTS;", ctx);
+    vm.runInContext(read("js/defaults.js") + "\n;globalThis.__d = ORCA_DEFAULTS;", ctx);
     return ctx.__d.sync.dark_preset;
 }
 
@@ -97,25 +97,25 @@ test("issue #11: the light-mode link colour is the one that was failing", () => 
     assert.ok(contrast(p.links, "#c7c7c7") >= 4.5, "background-1 is the worst surface for links");
 });
 
-test("--ochre-buttons is emitted by both presets", () => {
+test("--orca-buttons is emitted by both presets", () => {
     // Consumed by three rules in darkmodecss.js and emitted by nobody, so those
     // rules had never applied. A rule that resolves to nothing is a contrast
     // failure by definition.
     assert.ok("buttons" in lightPreset(), "light preset does not emit buttons");
     assert.ok("buttons" in darkPreset(), "dark preset does not emit buttons");
-    const consumed = (read("css/darkmodecss.js").match(/var\(--ochre-buttons/g) || []).length;
+    const consumed = (read("css/darkmodecss.js").match(/var\(--orca-buttons/g) || []).length;
     assert.ok(consumed > 0, "sanity: something should consume it");
 });
 
 test("every custom property consumed by the CSS is emitted by a preset", () => {
-    // The general form of the --ochre-buttons bug.
+    // The general form of the --orca-buttons bug.
     const css = read("css/darkmodecss.js") + read("css/content.css");
-    const consumed = new Set((css.match(/var\(\s*--ochre-([a-z0-9-]+)/g) || [])
-        .map(m => m.replace(/var\(\s*--ochre-/, "")));
+    const consumed = new Set((css.match(/var\(\s*--orca-([a-z0-9-]+)/g) || [])
+        .map(m => m.replace(/var\(\s*--orca-/, "")));
     const emitted = new Set([...Object.keys(lightPreset()), ...Object.keys(darkPreset())]);
     // Set at runtime rather than from a preset.
-    for (const k of (read("js/content.js").match(/setProperty\("--ochre-([a-z0-9-]+)"/g) || [])
-        .map(m => m.replace(/setProperty\("--ochre-/, "").replace(/"$/, ""))) emitted.add(k);
+    for (const k of (read("js/content.js").match(/setProperty\("--orca-([a-z0-9-]+)"/g) || [])
+        .map(m => m.replace(/setProperty\("--orca-/, "").replace(/"$/, ""))) emitted.add(k);
     const orphans = [...consumed].filter(k => !emitted.has(k));
     assert.deepStrictEqual(orphans, [],
         `consumed but never emitted, so these rules never apply: ${orphans.join(", ")}`);
@@ -185,9 +185,9 @@ test("the mouse-only to-do controls are now activatable", () => {
 
 test("focus is visible on injected controls", () => {
     const css = read("css/content.css");
-    assert.ok(/\[data-ochre-activatable="1"\]:focus-visible/.test(css),
+    assert.ok(/\[data-orca-activatable="1"\]:focus-visible/.test(css),
         "activatable controls have no visible focus ring");
-    assert.ok(/outline:/.test(css.slice(css.indexOf('[data-ochre-activatable="1"]:focus-visible'))),
+    assert.ok(/outline:/.test(css.slice(css.indexOf('[data-orca-activatable="1"]:focus-visible'))),
         "the focus rule should draw an outline");
 });
 

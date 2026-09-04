@@ -13,7 +13,7 @@ Loaded as a content script, by popup.html, and by the background worker.
 Where the two disagreed, the install-time value wins: it is what most users are
 actually running.
 */
-const OCHRE_DEFAULTS = {
+const ORCA_DEFAULTS = {
     "local": {
         "previous_colors": null,
         "previous_theme": null,

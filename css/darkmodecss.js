@@ -9,7 +9,7 @@ const DARKMODE_CSS = `
 #calendar-drag-and-drop-container .fc-month-view .fc-body,
 #content-wrapper .user_content.not_design_tools h3,
 #context-list-holder,
-.ochre-course-credit,
+.orca-course-credit,
 #kl_banner,
 #kl_banner_left,
 #kl_banner_right,
@@ -42,7 +42,7 @@ const DARKMODE_CSS = `
 .ac-result-container,
 .agenda-wrapper,
 .al-options,
-.ochre-assignment-container,
+.orca-assignment-container,
 .bjXfh_daKB,
 .bjXfh_daKB span,
 .bottom-reply-with-box,
@@ -127,7 +127,7 @@ body,
 code,
 img.kl_image_round_white_border,
 img.kl_image_white_border,
-.ochre-course-percent,
+.orca-course-percent,
 pre,
 table.summary tbody th,
 table.summary td,
@@ -159,8 +159,8 @@ table.seas-homepage-table,
 .ic-app-course-menu.with-left-side #left-side.XOwIb_eLeB:not([aria-selected]):not([aria-disabled]):hover,
 .XOwIb_eLeB[aria-selected],
 span.fOyUs_bGBk.fOyUs_desw.bDzpk_bGBk.bDzpk_busO.bDzpk_cQFX.bDzpk_bZNM,
-.ochre-todo-complete-btn,
-.ochre-card-grade,
+.orca-todo-complete-btn,
+.orca-card-grade,
 div[style*='background-color: #fff'],
 div[style*='background: #fff'],
 div[style*='background-color: #ffffff'],
@@ -175,28 +175,28 @@ span[style*='background: #fff'],
 #comments-tray,
 .css-d76rpr-view--inlineBlock[data-testid='tool-bar'],
 .css-vxe90h-view--inlineBlock,
-.ochre-todo-actions,
+.orca-todo-actions,
 .css-sg1rn7-view {
-    background:var(--ochre-background-0)!important
+    background:var(--orca-background-0)!important
 }
 
 #minical .fc-widget-content {
-    border:1px solid var(--ochre-background-0)!important
+    border:1px solid var(--orca-background-0)!important
 }
 
 #kl_wrapper_3.kl_colored_headings #kl_banner .kl_subtitle {
-    border-top:3px solid var(--ochre-background-0)!important;
-    border-bottom:3px solid var(--ochre-background-0)!important
+    border-top:3px solid var(--orca-background-0)!important;
+    border-bottom:3px solid var(--orca-background-0)!important
 }
 
 #submit_file_button,
 span[style*='background-color: #fbeeb8'],
-.ochre-todo-label {
-    color:var(--ochre-background-0)!important
+.orca-todo-label {
+    color:var(--orca-background-0)!important
 }
 
 .eHQDY_dTxv {
-    stroke:var(--ochre-background-0)!important
+    stroke:var(--orca-background-0)!important
 }
 
 #calendar-app .fc-agendaWeek-view .fc-event,
@@ -212,7 +212,7 @@ span[style*='background-color: #fbeeb8'],
 .Button,
 .ac-input-box,
 .agenda-day.agenda-today,
-.ochre-assignment-container:hover,
+.orca-assignment-container:hover,
 .btn,
 .discussion-reply-box,
 .discussions-v2__wrapper>span>span>span>span>button>span,
@@ -275,11 +275,11 @@ table.seas-homepage-table tr:nth-child(odd),
 .list-view a.active,
 #calendars-context-list .context_list_context:hover,
 #other-calendars-context-list .context_list_context:hover,
-.ochre-todo-complete-btn:hover,
-.ochre-custom-btn,
-.ochre-skeleton-text,
-.ochre-hover-preview,
-.ochre-gpa-edit-btn,
+.orca-todo-complete-btn:hover,
+.orca-custom-btn,
+.orca-skeleton-text,
+.orca-hover-preview,
+.orca-gpa-edit-btn,
 div[style*='background-color: rgb(229, 242, 248)'],
 div[style*='background-color: rgb(245, 245, 245)'],
 .css-7naoe-textInp,
@@ -288,16 +288,16 @@ div[style*='background-color: rgb(245, 245, 245)'],
 #course_select_menu,
 .css-1dn3ise-textInput__facade,
 .css-1veueey-textInput__facade,
-.ochre-todo-action:hover {
-    background:var(--ochre-background-1)!important
+.orca-todo-action:hover {
+    background:var(--orca-background-1)!important
 }
 
 .ic-DashboardCard__placeholder-svg .ic-DashboardCard__placeholder-animates>* {
-    fill:var(--ochre-background-1)!important
+    fill:var(--orca-background-1)!important
 }
 
-.ochre-hover-preview::after {
-    background:linear-gradient(0deg,  var(--ochre-background-1) 50%,  transparent)
+.orca-hover-preview::after {
+    background:linear-gradient(0deg,  var(--orca-background-1) 50%,  transparent)
 }
 
 #calendar-app .fc-month-view .fc-today,
@@ -338,7 +338,7 @@ div[style*='background-color: rgb(245, 245, 245)'],
 div.checkbox:hover,
 .gradebook-cell.grayed-out,
 .baylor-table tr:nth-of-type(2n + 1) {
-    background:var(--ochre-buttons)!important
+    background:var(--orca-buttons)!important
 }
 
 #kl_content_block_0 h3:nth-child(1),
@@ -363,11 +363,11 @@ div.checkbox:hover,
 .tox .tox-collection--list .tox-collection__item--enabled,
 ul.outcome-level li:focus,
 ul.outcome-level li:hover {
-    background-color:var(--ochre-buttons)!important
+    background-color:var(--orca-buttons)!important
 }
 
 .eHQDY_dTxv {
-    stroke:var(--ochre-buttons)
+    stroke:var(--orca-buttons)
 }
 
 .no-touch .ic-DashboardCard:hover {
@@ -376,7 +376,7 @@ ul.outcome-level li:hover {
 
 #calendar-drag-and-drop-container .fc-row .fc-content-skeleton td,
 #calendar-drag-and-drop-container .fc-row .fc-helper-skeleton td,
-.ochre-course-credit,
+.orca-course-credit,
 #kl_content_block_0,
 #kl_custom_block_0,
 #kl_custom_block_1,
@@ -431,7 +431,7 @@ ul.outcome-level li:hover {
 .uneditable-input,
 .unpinned-discussions-v2__wrapper,
 form.question_form .form_answers .answer,
-.ochre-course-percent,
+.orca-course-percent,
 input[type=color],
 input[type=date],
 input[type=datetime-local],
@@ -459,12 +459,12 @@ textarea,
 .ui-state-default,
 .ui-widget-header .ui-state-default,
 .ui-widget-content,
-.ochre-custom-btn,
-.ochre-gpa-edit-btn,
+.orca-custom-btn,
+.orca-gpa-edit-btn,
 .css-26xxi8-view--block,
 .css-9fqfm7-view--block,
-.ochre-todo-actions {
-    border:1px solid var(--ochre-borders)!important
+.orca-todo-actions {
+    border:1px solid var(--orca-borders)!important
 }
 
 #content-wrapper .user_content.not_design_tools table td,
@@ -473,7 +473,7 @@ table.seas-homepage-table,
 .avatar,
 .css-7naoe-textInput__facade,
 .css-1dn3ise-textInput__facade {
-    border:2px solid var(--ochre-borders)!important
+    border:2px solid var(--orca-borders)!important
 }
 
 #course_select_menu,
@@ -541,8 +541,8 @@ table.summary thead th,
 .submission-details-header__heading-and-grades,
 #right_side .content_box,
 .assignment-student-header,
-.ochre-gpa-course {
-    border-bottom:1px solid var(--ochre-borders)!important
+.orca-gpa-course {
+    border-bottom:1px solid var(--orca-borders)!important
 }
 
 #planner-today-btn,
@@ -572,20 +572,20 @@ table.summary thead th,
 .MyTable,
 #inbox-conversation-holder *,
 .css-1vqfmz1-view {
-    border-color:var(--ochre-borders)!important
+    border-color:var(--orca-borders)!important
 }
 
 tr.student_assignment.assignment_graded.editable {
-    border-top:1px solid var(--ochre-text-1)!important;
-    border-bottom:1px solid var(--ochre-text-1)!important
+    border-top:1px solid var(--orca-text-1)!important;
+    border-bottom:1px solid var(--orca-text-1)!important
 }
 
 .discussion-section.message_wrapper table {
-    border:4px solid var(--ochre-borders)!important
+    border:4px solid var(--orca-borders)!important
 }
 
 .nav_list li.navitem {
-    border:solid var(--ochre-borders)!important;
+    border:solid var(--orca-borders)!important;
     border-width:0 1px 1px!important
 }
 
@@ -600,7 +600,7 @@ tr.student_assignment.assignment_graded.editable {
 .topic .entry-content,
 body.responsive_awareness .message-list-scroller,
 ul.outcome-level {
-    border-right:1px solid var(--ochre-borders)!important
+    border-right:1px solid var(--orca-borders)!important
 }
 
 #questions .assessment_question_bank,
@@ -614,7 +614,7 @@ ul.outcome-level {
 .table-bordered th,
 .topic .entry-content,
 .submission-details-comments .comments {
-    border-left:1px solid var(--ochre-borders)!important
+    border-left:1px solid var(--orca-borders)!important
 }
 
 #assignment_show .student-assignment-overview,
@@ -635,11 +635,11 @@ ul.outcome-level {
 .table td,
 .table th,
 .dNoYT_bGBk {
-    border-top:1px solid var(--ochre-borders)!important
+    border-top:1px solid var(--orca-borders)!important
 }
 
 .discussions-v2__container-image {
-    border:.125rem dashed var(--ochre-borders)!important
+    border:.125rem dashed var(--orca-borders)!important
 }
 
 .Button--active.ui-button,
@@ -659,7 +659,7 @@ ul.outcome-level {
 ::-webkit-scrollbar-thumb,
 .ic-unread-badge__total-count,
 #calendar-app .fc-month-view .fc-today {
-    background:var(--ochre-background-2)!important
+    background:var(--orca-background-2)!important
 }
 
 .discussion-entries .entry .entry,
@@ -668,7 +668,7 @@ ul.outcome-level {
 }
 
 .ac-result-wrapper:before {
-    border-bottom:10px solid var(--ochre-borders)
+    border-bottom:10px solid var(--orca-borders)
 }
 
 .eIQkd_bGBk,
@@ -676,11 +676,11 @@ ul.outcome-level {
 .eHzxc_bGBk,
 .quiz_comment:after,
 .quiz_comment:before {
-    border-bottom-color:var(--ochre-borders)!important
+    border-bottom-color:var(--orca-borders)!important
 }
 
 .ic-item-row {
-    box-shadow:0 -1px var(--ochre-borders), inset 0 -1px var(--ochre-borders)!important
+    box-shadow:0 -1px var(--orca-borders), inset 0 -1px var(--orca-borders)!important
 }
 
 #GradeSummarySelectMenuGroup span,
@@ -701,8 +701,8 @@ ul.outcome-level {
 #kl_wrapper_3.kl_colored_headings_box_left>div>h3 i,
 #kl_wrapper_3.kl_colored_headings_box_left>div>h3:not(.ui-state-default),
 #kl_wrapper_3.kl_emta h3:not(.ui-state-default),
-.ochre-card-grade,
-.ochre-card-header,
+.orca-card-grade,
+.orca-card-header,
 .discussion-fyi,
 .ic-DashboardCard__action-badge,
 .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active .menu-item__text,
@@ -711,13 +711,13 @@ ul.outcome-level {
 .menu-item__badge,
 .mini_calendar .day.other_month,
 .ui-tabs .ui-tabs-nav li.ui-tabs-active a,
-.ochre-course-percent,
-.ochre-todo-container,
-.ochre-todo-container:hover,
+.orca-course-percent,
+.orca-todo-container,
+.orca-todo-container:hover,
 .MlJlv_ebWM,
-.ochre-todo-item,
-.ochre-todo-item:hover,
-.ochre-hover-preview,
+.orca-todo-item,
+.orca-todo-item:hover,
+.orca-hover-preview,
 .baylorMainContainer,
 .baylor-table td,
 .fOyUs_dUgE,
@@ -742,18 +742,18 @@ h5,
 h6,
 #tinymce,
 .PlannerItem-styles__type > span,
-.ochre-todo-actions {
-    color:var(--ochre-text-0)!important
+.orca-todo-actions {
+    color:var(--orca-text-0)!important
 }
 
 .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active svg,
 .ToDoSidebarItem__Icon,
-.ochre-todo-svg {
-    fill:var(--ochre-text-0)!important
+.orca-todo-svg {
+    fill:var(--orca-text-0)!important
 }
 
 .ic-avatar {
-    border:2px solid var(--ochre-text-0)!important
+    border:2px solid var(--orca-text-0)!important
 }
 
 #breadcrumbs>ul>li+li:last-of-type a,
@@ -764,7 +764,7 @@ h6,
 #calendar-drag-and-drop-container .fc-agendaWeek-view .fc-widget-header,
 #calendar-drag-and-drop-container .fc-month-view .fc-widget-header,
 #content-wrapper .user_content.not_design_tools h3,
-.ochre-course-credit,
+.orca-course-credit,
 #kl_banner,
 #kl_banner h2,
 #kl_banner_left,
@@ -798,8 +798,8 @@ h6,
 .ToDoSidebarItem__Info li,
 .ac-input-box,
 .accessible-toggler,
-.ochre-assignment-container,
-.ochre-assignment-container:hover,
+.orca-assignment-container,
+.orca-assignment-container:hover,
 .bjXfh_daKB,
 .bjXfh_daKB span,
 .cWmNi_bGBk,
@@ -919,18 +919,18 @@ ic-tokeninput-input,
 .dUOHu_eCSh,
 .blnAQ_eCSh,
 #gradebook_header,
-.ochre-assignment-link,
-.ochre-assignment-link:hover,
+.orca-assignment-link,
+.orca-assignment-link:hover,
 .jumbotron,
 .card,
 .ac-token,
 span[style='color: #000000;'],
-.ochre-gpa-edit-btn {
-    color:var(--ochre-text-1)!important
+.orca-gpa-edit-btn {
+    color:var(--orca-text-1)!important
 }
 
 .list-view a.active {
-    border-left:2px solid var(--ochre-links)!important
+    border-left:2px solid var(--orca-links)!important
 }
 
 .ToDoSidebarItem svg,
@@ -940,11 +940,11 @@ span[style='color: #000000;'],
 .tox .tox-tbtn svg,
 .tox .tox-tbtn svg g,
 .tox .tox-tbtn svg path {
-    fill:var(--ochre-text-1)!important
+    fill:var(--orca-text-1)!important
 }
 
 .caret {
-    border-top:4px solid var(--ochre-text-1)!important
+    border-top:4px solid var(--orca-text-1)!important
 }
 
 #last_saved_indicator,
@@ -968,7 +968,7 @@ span[style='color: #000000;'],
 ul#question_list.read_only li.seen,
 ul#question_list li.current_question,
 .css-1sr6v3o-text {
-    color:var(--ochre-text-2)!important
+    color:var(--orca-text-2)!important
 }
 
 #content-wrapper .user_content.not_design_tools a,
@@ -984,7 +984,7 @@ a:hover,
 .no-touch .ic-DashboardCard__action:hover,
 .enRcg_bGBk.enRcg_fpfC,
 input.enRcg_bGBk[type].enRcg_fpfC {
-    color:var(--ochre-links)!important
+    color:var(--orca-links)!important
 }
 
 #minical .fc-bg .fc-state-highlight,
@@ -1005,54 +1005,54 @@ ul.outcome-level li.selected a::before,
 .ic-unread-badge,
 .cECYn_bXiG,
 .unread-grade,
-.ochre-todo-label {
-    background:var(--ochre-links)!important
+.orca-todo-label {
+    background:var(--orca-links)!important
 }
 
 .eHQDY_ddES .eHQDY_eWAY {
-    stroke:var(--ochre-links)!important
+    stroke:var(--orca-links)!important
 }
 
 .message-list .messages>li:hover {
-    box-shadow:inset -4px 0 0 var(--ochre-links)!important
+    box-shadow:inset -4px 0 0 var(--orca-links)!important
 }
 
 .agenda-event__item-container:focus,
 .agenda-event__item-container:hover {
-    box-shadow:inset 3px 0 0 var(--ochre-links)
+    box-shadow:inset 3px 0 0 var(--orca-links)
 }
 
 #calendar-app .fc-agendaWeek-view .fc-day-grid .fc-today,
 #calendar-drag-and-drop-container .fc-agendaWeek-view .fc-day-grid .fc-today {
-    box-shadow:.5px -6px 0 0 var(--ochre-links)
+    box-shadow:.5px -6px 0 0 var(--orca-links)
 }
 
 .message-list .read-state.read:before {
-    box-shadow:0 0 0 1px var(--ochre-links)
+    box-shadow:0 0 0 1px var(--orca-links)
 }
 
 #minical .event::after {
-    border:1px solid var(--ochre-links)
+    border:1px solid var(--orca-links)
 }
 
 .ic-notification {
-    border:2px solid var(--ochre-links)!important
+    border:2px solid var(--orca-links)!important
 }
 
 .eMdva_pypk,
 .tox .tox-edit-area.active,
 .tox .tox-edit-area.active iframe,
 .emSEn_QUBp:hover {
-    border-color:var(--ochre-links)!important
+    border-color:var(--orca-links)!important
 }
 
 .eHQDY_ddES .eHQDY_eWAY {
-    stroke:var(--ochre-links)
+    stroke:var(--orca-links)
 }
 
 .ui-dialog .ui-dialog-titlebar-close.ui-state-hover,
 .ui-dialog .ui-dialog-titlebar-close.ui-state-focus {
-    box-shadow:0 0 0 2px var(--ochre-links)
+    box-shadow:0 0 0 2px var(--orca-links)
 }
 
 select.ic-Input:focus,
@@ -1072,7 +1072,7 @@ input[type=search].ic-Input:focus,
 input[type=tel].ic-Input:focus,
 input[type=color].ic-Input:focus,
 .uneditable-input.ic-Input:focus {
-    outline-color:var(--ochre-links)
+    outline-color:var(--orca-links)
 }
 
 .discussion-section.message_wrapper table {
@@ -1097,7 +1097,7 @@ input[type=color].ic-Input:focus,
 .extension-aldue:hover,
 .ic-DashboardCard,
 .navigation-tray-container,
-.ochre-gpa-card {
+.orca-gpa-card {
     box-shadow:0 2px 5px #00000080!important
 }
 
@@ -1155,7 +1155,7 @@ hr {
 }
 
 .ic-app-header {
-    background:var(--ochre-sidebar)!important
+    background:var(--orca-sidebar)!important
 }
 
 .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active .ic-app-header__menu-list-link,
@@ -1169,18 +1169,18 @@ hr {
 
 .ic-app-header__menu-list-link svg,
 .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active svg {
-    fill:var(--ochre-sidebar-text)!important
+    fill:var(--orca-sidebar-text)!important
 }
 
 .menu-item-icon-container,
 .ic-app-header__menu-list-link .menu-item__text,
 .ic-app-header__menu-list-item.ic-app-header__menu-list-item--active .menu-item__text {
-    color:var(--ochre-sidebar-text)!important
+    color:var(--orca-sidebar-text)!important
 }
 
 .ic-DashboardCard,
 .ic-DashboardCard__header_content,
-.ochre-assignment-container,
+.orca-assignment-container,
 .recent_feedback .event-details {
     background:none!important
 }
@@ -1188,10 +1188,10 @@ hr {
 #right-side .event-details .event-details__context *,
 #right-side .recent_feedback .event-details p,
 #right-side .recent_feedback .event-details span {
-    color: var(--ochre-text-0) !important;
+    color: var(--orca-text-0) !important;
 }
 .event-details strong {
-	color: var(--ochre-text-0) !important;
+	color: var(--orca-text-0) !important;
 }
 /* Theme the native date/time picker icons so they stay visible on the dark
    sidebar surface. Applied in dark mode only — light mode keeps the default
@@ -1205,24 +1205,24 @@ hr {
 #better-todo-new-task-date,
 #better-todo-new-task-time {
     color-scheme: dark !important;
-    color: var(--ochre-text-0) !important;
+    color: var(--orca-text-0) !important;
 }
 /* Dashboard list view header (Today / Add To Do / Show My Grades /
    opportunities): Canvas paints the icon glyphs a dark ink color that
    disappears on the dark glass header bar. Recolor the header text and
    its icon SVGs to the theme text color. */
 .PlannerHeader-styles__root {
-    color: var(--ochre-text-0) !important;
+    color: var(--orca-text-0) !important;
 }
 .PlannerHeader-styles__root svg {
-    fill: var(--ochre-text-0) !important;
+    fill: var(--orca-text-0) !important;
 }
 /* The "Today" button's label span carries Canvas's dark ink color from its
    emotion class, which beats the inherited root color above — dark text on
    the dark header bar. Force the whole button chain to the theme text color. */
 .PlannerHeader-styles__root button,
 .PlannerHeader-styles__root button span {
-    color: var(--ochre-text-0) !important;
+    color: var(--orca-text-0) !important;
 }
 /* Solid themed surfaces for the header buttons. Canvas leaves the icon
    buttons (Add To Do / Show My Grades / opportunities) fully transparent
@@ -1231,13 +1231,13 @@ hr {
    is listed separately because the ID selector on the base background rule
    above would otherwise out-specify the class-only :hover rule. */
 .PlannerHeader-styles__root button {
-    background: var(--ochre-background-1) !important;
-    border: 1px solid var(--ochre-borders) !important;
+    background: var(--orca-background-1) !important;
+    border: 1px solid var(--orca-borders) !important;
     border-radius: 4px !important;
 }
 .PlannerHeader-styles__root button:hover,
 #planner-today-btn:hover {
-    background: var(--ochre-background-2) !important;
+    background: var(--orca-background-2) !important;
 }
 /* The "Today" button keeps its filled surface (from the rule above) but
    gets no outline. Two borders were boxing it in: the themed border the
@@ -1268,12 +1268,12 @@ hr {
    background. Paint the tray panel with the theme background; the tray
    contents already pick up the theme text color. */
 body > span > span[class*="-tray"] {
-    background: var(--ochre-background-0) !important;
+    background: var(--orca-background-0) !important;
 }
 /* The Add To Do form ships its own <style> tag hardcoding background
    #FFFFFF on its root. */
 .UpdateItemTray-styles__root {
-    background: var(--ochre-background-0) !important;
+    background: var(--orca-background-0) !important;
 }
 /* InstUI TextInput / Select facades (Title, Date, Time, Course fields):
    white surface, dark ink, gray border. Repaint with the theme surface,
@@ -1282,27 +1282,27 @@ body > span > span[class*="-tray"] {
    emotion appends animation-state classes (e.g. transition--*) after the
    component class. */
 [class*="-textInput__facade"] {
-    background: var(--ochre-background-1) !important;
-    border-color: var(--ochre-borders) !important;
-    color: var(--ochre-text-0) !important;
+    background: var(--orca-background-1) !important;
+    border-color: var(--orca-borders) !important;
+    color: var(--orca-text-0) !important;
 }
 /* Field labels (Title / Date / Time / Course / Details) and the date-time
    summary message keep Canvas's dark ink. */
 [class$="-formFieldLayout__label"],
 [class$="-formFieldMessage"] {
-    color: var(--ochre-text-1) !important;
+    color: var(--orca-text-1) !important;
 }
 /* InstUI ContextView popovers — the opportunities popup behind "Show My
    Grades" and the date-picker calendar behind the Date field: white card
    with dark text. Theme the card; descendants without their own ink
    color (weekday headers, month label) inherit from here. */
 [class*="-contextView__content"] {
-    background: var(--ochre-background-0) !important;
-    color: var(--ochre-text-0) !important;
+    background: var(--orca-background-0) !important;
+    color: var(--orca-text-0) !important;
 }
 /* The opportunities popup's tab labels carry their own dark ink. */
 [class*="-contextView__content"] [class$="-view-tab"] {
-    color: var(--ochre-text-0) !important;
+    color: var(--orca-text-0) !important;
 }
 /* Flatten the white InstUI View surfaces nested inside those popovers
    (the calendar body, the opportunities tab strip, the panel content) so
@@ -1319,10 +1319,10 @@ body > span > span[class*="-tray"] {
    aria-selected, since the chip's emotion class is a content hash). */
 [class*="-calendarDay__day"] {
     background: transparent !important;
-    color: var(--ochre-text-0) !important;
+    color: var(--orca-text-0) !important;
 }
 button[aria-selected="true"] > [class*="-calendarDay__day"] {
-    background: var(--ochre-links) !important;
+    background: var(--orca-links) !important;
     color: #ffffff !important;
 }
 /* InstUI Select dropdowns (Time / Course) open body-level popover portals
@@ -1331,19 +1331,19 @@ button[aria-selected="true"] > [class*="-calendarDay__day"] {
    classes carry no semantic suffix, so they are matched structurally with
    :has() on the options list they contain (portal pattern: body > span). */
 [class*="-options__list"] {
-    background: var(--ochre-background-0) !important;
-    color: var(--ochre-text-0) !important;
-    border-color: var(--ochre-borders) !important;
+    background: var(--orca-background-0) !important;
+    color: var(--orca-text-0) !important;
+    border-color: var(--orca-borders) !important;
 }
 [class*="-options__list"] [class$="-optionItem__container"] {
-    color: var(--ochre-text-0) !important;
+    color: var(--orca-text-0) !important;
 }
 [class$="-optionItem"] {
     background: transparent !important;
 }
 [class$="-optionItem"]:hover,
 [class$="-optionItem"][aria-selected="true"] {
-    background: var(--ochre-background-2) !important;
+    background: var(--orca-background-2) !important;
 }
 body > span span:has([class*="-options__list"]) {
     background: transparent !important;
@@ -1351,8 +1351,8 @@ body > span span:has([class*="-options__list"]) {
 /* Planner "Submitted" pill in the completed-items row: InstUI renders it
    as a white chip with gray text. */
 .BadgeList-styles__item [class*="-pill"] {
-    background: var(--ochre-background-2) !important;
-    color: var(--ochre-text-1) !important;
+    background: var(--orca-background-2) !important;
+    color: var(--orca-text-1) !important;
 }
 /* Flash alert toasts (.flashalert-message, e.g. "Nothing planned today.
    Selecting next item."): Canvas renders them as white cards with dark
@@ -1360,18 +1360,18 @@ body > span span:has([class*="-options__list"]) {
    text color; the inner div[open] is the alert card itself. The close X
    glyph inherits currentColor from the button. */
 .flashalert-message > div {
-    background: var(--ochre-background-0) !important;
-    color: var(--ochre-text-0) !important;
-    border-color: var(--ochre-borders) !important;
+    background: var(--orca-background-0) !important;
+    color: var(--orca-text-0) !important;
+    border-color: var(--orca-borders) !important;
 }
 .flashalert-message > div p {
-    color: var(--ochre-text-0) !important;
+    color: var(--orca-text-0) !important;
 }
 .flashalert-message > div button {
-    color: var(--ochre-text-0) !important;
+    color: var(--orca-text-0) !important;
 }
 .flashalert-message > div button svg {
-    fill: var(--ochre-text-0) !important;
+    fill: var(--orca-text-0) !important;
 }
 /* Global Announcements page (…/account_notifications): the Current/Recent
    tabs come from Instructure UI. Canvas paints the tab labels ("Current" /
@@ -1399,15 +1399,15 @@ body > span span:has([class*="-options__list"]) {
 div[class*='view-tabs__container']:has(#currentTab, #pastTab),
 #currentTab>div,
 #pastTab>div {
-    background: var(--ochre-background-0) !important;
+    background: var(--orca-background-0) !important;
 }
 [aria-controls=currentTab],
 [aria-controls=pastTab] {
-    color: var(--ochre-text-1) !important;
+    color: var(--orca-text-1) !important;
 }
 #currentTab>div>span,
 #pastTab>div>span {
-    color: var(--ochre-text-2) !important;
+    color: var(--orca-text-2) !important;
 }
 .notification_account_content,
 .notification_account_content .ic-notification__content,
@@ -1421,18 +1421,18 @@ div[class*='view-tabs__container']:has(#currentTab, #pastTab),
 .notification_message li,
 .notification_message td,
 .notification_message th {
-    color: var(--ochre-text-1) !important;
+    color: var(--orca-text-1) !important;
 }
 .notification_account_content .ic-notification__title {
-    color: var(--ochre-text-0) !important;
+    color: var(--orca-text-0) !important;
 }
 .notification_account_content_text,
 .notification_account_content_text b,
 .notification_account_content_text strong {
-    color: var(--ochre-text-2) !important;
+    color: var(--orca-text-2) !important;
 }
 .notification_message a,
 .notification_account_content a {
-    color: var(--ochre-links) !important;
+    color: var(--orca-links) !important;
 }
 `;

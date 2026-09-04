@@ -43,7 +43,7 @@ test("a user-supplied NASA key is read and used", () => {
 test("the NASA key has a default and a settings control", () => {
     const ctx = {};
     vm.createContext(ctx);
-    vm.runInContext(read("js/defaults.js") + "\n;globalThis.__d = OCHRE_DEFAULTS;", ctx);
+    vm.runInContext(read("js/defaults.js") + "\n;globalThis.__d = ORCA_DEFAULTS;", ctx);
     assert.strictEqual(ctx.__d.sync.nasa_api_key, "", "no default, so it reads as undefined");
     assert.ok(read("html/popup.html").includes('id="nasa_api_key"'), "no input in the popup");
     assert.ok(/setupNasaApiKey/.test(read("js/popup.js")), "the input is not wired to storage");
@@ -75,7 +75,7 @@ test("a pre-paint dark base exists and is registered at document_start", () => {
     assert.ok(exists("css/darkbase.css"), "no pre-paint stylesheet");
     const bg = read("js/background.js");
     assert.ok(/css: \["css\/darkbase\.css"\]/.test(bg), "it is never registered");
-    assert.ok(/runAt: "document_start"/.test(bg.slice(bg.indexOf("OCHRE_DARK_BASE_ID"))),
+    assert.ok(/runAt: "document_start"/.test(bg.slice(bg.indexOf("ORCA_DARK_BASE_ID"))),
         "registering it after document_start would not prevent the flash");
 });
 
@@ -83,7 +83,7 @@ test("the dark base is removed when dark mode is off", () => {
     const bg = read("js/background.js");
     const fn = /async function syncDarkBaseStyle\(\)[\s\S]*?\n\}/.exec(bg);
     assert.ok(fn, "syncDarkBaseStyle not found");
-    assert.ok(/unregisterContentScripts\(\{ ids: \[OCHRE_DARK_BASE_ID\] \}\)/.test(fn[0]),
+    assert.ok(/unregisterContentScripts\(\{ ids: \[ORCA_DARK_BASE_ID\] \}\)/.test(fn[0]),
         "a light-mode user would get a dark page");
     assert.ok(/dark_mode === true \|\| device_dark === true/.test(fn[0]),
         "the system-theme option should count as dark mode too");

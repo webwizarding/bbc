@@ -86,8 +86,8 @@ test("dynamic registration injects the same files as the static entry", () => {
     // different subset of the extension than an instructure.com one.
     const m = manifest();
     const bg = strip(read("js/background.js"));
-    const block = /const OCHRE_CONTENT_FILES = \{[\s\S]*?\n\};/.exec(bg);
-    assert.ok(block, "OCHRE_CONTENT_FILES not found");
+    const block = /const ORCA_CONTENT_FILES = \{[\s\S]*?\n\};/.exec(bg);
+    assert.ok(block, "ORCA_CONTENT_FILES not found");
     const listed = (block[0].match(/"([^"]+\.(?:js|css))"/g) || []).map(x => x.slice(1, -1));
     const staticFiles = [...m.content_scripts[0].js, ...m.content_scripts[0].css];
     assert.deepStrictEqual(listed.sort(), staticFiles.sort(),
