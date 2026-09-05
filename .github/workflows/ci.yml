@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly, so a test that has quietly stopped testing anything is found
+    # within days rather than at the next refactor.
+    - cron: "0 6 * * 1"
+
+# A second push to the same PR should cancel the first run rather than queue
+# behind it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      # Errors fail the build; warnings do not. The warning set is deliberate
+      # and documented in eslint.config.js -- gating on it would mean either
+      # churn-only edits or a disabled rule.
+      - name: Lint
+        run: npx eslint .
+
+      - name: Test
+        run: npx vitest run --reporter=verbose
+
+      - name: Build both targets
+        run: npm run build
+
+      # A manifest that does not parse, or that points at a file the build did
+      # not emit, is not something the unit tests can catch.
+      - name: Validate built manifests
+        run: node tools/validate-dist.mjs
+
+  # Mutation checks re-run the whole suite once per mutation, so they are too
+  # slow for every push. On demand, and weekly so a hollow test cannot sit
+  # undetected for long.
+  mutation:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Mutation check
+        run: node tools/mutate.mjs
