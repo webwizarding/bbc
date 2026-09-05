@@ -106,13 +106,25 @@ and has one number.
 Then open your institution's Canvas site and click the extension icon to
 configure it.
 
-### Running tests
+### Working on it
 
 ```
-node test/run.js
+npm install
+npm run dev            # build both targets, rebuild on change
+npm test               # Vitest
+npm run lint
+npm run build          # dist/chrome and dist/firefox
+npm run check          # lint + test + build, what CI runs
 ```
 
-Dependency-free for now; a real runner arrives with Phase 2.
+Load `dist/chrome` or `dist/firefox` as an unpacked extension, not the
+repository root — the two targets differ in their background entry, and the
+source manifest declares both.
+
+`node tools/mutate.mjs` re-runs the mutation checks: it re-introduces each
+defect the suite is meant to catch and confirms the suite goes red. It runs the
+whole suite once per mutation, so it takes a few minutes. CI runs it weekly and
+on demand rather than per push.
 
 ### Regenerating icons
 
