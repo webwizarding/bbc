@@ -41,9 +41,9 @@ function extractFn(src, name) {
 }
 
 function loadFn(file, name) {
-    // Extract from RAW source, not stripped. strip() removes /* ... *​/ blocks
+    // Extract from RAW source, not stripped. strip() removes /* ... */ blocks
     // with a regex, which also matches the "/*" inside a template literal such
-    // as `https://${host}/*` -- it then deletes through to the next "*​/",
+    // as `https://${host}/*` -- it then deletes through to the next "*/",
     // unbalancing the braces and making the function unextractable.
     const m = [extractFn(read(file), name)];
     assert.ok(m[0], name + " not found in " + file);
@@ -125,7 +125,7 @@ test("access is requested on change, not on every keystroke", () => {
     const pop = strip(read("js/popup.js"));
     assert.ok(/addEventListener\('change', function \(\) \{\s*requestCustomDomainAccess/.test(pop),
         "a permission prompt per keystroke would be unusable");
-    const inputHandler = /#customDomain'\)\.addEventListener\('input'[\s\S]*?\n    \}\);/.exec(pop);
+    const inputHandler = /#customDomain'\)\.addEventListener\('input'[\s\S]*?\n {4}\}\);/.exec(pop);
     assert.ok(inputHandler && !/permissions\.request/.test(inputHandler[0]),
         "the input handler must not request permission");
 });

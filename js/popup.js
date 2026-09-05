@@ -1179,7 +1179,7 @@ function setup() {
         input.addEventListener("change", () => {
             orcaStorage.get(syncedSwitches.concat(syncedSubOptions).concat(["dark_preset", "custom_cards", "custom_font", "gpa_calc_bounds", "custom_styles"])).then(async storage => {
                 let final = {};
-                for await (item of document.querySelectorAll(".export-details input")) {
+                for await (const item of document.querySelectorAll(".export-details input")) {
                     if (item.checked) {
                         switch (item.id) {
                             case "export-toggles":
@@ -1264,15 +1264,18 @@ function setup() {
     });
     document.querySelector("#setGradientColor").addEventListener("click", () => {
         orcaStorage.get("custom_cards").then(sync => {
-            length = 0;
+            // Was `length = 0` / `length++`, which targets window.length --
+            // the number of frames, and read-only. The count therefore never
+            // moved, so the gradient was always built for zero visible cards.
+            let visibleCards = 0;
             Object.keys(sync["custom_cards"]).forEach(key => {
-                if (sync["custom_cards"][key].hidden !== true) length++;
+                if (sync["custom_cards"][key].hidden !== true) visibleCards++;
             });
             let colors = [];
             let from = document.querySelector("#gradientColorFrom").value;
             let to = document.querySelector("#gradientColorTo").value;
-            for (let i = 1; i <= length; i++) {
-                colors.push(getColorInGradient(i / length, from, to));
+            for (let i = 1; i <= visibleCards; i++) {
+                colors.push(getColorInGradient(i / visibleCards, from, to));
             }
             sendFromPopup("setcolors", colors);
         });
@@ -1518,14 +1521,15 @@ async function getExport(storage, options) {
     let final = {};
     for (const option of options) {
         switch (option) {
-            case "custom_cards":
-                let arr = [];
+            case "custom_cards": {
+                const arr = [];
                 Object.keys(storage["custom_cards"]).forEach(key => {
                     const img = storage["custom_cards"][key].img;
                     if (img && img !== "none" && img.trim() !== "") arr.push(img);
                 });
                 final["custom_cards"] = arr;
                 break;
+            }
             case "card_colors":
                 final["card_colors"] = [];
                 try {
@@ -1564,8 +1568,11 @@ const colorValues = {
     "green": 6,
     "lightblue": 7,
     "blue": 8,
-    "lightpurple": 9,
     "purple": 10,
+    // Was listed twice, at 9 and 11. The later value wins in an object
+    // literal, so removing the earlier one preserves current ordering exactly.
+    // Note black, white and whitebrown are theme colours with no entry here at
+    // all, so they sort as undefined; left alone rather than guessed at.
     "lightpurple": 11,
     "beige": 12,
     "brown": 13,
@@ -1582,9 +1589,6 @@ function themeSortFn(method) {
         case "Color":
             return themes.sort((a, b) => {
                 return (colorValues[a.color] || (a.color !== "whiteblack" && a.color.includes("white") ? 15 : 16)) - (colorValues[b.color] || (b.color !== "whiteblack" && b.color.includes("white") ? 15 : 16))
-            })
-            return themes.sort((a, b) => {
-                return a.color < b.color ? 1 : -1;
             })
         case "ABC":
             return themes.sort((a, b) => {
@@ -2228,7 +2232,10 @@ function getColorInGradient(d, from, to) {
 function displaySidebarMode(mode, style) {
     style = style.replace(" ", "");
     let match = style.match(/linear-gradient\((?<color1>\#\w*),(?<color2>\#\w*)\)/);
-    let c1 = c2 = "#000000";
+    // Was `let c1 = c2 = "#000000"`, which declares c1 and leaks c2 onto the
+    // global object.
+    let c1 = "#000000";
+    let c2 = "#000000";
 
     if (mode === "image") {
         document.querySelector("#radio-sidebar-image").checked = true;

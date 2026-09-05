@@ -132,7 +132,7 @@ test("the breakout backstop catches what the shape whitelist cannot", () => {
     // Added after a mutation that removed the backstop failed to turn the suite
     // red -- the existing cases were all caught by the shape checks, so nothing
     // exercised the backstop at all.
-    const shapeWhitelist = /^[\w\s#.,%()\/'" -]*$/;
+    const shapeWhitelist = /^[\w\s#.,%()/'" -]*$/;
     assert.ok(shapeWhitelist.test("expression(alert(1))"),
         "precondition: the shape check alone would accept this");
     no(S.sanitizeCssValue("expression(alert(1))"));

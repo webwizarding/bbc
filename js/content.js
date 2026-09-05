@@ -1254,8 +1254,18 @@ function applyOptionsChanges(changes) {
 				}
 				break;
 			case "custom_cards_2":
-			case "custom_cards_3":
 				customizeCards();
+				break;
+			case "custom_cards_3":
+				// Per-course colour. It was listed in two case groups; the
+				// second was unreachable, so changing a course colour
+				// repainted the cards and left the to-do list showing the old
+				// one. Both are refreshed here.
+				customizeCards();
+				moreAnnouncementCount = 0;
+				moreAssignmentCount = 0;
+				clearTodoList();
+				createTodoSections(document.querySelector("#orca-todo-list"));
 				break;
 			case "todo_hr24":
 			case "todo_separate_scrollbar":
@@ -1267,7 +1277,6 @@ function applyOptionsChanges(changes) {
 			case "todo_full_height":
 			case "todo_ignore_card_colors":
 			case "todo_remove_icons":
-			case "custom_cards_3":
 				moreAnnouncementCount = 0;
 				moreAssignmentCount = 0;
 				// loadBetterTodo();
@@ -2109,14 +2118,19 @@ function getCardsFromDashboard() {
             console.log("Error getting dashboard cards\n", e);
             logError(e);
         } finally {
-            if(newCards !== true) { resolve(); return; }
-            console.log(newCards ? "new cards found" : "");
+            // No `return` in here: returning from a finally block discards any
+            // exception still propagating from the try, which would hide a
+            // real failure behind a silent resolve.
+            if (newCards !== true) {
+                resolve();
+            } else {
             // resolve() on both outcomes. It used to sit only in .then(), so a
             // rejected write -- which is exactly what a quota failure is --
             // left this promise pending forever and hung every caller. The
             // write failure is already reported by the storage layer.
             orcaStorage.set({ "custom_cards": cards, "custom_cards_2": cards_2, "custom_cards_3": cards_3 })
                 .catch(() => {}).then(() => resolve());
+            }
         }
     });
     });
@@ -2209,7 +2223,9 @@ Better todo list
 
 
 function convertToDueDate(dueAt) {
-	final = "due ";
+	// Was an implicit global. Two calls would clobber each other, and the
+	// value leaked onto window between them.
+	let final = "due ";
 	let date = new Date(dueAt);
 	final += date.toLocaleString("en-US", { month: "short", day: "numeric" });
 	final += " at " + date.toLocaleString("en-US", { hour: "numeric", minute: "numeric", hour12: !options.todo_hr24 });
@@ -2240,6 +2256,10 @@ betterTodoFilter = "tasks";
 // items are limited to those due on/before now+range (which also keeps
 // overdue items). Only affects the Tasks (upcoming) tab; announcements and
 // completed are unaffected because their dates are in the past.
+// Both were implicit globals: assigned and read across several functions but
+// never declared. They worked only because content scripts are non-strict.
+let betterTodoFilter = "tasks";
+let moreCompletedCount = 0;
 let betterTodoTimeframe = "all";
 const BETTER_TODO_TIMEFRAME_DAYS = {
 	"1week": 7,
@@ -4155,6 +4175,31 @@ function createConfettiBurst(targetElement, opts = {}) {
     }
 }
 
+/**
+ * Persist per-assignment to-do state (crossed off, labelled, reminded).
+ *
+ * This function was commented out at some point and the commented block was
+ * then deleted in "cleaned up old stuff", but its four call sites stayed. Every
+ * to-do action button -- cross off, label, remind -- has therefore been
+ * throwing ReferenceError since. Because the calls sit inside click handlers,
+ * the throw goes to the console and the button silently does nothing, which is
+ * why it went unnoticed. Found by enabling no-undef.
+ *
+ * Restored without the original's quota pruning. That dropped the five oldest
+ * entries once the serialised object passed 7,400 bytes, working around the
+ * 8,192-byte per-item limit in chrome.storage.sync. assignment_states now
+ * routes to local, which has no per-item limit, so the pruning would only
+ * discard state the user can still see.
+ */
+function setAssignmentState(id, updates) {
+    const states = { ...(options.assignment_states || {}) };
+    states[id] = states[id] ? { ...states[id], ...updates } : updates;
+    options = { ...options, assignment_states: states };
+    orcaStorage.set({ assignment_states: states })
+        .then(() => { cardAssignments = preloadAssignmentEls(); })
+        .catch(() => { /* reported by the storage layer */ });
+}
+
 function markAs(item, element) {
 	const csrfToken = CSRFtoken();
 	const completeState = item.planner_override ? !item.planner_override.marked_complete : true;
@@ -4971,7 +5016,7 @@ async function changeColorPreset(colors) {
     clearInterval(changeColorInterval);
     const csrfToken = CSRFtoken();
     const delay = 250;
-    previous = []
+    const previous = [];
     colorChanges = [];
 
     // sort cards
@@ -5728,8 +5773,9 @@ function createGPACalcCourse(location, course) {
     } else if (options.custom_cards && options.custom_cards[course.id]) {
         customs = options.custom_cards[course.id];
     } else {
+        // Courses with no stored card entry are skipped. The fallback object
+        // that used to follow this return was unreachable.
         return;
-        customs = { "name": course.name, "hidden": false, "weight": "regular", "credits": 1, "gr": null };
     }
     if (customs.hidden === true) return;
 
