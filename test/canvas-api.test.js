@@ -8,28 +8,15 @@ it had no timeout, no retry, and no error type a caller could branch on.
 
 Run: node test/canvas-api.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
 
-const SRC = fs.readFileSync(path.resolve(__dirname, "../js/content.js"), "utf8").replace(/\r/g, "");
+const SRC = fs.readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../js/content.js"), "utf8").replace(/\r/g, "");
 const code = () => SRC.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-
-let failures = 0;
-function test(name, fn) {
-    const done = (e) => { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); };
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") {
-            throw new Error("test body must be synchronous; use runAsync()");
-        }
-        console.log(`  PASS  ${name}`);
-    } catch (e) { done(e); }
-}
-const asyncTests = [];
-function testAsync(name, fn) { asyncTests.push([name, fn]); }
 
 /* ---------------- harness ---------------- */
 function load({ responses = [], now = () => Date.now() } = {}) {
@@ -84,8 +71,6 @@ function load({ responses = [], now = () => Date.now() } = {}) {
     return ctx;
 }
 
-console.log("\ncanvasApi\n");
-
 /* ---------------- Link header parsing ---------------- */
 const linkCases = [
     ['canonical Canvas', '<https://canvas.example.edu/a?page=2>; rel="next",<https://canvas.example.edu/a?page=1>; rel="first"', "https://canvas.example.edu/a?page=2"],
@@ -118,7 +103,7 @@ test("Link: relative rel=next resolves against the Canvas origin", () => {
 });
 
 /* ---------------- error typing ---------------- */
-testAsync("auth redirect returning HTML is typed, not an opaque parse error", async () => {
+test("auth redirect returning HTML is typed, not an opaque parse error", async () => {
     const ctx = load({ responses: [{ status: 200, body: "<!DOCTYPE html><html>sign in</html>" }] });
     await assert.rejects(() => ctx.canvasGet("https://canvas.example.edu/api/v1/x"), (e) => {
         assert.strictEqual(e.name, "CanvasApiError");
@@ -127,39 +112,39 @@ testAsync("auth redirect returning HTML is typed, not an opaque parse error", as
     });
 });
 
-testAsync("401 is typed as auth", async () => {
+test("401 is typed as auth", async () => {
     const ctx = load({ responses: [{ status: 401, body: "" }] });
     await assert.rejects(() => ctx.canvasGet("https://canvas.example.edu/api/v1/x"),
         (e) => e.kind === "auth" && e.status === 401);
 });
 
-testAsync("429 is typed and carries Retry-After", async () => {
+test("429 is typed and carries Retry-After", async () => {
     const ctx = load({ responses: [{ status: 429, headers: { "Retry-After": "2" }, body: "" }] });
     await assert.rejects(() => ctx.canvasGet("https://canvas.example.edu/api/v1/x", { force: true }),
         (e) => e.kind === "ratelimit" && e.retryAfter === 2);
 });
 
-testAsync("a 500 is retried once, then reported", async () => {
+test("a 500 is retried once, then reported", async () => {
     const ctx = load({ responses: [{ status: 500, body: "" }, { status: 500, body: "" }] });
     await assert.rejects(() => ctx.canvasGet("https://canvas.example.edu/api/v1/x"),
         (e) => e.kind === "http" && e.status === 500);
     assert.strictEqual(ctx.__calls.length, 2, "a 5xx should be retried exactly once");
 });
 
-testAsync("a 500 followed by success returns the data", async () => {
+test("a 500 followed by success returns the data", async () => {
     const ctx = load({ responses: [{ status: 500, body: "" }, { status: 200, json: [{ id: 1 }] }] });
     const data = await ctx.canvasGet("https://canvas.example.edu/api/v1/x");
     assert.deepStrictEqual(JSON.parse(JSON.stringify(data)), [{ id: 1 }]);
 });
 
-testAsync("a 404 is NOT retried", async () => {
+test("a 404 is NOT retried", async () => {
     const ctx = load({ responses: [{ status: 404, body: "" }] });
     await assert.rejects(() => ctx.canvasGet("https://canvas.example.edu/api/v1/x"), (e) => e.status === 404);
     assert.strictEqual(ctx.__calls.length, 1, "4xx must not be retried");
 });
 
 /* ---------------- pagination ---------------- */
-testAsync("getAll follows Link rel=next across pages", async () => {
+test("getAll follows Link rel=next across pages", async () => {
     const ctx = load({ responses: [
         { json: [1, 2], headers: { Link: '<https://canvas.example.edu/api/v1/x?page=2>; rel="next"' } },
         { json: [3, 4], headers: { Link: '<https://canvas.example.edu/api/v1/x?page=3>; rel="next"' } },
@@ -170,7 +155,7 @@ testAsync("getAll follows Link rel=next across pages", async () => {
     assert.strictEqual(ctx.__calls.length, 3);
 });
 
-testAsync("getAll stops at the page cap", async () => {
+test("getAll stops at the page cap", async () => {
     const ctx = load({ responses: [
         (url) => ({ ok: true, status: 200,
             headers: { get: (h) => h === "Link" ? '<https://canvas.example.edu/api/v1/x?page=n>; rel="next"' : null },
@@ -180,7 +165,7 @@ testAsync("getAll stops at the page cap", async () => {
     assert.strictEqual(all.length, 3, "should have stopped after 3 pages");
 });
 
-testAsync("getAll THROWS on a mid-pagination failure instead of truncating", async () => {
+test("getAll THROWS on a mid-pagination failure instead of truncating", async () => {
     const ctx = load({ responses: [
         { json: [1, 2], headers: { Link: '<https://canvas.example.edu/api/v1/x?page=2>; rel="next"' } },
         { status: 500, body: "" }, { status: 500, body: "" },
@@ -191,7 +176,7 @@ testAsync("getAll THROWS on a mid-pagination failure instead of truncating", asy
 });
 
 /* ---------------- cache ---------------- */
-testAsync("a repeated GET within the TTL is served from cache", async () => {
+test("a repeated GET within the TTL is served from cache", async () => {
     const ctx = load({ responses: [{ json: [{ id: 1 }] }] });
     const url = "https://canvas.example.edu/api/v1/users/self/colors";
     await ctx.canvasGet(url);
@@ -200,7 +185,7 @@ testAsync("a repeated GET within the TTL is served from cache", async () => {
     assert.strictEqual(ctx.__calls.length, 1, "three calls should have produced one request");
 });
 
-testAsync("a failed GET is not cached", async () => {
+test("a failed GET is not cached", async () => {
     const ctx = load({ responses: [{ status: 404, body: "" }, { json: [{ id: 7 }] }] });
     const url = "https://canvas.example.edu/api/v1/x";
     await assert.rejects(() => ctx.canvasGet(url));
@@ -210,14 +195,14 @@ testAsync("a failed GET is not cached", async () => {
 });
 
 /* ---------------- mutate ---------------- */
-testAsync("mutate sends the CSRF token", async () => {
+test("mutate sends the CSRF token", async () => {
     const ctx = load({ responses: [{ json: { id: 1 } }] });
     await ctx.canvasMutate("https://canvas.example.edu/api/v1/planner_notes",
         { bodies: [{ headers: { "content-type": "application/json" }, body: "{}" }] });
     assert.strictEqual(ctx.__calls[0].init.headers["X-CSRF-Token"], "tok");
 });
 
-testAsync("mutate falls through body encodings until one is accepted", async () => {
+test("mutate falls through body encodings until one is accepted", async () => {
     const ctx = load({ responses: [
         { status: 400, body: "" }, { status: 422, body: "" }, { json: { id: 9 } },
     ]});
@@ -229,7 +214,7 @@ testAsync("mutate falls through body encodings until one is accepted", async () 
     assert.strictEqual(ctx.__calls[2].init.body, "c");
 });
 
-testAsync("mutate does NOT keep trying encodings after an auth failure", async () => {
+test("mutate does NOT keep trying encodings after an auth failure", async () => {
     const ctx = load({ responses: [{ status: 401, body: "" }] });
     await assert.rejects(() => ctx.canvasMutate("https://canvas.example.edu/api/v1/x",
         { bodies: [{ body: "a" }, { body: "b" }, { body: "c" }] }), (e) => e.kind === "auth");
@@ -261,12 +246,3 @@ test("the failure path is visible to the user, not console-only", () => {
     assert.ok(/ensureInjected|appendChild/.test(m[0]), "showApiError must render something");
     assert.ok(/Retry/.test(m[0]), "the user needs a way to retry without reloading");
 });
-
-(async () => {
-    for (const [name, fn] of asyncTests) {
-        try { await fn(); console.log(`  PASS  ${name}`); }
-        catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-    }
-    console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-    process.exit(failures === 0 ? 0 : 1);
-})();

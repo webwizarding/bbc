@@ -10,26 +10,17 @@ Phase 1.9: the smaller items.
 
 Run: node test/misc.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8").replace(/\r/g, "");
 const exists = (f) => fs.existsSync(path.join(ROOT, f));
-
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
-
-console.log("\nsmaller items\n");
 
 /* ---------------- NASA key ---------------- */
 test("a user-supplied NASA key is read and used", () => {
@@ -134,6 +125,3 @@ test("both browsers have a background entry point", () => {
     assert.ok(/importScripts\("\/js\/defaults\.js"\)/.test(read("js/background.js")),
         "defaults.js is in background.scripts but Chrome would never load it");
 });
-
-console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-process.exit(failures === 0 ? 0 : 1);

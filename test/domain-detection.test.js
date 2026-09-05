@@ -15,12 +15,14 @@ itself as the user's Canvas, and the host match itself was a substring test
 Loads the real functions from js/content.js rather than copying them.
 Run: node test/domain-detection.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const SRC = fs.readFileSync(path.join(ROOT, "js/content.js"), "utf8").replace(/\r/g, "");
 
@@ -47,17 +49,6 @@ vm.runInContext(extract("CANVAS_BUILTIN_HOST_PATTERNS", "const"), ctx);
 for (const f of ["normalizeDomainEntry", "hostMatchesConfiguredDomain", "isBuiltInCanvasHost"]) {
     vm.runInContext(extract(f), ctx);
 }
-
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
-
-console.log("\ndomain detection\n");
 
 /* ---- the probe must be gone ---- */
 test("the credentialed auto-detect probe no longer exists", () => {
@@ -150,6 +141,3 @@ test("non-string entries are ignored, not crashed on", () => {
     assert.strictEqual(ctx.normalizeDomainEntry(42), "");
     assert.strictEqual(ctx.hostMatchesConfiguredDomain("x.com", [null, 42, "x.com"]), true);
 });
-
-console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-process.exit(failures === 0 ? 0 : 1);

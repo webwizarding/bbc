@@ -16,12 +16,15 @@ Covers:
   3. customizeCards clears an image it injected once storage says img === "".
   4. customizeCards does NOT clear an image Canvas set itself.
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
+import * as sanitizers from "../js/sanitize.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 
 /** Pull one top-level function's source out of a file by brace matching. */
@@ -117,7 +120,7 @@ const ctx = {
     // customizeCards validates theme-supplied image URLs before writing them
     // into a CSS url(); load the real implementation rather than a stub, so the
     // test exercises what ships.
-    ...require("../js/sanitize.js"),
+    ...sanitizers,
 };
 vm.createContext(ctx);
 vm.runInContext(extractFunction("js/popup.js", "getExport"), ctx);
@@ -154,23 +157,6 @@ function runImport(theme, liveCards) {
 }
 
 /* ---------- tests ---------- */
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        // An async test body would resolve after this function returns, so its
-        // assertions could never fail the run. Reject them outright.
-        if (r && typeof r.then === "function") {
-            throw new Error("test body must be synchronous; async bodies cannot fail");
-        }
-        console.log(`  PASS  ${name}`);
-    } catch (e) {
-        failures++;
-        console.log(`  FAIL  ${name}\n        ${e.message}`);
-    }
-}
-
-console.log("\ntheme apply/revert round trip\n");
 
 test("revert clears card images when the user originally had none", () => {
     // 1. user has no images; snapshot is taken on theme apply
@@ -278,6 +264,3 @@ test("customizeCards leaves a Canvas-native image alone", () => {
     assert.match(native.style.backgroundImage, /native\.png/,
         "Canvas' own card image must not be cleared");
 });
-
-console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-process.exit(failures === 0 ? 0 : 1);

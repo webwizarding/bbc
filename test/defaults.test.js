@@ -9,24 +9,17 @@ had no install-time default at all.
 
 Run: node test/defaults.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8").replace(/\r/g, "");
 const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
 
 function loadDefaults() {
     const ctx = {};
@@ -36,8 +29,6 @@ function loadDefaults() {
     vm.runInContext(read("js/defaults.js") + "\n;globalThis.__d = ORCA_DEFAULTS;", ctx);
     return ctx.__d;
 }
-
-console.log("\ndefaults\n");
 
 test("there is exactly one defaults object", () => {
     const d = loadDefaults();
@@ -137,6 +128,3 @@ test("all three contexts load the defaults file", () => {
     const html = read("html/popup.html");
     assert.ok(html.indexOf("js/defaults.js") < html.indexOf("js/popup.js"), "defaults must load first");
 });
-
-console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-process.exit(failures === 0 ? 0 : 1);

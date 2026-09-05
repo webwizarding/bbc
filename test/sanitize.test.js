@@ -12,23 +12,14 @@ include values nobody would have thought to blocklist.
 
 Run: node test/sanitize.test.js
 */
-"use strict";
-const path = require("path");
-const assert = require("assert");
-const S = require(path.resolve(__dirname, "../js/sanitize.js"));
+import { test } from "vitest";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import assert from "assert";
+import S from "../js/sanitize.js";
 
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
 const ok = (v) => assert.notStrictEqual(v, "", "should have been accepted");
 const no = (v, why) => assert.strictEqual(v, "", why || "should have been refused");
-
-console.log("\nsanitizers\n");
 
 /* ---------------- colours ---------------- */
 test("valid colours pass unchanged", () => {
@@ -151,8 +142,8 @@ test("the breakout backstop catches what the shape whitelist cannot", () => {
 });
 
 /* ---------------- applied at the sinks ---------------- */
-const fs = require("fs");
-const content = fs.readFileSync(path.resolve(__dirname, "../js/content.js"), "utf8");
+import fs from "fs";
+const content = fs.readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../js/content.js"), "utf8");
 
 test("the custom font family is sanitized before it reaches a style element", () => {
     assert.ok(/sanitizeFontFamily\(options\.custom_font\.family\)/.test(content),
@@ -177,6 +168,3 @@ test("per-course colours are sanitized before entering a style attribute", () =>
     assert.ok(!/background-color:\$\{courseColor\}/.test(stripped),
         "the unsanitized colour still reaches a style attribute");
 });
-
-console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-process.exit(failures === 0 ? 0 : 1);

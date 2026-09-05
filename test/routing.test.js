@@ -8,29 +8,19 @@ run" and "decided using a path from four navigations ago".
 
 Run: node test/routing.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
 
-const SRC = fs.readFileSync(path.resolve(__dirname, "../js/content.js"), "utf8").replace(/\r/g, "");
-
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
+const SRC = fs.readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../js/content.js"), "utf8").replace(/\r/g, "");
 
 /** Strip comments so source assertions test code, not prose about code. */
 function code() {
     return SRC.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 }
-
-console.log("\nrouting\n");
 
 test("no module-level capture of the path survives", () => {
     const c = code();
@@ -102,6 +92,3 @@ test("dev's partial navigation layer is not reintroduced alongside ours", () => 
     assert.ok(!/function setupNavigationListener/.test(c),
         "setupNavigationListener is back; there must be one navigation mechanism");
 });
-
-console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-process.exit(failures === 0 ? 0 : 1);

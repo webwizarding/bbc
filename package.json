@@ -1,0 +1,32 @@
+{
+  "name": "orca-for-canvas",
+  "version": "0.1.0",
+  "description": "Browser extension that improves the Instructure Canvas interface. Local-only.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node tools/build.mjs --watch",
+    "build": "node tools/build.mjs",
+    "build:chrome": "node tools/build.mjs --target=chrome",
+    "build:firefox": "node tools/build.mjs --target=firefox",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run lint && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.6",
+    "vitest": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

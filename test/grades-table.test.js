@@ -10,24 +10,14 @@ source assertions.
 
 Run: node test/grades-table.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import assert from "assert";
 
-const CSS = fs.readFileSync(path.resolve(__dirname, "../css/content.css"), "utf8").replace(/\r/g, "");
+const CSS = fs.readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../css/content.css"), "utf8").replace(/\r/g, "");
 const code = () => CSS.replace(/\/\*[\s\S]*?\*\//g, "");
-
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
-
-console.log("\ngrades table layout\n");
 
 test("no positional column-width enumeration", () => {
     const c = code();
@@ -71,6 +61,3 @@ test("the override still exists for narrow windows", () => {
         "the narrow-window fix was removed rather than scoped; Canvas overflows " +
         "the page below ~780px without it");
 });
-
-console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-process.exit(failures === 0 ? 0 : 1);

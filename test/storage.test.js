@@ -8,29 +8,20 @@ had a rejection handler, so hitting either quota lost data silently.
 
 Run: node test/storage.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 // The storage layer lives in js/storage.js, shared by the content script and
 // the popup. The background worker keeps its own copy of the key list.
 const CONTENT = fs.readFileSync(path.join(ROOT, "js/storage.js"), "utf8").replace(/\r/g, "");
 const BG = fs.readFileSync(path.join(ROOT, "js/background.js"), "utf8").replace(/\r/g, "");
 const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous; use testAsync");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
-const asyncTests = [];
-const testAsync = (name, fn) => asyncTests.push([name, fn]);
 
 /* ------------ fake chrome.storage with real quota semantics ------------ */
 function fakeChrome({ perItem = 8192, total = 102400 } = {}) {
@@ -117,8 +108,6 @@ function loadMigration(chrome) {
     return ctx;
 }
 
-console.log("\nstorage\n");
-
 /* ---------------- routing ---------------- */
 test("keys that grow with usage route to local", () => {
     const ctx = loadStorage(fakeChrome());
@@ -180,7 +169,7 @@ test("prefix routing covers keys generated per course", () => {
 });
 
 /* ---------------- writes ---------------- */
-testAsync("a write splits across areas by key", async () => {
+test("a write splits across areas by key", async () => {
     const chrome = fakeChrome();
     const ctx = loadStorage(chrome);
     await ctx.storageSet({ dark_mode: true, custom_cards: { 1: { img: "x" } } });
@@ -188,7 +177,7 @@ testAsync("a write splits across areas by key", async () => {
     assert.deepStrictEqual(Object.keys(chrome.storage.local.data), ["custom_cards"]);
 });
 
-testAsync("a per-item quota rejection is reported, not swallowed", async () => {
+test("a per-item quota rejection is reported, not swallowed", async () => {
     const chrome = fakeChrome({ perItem: 50 });
     const ctx = loadStorage(chrome);
     await assert.rejects(() => ctx.storageSet({ dark_preset: { a: "x".repeat(200) } }));
@@ -196,7 +185,7 @@ testAsync("a per-item quota rejection is reported, not swallowed", async () => {
     assert.match(ctx.__notices[0].o.feature, /storage is full/i);
 });
 
-testAsync("the quota notice is shown once, not per failed write", async () => {
+test("the quota notice is shown once, not per failed write", async () => {
     const chrome = fakeChrome({ perItem: 50 });
     const ctx = loadStorage(chrome);
     for (let i = 0; i < 5; i++) {
@@ -205,7 +194,7 @@ testAsync("the quota notice is shown once, not per failed write", async () => {
     assert.strictEqual(ctx.__notices.length, 1, "repeating the notice would bury the page");
 });
 
-testAsync("bulk data no longer competes for the sync quota", async () => {
+test("bulk data no longer competes for the sync quota", async () => {
     const chrome = fakeChrome({ perItem: 8192, total: 102400 });
     const ctx = loadStorage(chrome);
     // A card set well past the whole sync budget.
@@ -243,7 +232,7 @@ test("a boolean where a mode string is expected falls back to the default", () =
     assert.strictEqual(ctx.coerceStoredValue("todo_timeframe", 7), "all");
 });
 
-testAsync("coercion applies on write, so a drifted value is corrected once", async () => {
+test("coercion applies on write, so a drifted value is corrected once", async () => {
     const chrome = fakeChrome();
     const ctx = loadStorage(chrome);
     await ctx.storageSet({ cardHeight: "250", todo_progress_rings: true });
@@ -251,7 +240,7 @@ testAsync("coercion applies on write, so a drifted value is corrected once", asy
     assert.strictEqual(chrome.storage.sync.data.todo_progress_rings, "rings");
 });
 
-testAsync("coercion applies on read, for values written before this landed", async () => {
+test("coercion applies on read, for values written before this landed", async () => {
     const chrome = fakeChrome();
     const ctx = loadStorage(chrome);
     chrome.storage.sync.data.cardWidth = "262";       // written by an older version
@@ -275,7 +264,7 @@ test("no default is seeded into sync if its key belongs in local", () => {
 });
 
 /* ---------------- migration, against a seeded profile ---------------- */
-testAsync("migration moves bulk keys from sync to local and clears sync", async () => {
+test("migration moves bulk keys from sync to local and clears sync", async () => {
     const chrome = fakeChrome();
     // Seed a profile as an existing user would have it: everything in sync.
     Object.assign(chrome.storage.sync.data, {
@@ -303,7 +292,7 @@ testAsync("migration moves bulk keys from sync to local and clears sync", async 
     assert.strictEqual(chrome.storage.sync.data.cardWidth, 262);
 });
 
-testAsync("migration is idempotent", async () => {
+test("migration is idempotent", async () => {
     const chrome = fakeChrome();
     chrome.storage.sync.data.custom_cards = { 1: { img: "a" } };
     const ctx = loadMigration(chrome);
@@ -315,7 +304,7 @@ testAsync("migration is idempotent", async () => {
         "a second run must not overwrite newer local data");
 });
 
-testAsync("an existing local value wins over a stale sync copy", async () => {
+test("an existing local value wins over a stale sync copy", async () => {
     const chrome = fakeChrome();
     chrome.storage.sync.data.custom_cards = { 1: { img: "OLD" } };
     chrome.storage.local.data.custom_cards = { 1: { img: "NEW" } };
@@ -324,7 +313,7 @@ testAsync("an existing local value wins over a stale sync copy", async () => {
     assert.deepStrictEqual(chrome.storage.local.data.custom_cards, { 1: { img: "NEW" } });
 });
 
-testAsync("sync copies survive if the local write fails", async () => {
+test("sync copies survive if the local write fails", async () => {
     const chrome = fakeChrome();
     chrome.storage.sync.data.custom_cards = { 1: { img: "a" } };
     chrome.storage.local.set = async () => { throw new Error("disk full"); };
@@ -334,7 +323,7 @@ testAsync("sync copies survive if the local write fails", async () => {
         "sync must not be cleared until the local write is verified");
 });
 
-testAsync("the version marker is not written when the move fails", async () => {
+test("the version marker is not written when the move fails", async () => {
     // The marker must be written last. If it is written first, a failure
     // anywhere in the move leaves the marker set, every later run skips, and
     // the data is stranded in sync forever.
@@ -352,7 +341,7 @@ testAsync("the version marker is not written when the move fails", async () => {
         "run will skip and the data is stranded in sync");
 });
 
-testAsync("a migration that failed part-way runs again next start", async () => {
+test("a migration that failed part-way runs again next start", async () => {
     const chrome = fakeChrome();
     chrome.storage.sync.data.custom_cards = { 1: { img: "a" } };
     const realRemove = chrome.storage.sync.remove.bind(chrome.storage.sync);
@@ -364,12 +353,3 @@ testAsync("a migration that failed part-way runs again next start", async () => 
     assert.notStrictEqual(again.skipped, true, "a retry should actually run");
     assert.ok(!("custom_cards" in chrome.storage.sync.data), "the retry should complete the move");
 });
-
-(async () => {
-    for (const [name, fn] of asyncTests) {
-        try { await fn(); console.log(`  PASS  ${name}`); }
-        catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-    }
-    console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-    process.exit(failures === 0 ? 0 : 1);
-})();

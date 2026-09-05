@@ -9,23 +9,15 @@ accumulates, nothing errors), so several of these are source assertions.
 
 Run: node test/lifecycle.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
 
-const SRC = fs.readFileSync(path.resolve(__dirname, "../js/content.js"), "utf8").replace(/\r/g, "");
+const SRC = fs.readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../js/content.js"), "utf8").replace(/\r/g, "");
 const code = () => SRC.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
 
 /* ---------- load the registry ---------- */
 function loadRegistry() {
@@ -50,8 +42,6 @@ function fakeObserver() {
              observe(t, o) { this.observed.push([t, o]); },
              disconnect() { this.disconnected++; } };
 }
-
-console.log("\nlifecycle registry\n");
 
 test("registerObserver observes and records", () => {
     const ctx = loadRegistry();
@@ -184,6 +174,3 @@ test("dark mode is not route-scoped and cannot join the route cycle", () => {
         "something removes the dark mode stylesheet; re-injecting it causes the " +
         "flash of light content it exists to prevent");
 });
-
-console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-process.exit(failures === 0 ? 0 : 1);

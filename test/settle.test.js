@@ -9,12 +9,14 @@ whatever happens to be on screen.
 
 Run: node test/settle.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8").replace(/\r/g, "");
 
@@ -41,17 +43,6 @@ function extractFn(src, name) {
     }
     return null;
 }
-
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous; use testAsync");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
-const asyncTests = [];
-const testAsync = (name, fn) => asyncTests.push([name, fn]);
 
 /** A controllable fake document + MutationObserver. */
 function harness({ readyState = "complete" } = {}) {
@@ -81,9 +72,7 @@ function harness({ readyState = "complete" } = {}) {
 
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-console.log("\nsettle signal\n");
-
-testAsync("runs once the DOM has been quiet for the quiet window", async () => {
+test("runs once the DOM has been quiet for the quiet window", async () => {
     const h = harness();
     let runs = 0;
     h.whenSettled(() => runs++, { quietMs: 40, capMs: 2000 });
@@ -92,7 +81,7 @@ testAsync("runs once the DOM has been quiet for the quiet window", async () => {
     assert.strictEqual(runs, 1, "should have run after the quiet window");
 });
 
-testAsync("a mutation restarts the quiet window", async () => {
+test("a mutation restarts the quiet window", async () => {
     const h = harness();
     let runs = 0;
     h.whenSettled(() => runs++, { quietMs: 60, capMs: 3000 });
@@ -103,7 +92,7 @@ testAsync("a mutation restarts the quiet window", async () => {
     assert.strictEqual(runs, 1, "should run once it finally goes quiet");
 });
 
-testAsync("runs exactly once, however much churn there is", async () => {
+test("runs exactly once, however much churn there is", async () => {
     const h = harness();
     let runs = 0;
     h.whenSettled(() => runs++, { quietMs: 30, capMs: 2000 });
@@ -113,7 +102,7 @@ testAsync("runs exactly once, however much churn there is", async () => {
     assert.strictEqual(runs, 1, "the two old setTimeouts ran twice; this runs once");
 });
 
-testAsync("a page that never settles still gets one pass, at the cap", async () => {
+test("a page that never settles still gets one pass, at the cap", async () => {
     const h = harness();
     let runs = 0;
     h.whenSettled(() => runs++, { quietMs: 1000, capMs: 60 });
@@ -123,7 +112,7 @@ testAsync("a page that never settles still gets one pass, at the cap", async () 
     assert.strictEqual(runs, 1, "a live-updating dashboard must not starve the callback forever");
 });
 
-testAsync("waits for load before arming when the document is still loading", async () => {
+test("waits for load before arming when the document is still loading", async () => {
     const h = harness({ readyState: "loading" });
     let runs = 0;
     h.whenSettled(() => runs++, { quietMs: 30, capMs: 5000 });
@@ -134,7 +123,7 @@ testAsync("waits for load before arming when the document is still loading", asy
     assert.strictEqual(runs, 1, "should run once loaded and quiet");
 });
 
-testAsync("a callback that throws does not break the caller", async () => {
+test("a callback that throws does not break the caller", async () => {
     const h = harness();
     h.whenSettled(() => { throw new Error("boom"); }, { quietMs: 20, capMs: 500 });
     await wait(60);   // an unhandled throw here would surface as a crash
@@ -148,13 +137,3 @@ test("the guessed dark-mode delays are gone", () => {
     assert.ok(/whenSettled\(\(\) => runDarkModeFixer\(false\)\)/.test(c),
         "the dark-mode fixer should run on the settle signal");
 });
-
-console.log("");
-(async () => {
-    for (const [name, fn] of asyncTests) {
-        try { await fn(); console.log(`  PASS  ${name}`); }
-        catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-    }
-    console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-    process.exit(failures === 0 ? 0 : 1);
-})();

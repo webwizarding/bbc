@@ -8,26 +8,17 @@ the same shape: a `new Promise` wrapper whose reject path was never wired up.
 
 Run: node test/promise-hazards.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8").replace(/\r/g, "");
 const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous; use testAsync");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
-const asyncTests = [];
-const testAsync = (name, fn) => asyncTests.push([name, fn]);
 
 function extract(src, name) {
     const re = new RegExp("^(?:async )?function " + name + "\\s*\\([\\s\\S]*?\\n\\}", "m");
@@ -44,9 +35,7 @@ function withTimeout(p, ms = 250) {
     ]);
 }
 
-console.log("\npromise hazards\n");
-
-testAsync("sendFromPopup settles when tabs.query rejects", async () => {
+test("sendFromPopup settles when tabs.query rejects", async () => {
     const ctx = {
         console: { warn() {} },
         chrome: { tabs: { query: async () => { throw new Error("no permission"); }, sendMessage: async () => null } },
@@ -57,7 +46,7 @@ testAsync("sendFromPopup settles when tabs.query rejects", async () => {
     assert.strictEqual(res, null, "should resolve null, not hang");
 });
 
-testAsync("sendFromPopup settles when every tab rejects", async () => {
+test("sendFromPopup settles when every tab rejects", async () => {
     const ctx = {
         console: { warn() {} },
         chrome: { tabs: {
@@ -70,7 +59,7 @@ testAsync("sendFromPopup settles when every tab rejects", async () => {
     assert.strictEqual(await withTimeout(ctx.sendFromPopup("x")), null);
 });
 
-testAsync("sendFromPopup returns the first tab that answers", async () => {
+test("sendFromPopup returns the first tab that answers", async () => {
     const ctx = {
         console: { warn() {} },
         chrome: { tabs: {
@@ -114,13 +103,3 @@ test("preloadAssignmentEls still propagates rejection", () => {
     const src = extract(read("js/content.js"), "preloadAssignmentEls");
     assert.ok(!/new Promise/.test(src));
 });
-
-console.log("");
-(async () => {
-    for (const [name, fn] of asyncTests) {
-        try { await fn(); console.log(`  PASS  ${name}`); }
-        catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-    }
-    console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-    process.exit(failures === 0 ? 0 : 1);
-})();

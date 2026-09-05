@@ -14,23 +14,15 @@ manual click-through.
 
 Run: node test/route-cycle.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
 
-const SRC = fs.readFileSync(path.resolve(__dirname, "../js/content.js"), "utf8").replace(/\r/g, "");
+const SRC = fs.readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../js/content.js"), "utf8").replace(/\r/g, "");
 const code = () => SRC.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
 
 /* ---------------- fake DOM ---------------- */
 class El {
@@ -80,8 +72,6 @@ function loadCycle() {
     ctx.__doc = doc;
     return ctx;
 }
-
-console.log("\nroute cycle\n");
 
 test("ensureInjected returns the same node instead of adding another", () => {
     const ctx = loadCycle();
@@ -252,6 +242,3 @@ test("route state that gates re-setup is reset", () => {
         assert.ok(m[0].includes(v), `${v} is not reset; it would gate re-setup after navigation`);
     }
 });
-
-console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-process.exit(failures === 0 ? 0 : 1);

@@ -1,0 +1,9 @@
+dist/
+node_modules/
+# ~450 bundled themes, one per line. Reformatting would produce a 450-line
+# diff of pure churn and make the file harder to scan, not easier.
+js/themes.js
+# A single ~1,200-line CSS template literal.
+css/darkmodecss.js
+_locales/
+package-lock.json

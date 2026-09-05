@@ -12,25 +12,18 @@ the third instance of that bug class in Phase 1.
 
 Run: node test/permissions.test.js
 */
-"use strict";
-const fs = require("fs");
-const path = require("path");
-const vm = require("vm");
-const assert = require("assert");
+import { test } from "vitest";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "node:url";
+import vm from "vm";
+import assert from "assert";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8").replace(/\r/g, "");
 const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 const manifest = () => JSON.parse(read("manifest.json"));
-
-let failures = 0;
-function test(name, fn) {
-    try {
-        const r = fn();
-        if (r && typeof r.then === "function") throw new Error("test body must be synchronous");
-        console.log(`  PASS  ${name}`);
-    } catch (e) { failures++; console.log(`  FAIL  ${name}\n        ${e.message}`); }
-}
 
 /** Extract a function by brace matching. A non-greedy regex truncates it at
     the first line-initial "}", which for a function with nested blocks yields
@@ -59,8 +52,6 @@ function loadFn(file, name) {
     vm.runInContext(m[0] + `\n;globalThis.__f = ${name};`, ctx);
     return ctx.__f;
 }
-
-console.log("\nhost permissions\n");
 
 test("the static content script no longer matches every HTTPS site", () => {
     const m = manifest();
@@ -164,6 +155,3 @@ test("registration re-syncs when the domain list or grants change", () => {
     assert.ok(/onStartup\.addListener/.test(bg),
         "registrations do not always survive an update");
 });
-
-console.log(`\n${failures === 0 ? "all passed" : failures + " FAILED"}\n`);
-process.exit(failures === 0 ? 0 : 1);
